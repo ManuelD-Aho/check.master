@@ -1,9 +1,9 @@
 ---
-description: Create or update the project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync.
+description: Create or update the CheckMaster project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync.
 handoffs: 
   - label: Build Specification
     agent: speckit.specify
-    prompt: Implement the feature specification based on the updated constitution. I want to build...
+    prompt: Implement the feature specification based on the CheckMaster constitution (PHP 8.0+ MVC++, MySQL, DB-Driven). I want to build...
 ---
 
 ## User Input
@@ -13,6 +13,98 @@ $ARGUMENTS
 ```
 
 You **MUST** consider the user input before proceeding (if not empty).
+
+## CheckMaster Constitution Context
+
+### Existing Constitution Pillars (NON-NEGOTIABLE)
+
+The CheckMaster constitution at `.specify/memory/constitution.md` establishes these core principles that **MUST NOT** be violated:
+
+1. **Database-Driven Architecture**: All configuration, permissions, workflows, and menus in database (not PHP files)
+2. **Single Source of Truth**: Each system element has exactly one authoritative data source
+3. **Sécurité Par Défaut**: Deny-all permissions, Argon2id passwords, prepared statements, Hashids routing
+4. **Séparation des Responsabilités**: Strict MVC++ with Controllers (≤50 lines), Services (business logic), Models (ORM)
+5. **Convention Over Configuration**: PSR-12, strict naming (PascalCase classes, camelCase methods, snake_case DB)
+6. **Auditabilité Totale**: Double logging (Monolog + pister table) with before/after snapshots
+7. **Versioning Strict**: Sequential migrations, historique_entites for rollback
+
+### Stack Constraints (IMMUTABLE)
+
+**Allowed**:
+- PHP 8.0+ (strict types mandatory)
+- MySQL 8.0+ / MariaDB 10.5+
+- 12 approved dependencies (~12MB total):
+  - hashids, symfony/validator, symfony/http-foundation, symfony/cache
+  - mpdf, tcpdf, phpoffice/phpspreadsheet, phpmailer, monolog
+
+**Forbidden**:
+- Laravel/Symfony Full Stack
+- Node.js, Redis, Memcached as required dependencies
+- Any framework exceeding 50MB
+- Raw SQL queries (must use prepared statements)
+- Logic in Controllers (must be in Services)
+- Hardcoded permissions/config (must be DB-driven)
+
+### CheckMaster-Specific Rules
+
+**Workflow Management**:
+- All states in workflow_etats table
+- Transitions in workflow_transitions table
+- ServiceWorkflow::effectuerTransition for all state changes
+- Workflow gates block progress until conditions met
+
+**Permission System**:
+- 13 user groups (Administrateur, Scolarité, Commission, Étudiant, etc.)
+- traitement → action → rattacher mappings
+- ServicePermission::verifier before restricted operations
+- Rôles temporaires (président jury day-of access)
+
+**Document Generation**:
+- 13 PDF types (reçus, PV, bulletins, attestations, etc.)
+- TCPDF for simple, mPDF for complex CSS layouts
+- SHA256 integrity hashing mandatory
+- Archive with verificat ion périodique
+
+**Notification System**:
+- 71 email templates for workflow transitions
+- Multi-channel: Email (primary) + Messagerie interne (backup)
+- ServiceNotification::envoyer with template code
+- Bounce tracking and retry logic
+
+**Configuration**:
+- ~170 parameters in configuration_systeme table
+- Organized by prefix (workflow.*, notify.*, finance.*, etc.)
+- ServiceParametres::get/set for access
+- 27 désactivable features via config flags
+
+**Financial Operations**:
+- Paiements, pénalités, exonérations tables
+- Reçu generation with TCPDF
+- Financial gates in workflow (block if unpaid)
+- Configuration-driven amounts and rules
+
+### Amendment Guidelines for CheckMaster
+
+When updating the constitution, respect these guidelines:
+
+**Version Bumping**:
+- **MAJOR**: Changing core architecture (DB-driven → file-based) - FORBIDDEN for CheckMaster
+- **MINOR**: Adding new mandatory service (e.g., ServiceReclamation)
+- **PATCH**: Clarifying existing principles, fixing typos
+
+**Principle Addition Criteria**:
+- Must address recurring cross-cutting concern
+- Must be testable/verifiable in code review
+- Must not contradict existing pillars
+- Must apply broadly (not feature-specific)
+
+**Consistency Propagation Required**:
+After constitution updates, verify:
+- `.specify/templates/plan-template.md` (Constitution Check section)
+- `.specify/templates/spec-template.md` (scope requirements)
+- `.specify/templates/tasks-template.md` (task types)
+- `.github/prompts/*.md` (agent instructions)
+- `.github/agents/*.md` (agent behaviors)
 
 ## Outline
 

@@ -1,5 +1,5 @@
 ---
-description: Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation.
+description: Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation for CheckMaster features.
 ---
 
 ## User Input
@@ -9,6 +9,145 @@ $ARGUMENTS
 ```
 
 You **MUST** consider the user input before proceeding (if not empty).
+
+## CheckMaster-Specific Analysis Rules
+
+### Constitution Compliance (CRITICAL Checks)
+
+**Every analysis MUST verify these CheckMaster mandates**:
+
+1. **DB-Driven Architecture**:
+   - [ ] Configuration NOT in PHP files (must use configuration_systeme table)
+   - [ ] Permissions NOT hardcoded (must use rattacher + permissions tables)
+   - [ ] Menus constructed from traitement + rattacher tables
+   - [ ] Workflow states in workflow_etats/transitions tables
+
+2. **Security Standards**:
+   - [ ] All entity IDs use Hashids in URLs (no raw integers)
+   - [ ] Passwords use Argon2id (no md5, sha1, bcrypt)
+   - [ ] SQL uses prepared statements (no string concatenation)
+   - [ ] Views use `e()` escaping (no raw echo)
+   - [ ] All forms have CSRF tokens
+   - [ ] ServiceAudit called for write operations
+
+3. **Architecture Layers**:
+   - [ ] Controllers max 50 lines (validation + service + response only)
+   - [ ] Business logic in Services (not Controllers or Views)
+   - [ ] Models extend App\Orm\Model
+   - [ ] Dependency injection via constructor
+   - [ ] Transactions for multi-table operations
+
+4. **CheckMaster Integration**:
+   - [ ] Workflow changes use ServiceWorkflow::effectuerTransition()
+   - [ ] Permissions checked via ServicePermission::verifier()
+   - [ ] Notifications via ServiceNotification::envoyer()
+   - [ ] Configuration via ServiceParametres::get()
+   - [ ] PDF generation with SHA256 archiving
+   - [ ] Document types match 13 defined types
+
+5. **Database Standards**:
+   - [ ] Table names `snake_case` 
+   - [ ] Primary key always `id_tablename`
+   - [ ] Foreign keys with ON DELETE RESTRICT
+   - [ ] Migrations sequential (0XX_description.sql)
+   - [ ] Never modify existing migrations
+   - [ ] Indexes on FK + search columns
+
+### CheckMaster Domain Validation
+
+**Cross-check these domain patterns**:
+
+**Workflow Consistency**:
+```markdown
+- [ ] Feature touches candidature/rapport/soutenance?
+  - [ ] Spec defines which workflow states involved
+  - [ ] Plan maps states to transitions
+  - [ ] Tasks include workflow_etats/transitions updates
+  - [ ] Tasks call ServiceWorkflow for state changes
+  - [ ] Notifications defined for each transition
+```
+
+**Permission Mapping**:
+```markdown
+- [ ] Feature requires user access control?
+  - [ ] Spec defines which user groups need access
+  - [ ] Plan identifies traitement + action entries
+  - [ ] Tasks include seed data for rattacher table
+  - [ ] Controllers check ServicePermission
+  - [ ] Middleware applies PermissionMiddleware
+```
+
+**Document Generation**:
+```markdown
+- [ ] Feature generates PDF documents?
+  - [ ] Spec defines document type (simple/complex)
+  - [ ] Plan chooses TCPDF or mPDF appropriately
+  - [ ] Tasks create template in ressources/templates/pdf/
+  - [ ] Tasks calculate SHA256 hash
+  - [ ] Tasks archive with integrity check
+  - [ ] Tasks trigger download notification
+```
+
+**Financial Operations**:
+```markdown
+- [ ] Feature involves payments/pénalités?
+  - [ ] Spec defines amounts, calculation rules
+  - [ ] Plan maps to paiements/penalites tables
+  - [ ] Tasks generate reçu PDFs
+  - [ ] Tasks archive financial documents
+  - [ ] Tasks update student financial status
+  - [ ] Gate checks payment status before workflow advance
+```
+
+**Commission/Voting**:
+```markdown
+- [ ] Feature involves commission decisions?
+  - [ ] Spec defines vote logic (unanimity/majority)
+  - [ ] Plan handles 3-round maximum with escalation
+  - [ ] Tasks track votes in sessions_commission
+  - [ ] Tasks trigger Dean escalation after round 3
+  - [ ] Tasks generate PV documents
+  - [ ] Tasks send round notifications
+```
+
+### CheckMaster-Specific Findings
+
+**Look for these common issues**:
+
+**CRITICAL Issues**:
+- Using Laravel/Symfony Full Stack (CheckMaster is native MVC++)
+- Node.js dependencies (CheckMaster is PHP-only)
+- Redis/Memcached as required dependencies (only Symfony Cache)
+- Raw SQL queries (must use prepared statements)
+- Controllers with business logic (>50 lines, complex logic)
+- Hardcoded permissions (must be DB-driven)
+- Raw integer IDs in URLs (must use Hashids)
+- Missing ServiceAudit calls for data writes
+
+**HIGH Issues**:
+- Workflow state changes without ServiceWorkflow
+- Permission checks missing ServicePermission
+- Notifications not using ServiceNotification
+- Configuration in PHP files (must use DB)
+- PDF without SHA256 archiving
+- Modifications to existing migrations
+- Missing transaction wrappers for multi-table ops
+- Non-typed properties/parameters/returns
+
+**MEDIUM Issues**:
+- Inconsistent table naming (not snake_case)
+- Missing indexes on search/FK columns
+- Direct $_POST/$_GET usage (must use Request wrapper)
+- Views with raw echo (must use e() helper)
+- Services not stateless (storing state)
+- Missing PHPDoc on public methods
+- Validator not using Symfony constraints
+
+**LOW Issues**:
+- Inconsistent variable naming
+- Missing comments on complex logic
+- Non-PSR-12 compliant formatting
+- Suboptimal query patterns
 
 ## Goal
 

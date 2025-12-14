@@ -1,5 +1,5 @@
 ---
-description: Generate a custom checklist for the current feature based on user requirements.
+description: Generate a custom checklist for the current CheckMaster feature based on user requirements - validates requirement quality, not implementation.
 ---
 
 ## Checklist Purpose: "Unit Tests for English"
@@ -15,13 +15,187 @@ description: Generate a custom checklist for the current feature based on user r
 
 **FOR requirements quality validation**:
 
-- ✅ "Are visual hierarchy requirements defined for all card types?" (completeness)
-- ✅ "Is 'prominent display' quantified with specific sizing/positioning?" (clarity)
-- ✅ "Are hover state requirements consistent across all interactive elements?" (consistency)
-- ✅ "Are accessibility requirements defined for keyboard navigation?" (coverage)
-- ✅ "Does the spec define what happens when logo image fails to load?" (edge cases)
+- ✅ "Are workflow state transitions defined for all candidature operations?" (completeness)
+- ✅ "Is 'validated by scolarité' quantified with specific criteria?" (clarity)
+- ✅ "Are permission requirements consistent across all admin actions?" (consistency)
+- ✅ "Are Hashids routing requirements defined for all entity URLs?" (coverage)
+- ✅ "Does the spec define what happens when ServiceWorkflow transition fails?" (edge cases)
 
 **Metaphor**: If your spec is code written in English, the checklist is its unit test suite. You're testing whether the requirements are well-written, complete, unambiguous, and ready for implementation - NOT whether the implementation works.
+
+## CheckMaster Domain-Specific Checklist Categories
+
+When generating checklists for CheckMaster features, consider these standard categories:
+
+### 1. Architecture Compliance Checklist (architecture.md)
+
+Validates spec adherence to CheckMaster Constitution:
+
+```markdown
+- [ ] CHK001 Are all configuration requirements defined as DB parameters (not PHP constants)?
+- [ ] CHK002 Are all permission checks specified using groupe_utilisateur → traitement → action mappings?
+- [ ] CHK003 Are all entity IDs specified to use Hashids in URLs?
+- [ ] CHK004 Is Argon2id specified for any password handling?
+- [ ] CHK005 Are all SQL operations specified to use prepared statements?
+- [ ] CHK006 Is ServiceAudit logging specified for all write operations?
+- [ ] CHK007 Are Controller responsibilities limited to validation + service + response?
+- [ ] CHK008 Is business logic specified to reside in Services (not Controllers)?
+- [ ] CHK009 Are transactions specified for multi-table operations?
+- [ ] CHK010 Is dependency injection specified via constructor?
+```
+
+### 2. Workflow Checklist (workflow.md)
+
+Validates workflow-related requirements:
+
+```markdown
+- [ ] CHK001 Are all affected workflow states explicitly listed?
+- [ ] CHK002 Is the source state defined for each transition?
+- [ ] CHK003 Is the target state defined for each transition?
+- [ ] CHK004 Are transition conditions specified (who can trigger, when)?
+- [ ] CHK005 Are workflow gates clearly defined (what blocks transition)?
+- [ ] CHK006 Is ServiceWorkflow::effectuerTransition specified for state changes?
+- [ ] CHK007 Are notification requirements defined for each transition?
+- [ ] CHK008 Is workflow_historique snapshot specified for audit?
+- [ ] CHK009 Are escalation scenarios defined for délai dépassés?
+- [ ] CHK010 Is rollback behavior specified if transition fails?
+```
+
+### 3. Permission & Access Checklist (permissions.md)
+
+Validates access control requirements:
+
+```markdown
+- [ ] CHK001 Are all user groups needing access explicitly listed?
+- [ ] CHK002 Is each group mapped to a traitement entry?
+- [ ] CHK003 Are required actions (Consulter/Créer/Modifier/etc.) specified per group?
+- [ ] CHK004 Is ServicePermission::verifier specified before restricted actions?
+- [ ] CHK005 Are temporary roles defined with validity periods (if applicable)?
+- [ ] CHK006 Is fallback behavior specified for permission denial?
+- [ ] CHK007 Are permission cache invalidation rules defined?
+- [ ] CHK008 Is the resource code (traitement) clearly identified?
+- [ ] CHK009 Are admin override capabilities specified (if any)?
+- [ ] CHK010 Is audit logging specified for permission grants/revocations?
+```
+
+### 4. Notification Checklist (notifications.md)
+
+Validates communication requirements:
+
+```markdown
+- [ ] CHK001 Are all notification triggers clearly defined?
+- [ ] CHK002 Is the notification template code specified?
+- [ ] CHK003 Are recipient roles/groups explicitly listed?
+- [ ] CHK004 Are email subject and body placeholders defined?
+- [ ] CHK005 Is messagerie interne backup specified?
+- [ ] CHK006 Is ServiceNotification::envoyer usage specified?
+- [ ] CHK007 Are notification variables (dynamic data) listed?
+- [ ] CHK008 Is bounce handling behavior specified?
+- [ ] CHK009 Are retry rules defined for failed sends?
+- [ ] CHK010 Is notification historique archiving specified?
+```
+
+### 5. Document Generation Checklist (documents.md)
+
+Validates PDF generation requirements:
+
+```markdown
+- [ ] CHK001 Is document type clearly identified (reçu, PV, bulletin, etc.)?
+- [ ] CHK002 Is PDF engine (TCPDF vs mPDF) specified based on complexity?
+- [ ] CHK003 Are all document data requirements (variables) listed?
+- [ ] CHK004 Is PDF template location specified (ressources/templates/pdf/)?
+- [ ] CHK005 Is SHA256 hash calculation specified for archiving?
+- [ ] CHK006 Is archive table storage (archives) specified?
+- [ ] CHK007 Are download permissions (who can access) defined?
+- [ ] CHK008 Is regeneration capability specified (from snapshots)?
+- [ ] CHK009 Are document integrity verification rules defined?
+- [ ] CHK010 Is notification of document availability specified?
+```
+
+### 6. Financial Operations Checklist (financial.md)
+
+Validates payment/pénalité requirements:
+
+```markdown
+- [ ] CHK001 Are calculation rules explicitly defined (formulas, amounts)?
+- [ ] CHK002 Is configuration source specified (finance.* parameters)?
+- [ ] CHK003 Are payment recording triggers defined?
+- [ ] CHK004 Is pénalité calculation logic specified (delays, rates)?
+- [ ] CHK005 Is reçu generation specified (TCPDF + archiving)?
+- [ ] CHK006 Are financial gate checks defined (workflow blockers)?
+- [ ] CHK007 Is payment status tracking specified?
+- [ ] CHK008 Is student financial dashboard update specified?
+- [ ] CHK009 Are exonération rules defined (if applicable)?
+- [ ] CHK010 Is financial audit logging specified?
+```
+
+### 7. Commission/Voting Checklist (commission.md)
+
+Validates commission evaluation requirements:
+
+```markdown
+- [ ] CHK001 Is voting mechanism specified (unanimité/majorité)?
+- [ ] CHK002 Is the 3-round maximum enforced?
+- [ ] CHK003 Is escalation to Dean specified after round 3?
+- [ ] CHK004 Are vote tracking requirements defined (sessions_commission)?
+- [ ] CHK005 Are notification requirements defined per voting round?
+- [ ] CHK006 Is PV generation specified (template, signatures)?
+- [ ] CHK007 Are member assignment rules defined?
+- [ ] CHK008 Is quorum requirement specified?
+- [ ] CHK009 Are conflict resolution procedures defined?
+- [ ] CHK010 Is vote anonymity/visibility specified?
+```
+
+### 8. Data Model Checklist (data.md)
+
+Validates entity/table requirements:
+
+```markdown
+- [ ] CHK001 Are all entity names defined in snake_case?
+- [ ] CHK002 Is primary key format specified (id_tablename)?
+- [ ] CHK003 Are all foreign keys defined with ON DELETE behavior?
+- [ ] CHK004 Are required indexes specified (FK, search columns)?
+- [ ] CHK005 Are unique constraints defined where needed?
+- [ ] CHK006 Are JSON column schemas defined (if using JSON type)?
+- [ ] CHK007 Are migration file names specified (0XX_description)?
+- [ ] CHK008 Are table relationships clearly documented?
+- [ ] CHK009 Is data validation specified (NOT NULL, ranges, formats)?
+- [ ] CHK010 Are audit columns specified (created_at, updated_at)?
+```
+
+### 9. Security Checklist (security.md)
+
+Validates security requirements:
+
+```markdown
+- [ ] CHK001 Is Argon2id specified for password hashing?
+- [ ] CHK002 Are prepared statements specified for all SQL?
+- [ ] CHK003 Is e() escaping specified for all view output?
+- [ ] CHK004 Are CSRF tokens specified for all forms?
+- [ ] CHK005 Is rate limiting specified for sensitive endpoints?
+- [ ] CHK006 Is input validation specified (Symfony Validator)?
+- [ ] CHK007 Is ServiceAudit specified for security-relevant actions?
+- [ ] CHK008 Are permission checks specified before data access?
+- [ ] CHK009 Is session management specified (timeout, invalidation)?
+- [ ] CHK010 Are sensitive data handling rules defined (PII, credentials)?
+```
+
+### 10. Integration Checklist (integration.md)
+
+Validates Service integration requirements:
+
+```markdown
+- [ ] CHK001 Are all dependent Services explicitly listed?
+- [ ] CHK002 Is ServiceWorkflow integration specified (if workflow changes)?
+- [ ] CHK003 Is ServiceNotification integration specified (if notifications)?
+- [ ] CHK004 Is ServicePermission integration specified (if access control)?
+- [ ] CHK005 Is ServiceAudit integration specified (if data writes)?
+- [ ] CHK006 Is ServiceParametres integration specified (if configuration)?
+- [ ] CHK007 Is ServicePdf integration specified (if documents)?
+- [ ] CHK008 Are error handling behaviors defined for Service failures?
+- [ ] CHK009 Are retry/fallback strategies specified?
+- [ ] CHK010 Is transaction coordination specified across Services?
+```
 
 ## User Input
 
