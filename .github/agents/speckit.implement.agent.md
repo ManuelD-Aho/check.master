@@ -1,5 +1,5 @@
 ---
-description: Execute the implementation plan by processing and executing all tasks defined in tasks.md
+description: Execute the CheckMaster implementation plan by processing and executing all tasks defined in tasks.md (PHP 8.0+ MVC++)
 ---
 
 ## User Input
@@ -9,6 +9,315 @@ $ARGUMENTS
 ```
 
 You **MUST** consider the user input before proceeding (if not empty).
+
+## CheckMaster Implementation Standards (MANDATORY)
+
+### Code Quality Gates - Every Task Must Pass
+
+**PHP Code Style**:
+```bash
+# Must pass before considering task complete
+composer run fix       # PHP-CS-Fixer (PSR-12)
+composer run stan      # PHPStan level 6+
+composer run test      # PHPUnit (if tests exist)
+```
+
+**Mandatory Patterns**:
+1. **Strict Types**: Every PHP file starts with `<?php\n\ndeclare(strict_types=1);`
+2. **Type Hints**: 100% typed (parameters, returns, properties)
+3. **Request Wrapper**: Use `Request` class, never `$_POST`/`$_GET`
+4. **Escaping**: Use `e()` helper for output, never raw `echo`
+5. **SQL**: Prepared statements only, NO string concatenation
+6. **Audit**: Call `ServiceAudit::log()` for all write operations
+7. **Hashids**: Use for all entity IDs in URLs
+8. **Permissions**: Check via `ServicePermission::verifier()` before actions
+9. **Transactions**: Use for multi-table operations
+10. **Exceptions**: Typed exceptions (ValidationException, NotFoundException, etc.)
+
+### CheckMaster Code Templates
+
+**Controller Template**:
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Controllers\{Module};
+
+use App\Services\{Module}\Service{Feature};
+use App\Validators\{Feature}Validator;
+use Src\Http\Request;
+use Src\Http\JsonResponse;
+use Src\Exceptions\ValidationException;
+
+class {Feature}Controller
+{
+    public function __construct(
+        private Service{Feature} $service{Feature}
+    ) {}
+
+    public function action(int $id): JsonResponse
+    {
+        // 1. Get data
+        $data = Request::all();
+        
+        // 2. Validate
+        $validator = new {Feature}Validator();
+        $errors = $validator->validate($data);
+        if ($errors) {
+            throw new ValidationException($errors);
+        }
+        
+        // 3. Call service (business logic + audit + notifications)
+        $result = $this->service{Feature}->action($id, $data);
+        
+        // 4. Return response
+        return JsonResponse::success($result, 'Action completed');
+    }
+}
+```
+
+**Service Template**:
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services\{Module};
+
+use App\Models\{Entity};
+use App\Services\Core\ServiceAudit;
+use App\Services\Core\ServiceNotification;
+use App\Services\Core\ServiceWorkflow;
+use Src\Database\DB;
+use Src\Exceptions\NotFoundException;
+
+class Service{Feature}
+{
+    public function action(int $id, array $data): mixed
+    {
+        // 1. Load entity
+        $entity = {Entity}::find($id);
+        if (!$entity) {
+            throw new NotFoundException('{Entity} not found');
+        }
+        
+        // 2. Business logic
+        DB::beginTransaction();
+        try {
+            // Perform operations
+            $entity->field = $data['field'];
+            $entity->save();
+            
+            // 3. Audit trail
+            ServiceAudit::log('Action performed', '{entity}', $id, [
+                'before' => $snapshotBefore,
+                'after' => $entity->toArray()
+            ]);
+            
+            // 4. Workflow (if applicable)
+            if ($workflowChange) {
+                ServiceWorkflow::effectuerTransition($dossierId, 'transition_code', Auth::id());
+            }
+            
+            // 5. Notifications (if applicable)
+            ServiceNotification::envoyer('template_code', $destinataires, $variables);
+            
+            DB::commit();
+            return $entity;
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+}
+```
+
+**Model Template**:
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models;
+
+use App\Orm\Model;
+
+class {Entity} extends Model
+{
+    protected string $table = '{table_name}';
+    protected string $primaryKey = 'id_{table_name}';
+    
+    protected array $fillable = [
+        'field1',
+        'field2',
+    ];
+    
+    protected array $casts = [
+        'json_field' => 'json',
+        'bool_field' => 'boolean',
+        'date_field' => 'datetime',
+    ];
+    
+    // Relations
+    public function relatedEntity(): ?RelatedEntity
+    {
+        return $this->belongsTo(RelatedEntity::class, 'fk_id');
+    }
+}
+```
+
+**Validator Template**:
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Validators;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+class {Feature}Validator
+{
+    public function rules(): array
+    {
+        return [
+            'field' => [
+                new Assert\NotBlank(),
+                new Assert\Length(['max' => 255]),
+            ],
+            'email' => [
+                new Assert\Email(),
+            ],
+        ];
+    }
+    
+    public function validate(array $data): array
+    {
+        $validator = \Src\Validation\ValidatorFactory::create();
+        $violations = $validator->validate($data, new Assert\Collection($this->rules()));
+        
+        if (count($violations) > 0) {
+            $errors = [];
+            foreach ($violations as $violation) {
+                $errors[$violation->getPropertyPath()][] = $violation->getMessage();
+            }
+            return $errors;
+        }
+        
+        return [];
+    }
+}
+```
+
+**Migration Template**:
+```sql
+-- Migration: 0XX_description.sql
+-- Date: YYYY-MM-DD
+-- Purpose: [Description]
+
+-- Create table
+CREATE TABLE IF NOT EXISTS table_name (
+    id_table_name INT PRIMARY KEY AUTO_INCREMENT,
+    field1 VARCHAR(255) NOT NULL,
+    field2 TEXT,
+    field3_json JSON,
+    actif BOOLEAN DEFAULT TRUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    -- Indexes
+    INDEX idx_field1 (field1),
+    INDEX idx_actif (actif),
+    
+    -- Foreign keys
+    CONSTRAINT fk_table_other FOREIGN KEY (other_id) 
+        REFERENCES other_table(id_other_table) 
+        ON DELETE RESTRICT
+        
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert into migrations tracking
+INSERT INTO migrations (migration_name, executed_at) 
+VALUES ('0XX_description', NOW());
+```
+
+### CheckMaster-Specific Implementations
+
+**Workflow Integration**:
+```php
+// Check current state
+$dossier = DossierEtudiant::where(['etudiant_id' => $etudiantId])->first();
+if ($dossier->etat_actuel->code_etat !== 'expected_state') {
+    throw new ForbiddenException('Invalid workflow state');
+}
+
+// Perform transition
+ServiceWorkflow::effectuerTransition(
+    $dossier->id_dossier,
+    'transition_code',
+    Auth::id(),
+    'Optional comment'
+);
+```
+
+**Permission Checking**:
+```php
+// In Controller or Middleware
+if (!ServicePermission::verifier(Auth::id(), 'resource_code', 'action_code')) {
+    throw new ForbiddenException('Permission denied');
+}
+```
+
+**Notification Sending**:
+```php
+ServiceNotification::envoyer('template_code', [
+    'destinataires' => [$userId1, $userId2],
+    'variables' => [
+        'nom' => $etudiant->nom_etu,
+        'date' => date('d/m/Y'),
+        'lien' => url('/path')
+    ]
+]);
+```
+
+**PDF Generation**:
+```php
+// Simple document (TCPDF)
+$pdf = ServicePdf::generer('recu_paiement', [
+    'etudiant' => $etudiant,
+    'montant' => $montant,
+    'date' => date('d/m/Y')
+]);
+
+// Complex document (mPDF)
+$pdf = ServicePdf::genererAvance('rapport_commission', [
+    'session' => $session,
+    'rapports' => $rapports,
+    'membres' => $membres
+], true); // true = mPDF
+
+// Archive with integrity
+$hash = hash('sha256', $pdf);
+Archive::create([
+    'type_document' => 'recu',
+    'contenu' => $pdf,
+    'hash_sha256' => $hash,
+    'entite_type' => 'paiement',
+    'entite_id' => $paiementId
+]);
+```
+
+**Configuration Access**:
+```php
+// Read config
+$smtpHost = ServiceParametres::get('notify.email.smtp_host', 'localhost');
+$delaiMax = ServiceParametres::get('workflow.sla.scolarite_days', 5);
+
+// Write config (admin only)
+ServiceParametres::set('workflow.escalade.enabled', true);
+```
 
 ## Outline
 
