@@ -1,13 +1,13 @@
 ---
-description: Generate an actionable, dependency-ordered tasks.md for the feature based on available design artifacts.
+description: Generate an actionable, dependency-ordered tasks.md for CheckMaster features based on available design artifacts.
 handoffs: 
   - label: Analyze For Consistency
     agent: speckit.analyze
-    prompt: Run a project analysis for consistency
+    prompt: Run a CheckMaster project analysis for consistency
     send: true
   - label: Implement Project
     agent: speckit.implement
-    prompt: Start the implementation in phases
+    prompt: Start the CheckMaster implementation in phases (PHP 8.0+ MVC++)
     send: true
 ---
 
@@ -18,6 +18,154 @@ $ARGUMENTS
 ```
 
 You **MUST** consider the user input before proceeding (if not empty).
+
+## CheckMaster Task Generation Context
+
+### Development Cycle Strict Order
+1. **Database First**: Migrations → Seeds
+2. **Core (TDD if requested)**: Tests → Models → Services  
+3. **Interface**: Validators → Controllers → Routes → Views
+4. **Integration**: Permissions → Notifications → Audit → Documents
+5. **Quality**: PHPStan → PHP-CS-Fixer → PHPUnit
+
+### CheckMaster File Structure
+
+```
+app/
+├── Controllers/
+│   └── {Module}/
+│       └── {Feature}Controller.php
+├── Services/
+│   └── {Module}/
+│       └── Service{Feature}.php
+├── Models/
+│   └── {Entity}.php
+├── Validators/
+│   └── {Feature}Validator.php
+├── Middleware/
+│   └── {Feature}Middleware.php
+└── Orm/
+    └── Model.php (base class)
+
+database/
+├── migrations/
+│   └── 0XX_description.sql
+└── seeds/
+    └── 0XX_description.sql
+
+ressources/
+├── views/
+│   └── modules/
+│       └── {module}/
+│           └── {feature}/
+│               ├── index.php
+│               ├── create.php
+│               └── edit.php
+└── templates/
+    └── pdf/
+        └── {template}.php
+
+tests/
+├── Unit/
+│   ├── Services/
+│   ├── Models/
+│   └── Validators/
+└── Integration/
+    └── Controllers/
+```
+
+### CheckMaster-Specific Task Patterns
+
+**For Workflow Features**:
+```markdown
+### Phase X: User Story N - [Workflow State Change]
+- [ ] T0XX [USN] Add workflow state to workflow_etats table (migration)
+- [ ] T0XX [USN] Add transitions to workflow_transitions table (migration)
+- [ ] T0XX [P] [USN] Update ServiceWorkflow to handle new state
+- [ ] T0XX [USN] Add transition validation in {Feature}Validator
+- [ ] T0XX [USN] Implement state change in Service{Feature}
+- [ ] T0XX [USN] Add audit logging for state transitions
+- [ ] T0XX [P] [USN] Create notification template for transition
+- [ ] T0XX [USN] Test workflow integration
+```
+
+**For Permission-Protected Features**:
+```markdown
+### Phase X: User Story N - [Protected Action]
+- [ ] T0XX [USN] Add traitement entry in traitement table (seed)
+- [ ] T0XX [USN] Add action entry in action table (seed)
+- [ ] T0XX [USN] Link to groupes in rattacher table (seed)
+- [ ] T0XX [P] [USN] Implement permission check in controller
+- [ ] T0XX [USN] Add PermissionMiddleware to route
+- [ ] T0XX [USN] Test permission denial scenarios
+```
+
+**For Document Generation**:
+```markdown
+### Phase X: User Story N - [Document Type]
+- [ ] T0XX [USN] Create PDF template in ressources/templates/pdf/
+- [ ] T0XX [USN] Add document type to documents_generes config
+- [ ] T0XX [P] [USN] Implement generation in ServicePdf
+- [ ] T0XX [USN] Calculate and store SHA256 hash
+- [ ] T0XX [USN] Archive document with integrity check
+- [ ] T0XX [P] [USN] Send notification with download link
+- [ ] T0XX [USN] Test PDF generation and archiving
+```
+
+**For CRUD Operations**:
+```markdown
+### Phase X: User Story N - [Entity CRUD]
+- [ ] T0XX [USN] Create entity table (migration)
+- [ ] T0XX [P] [USN] Create Model in app/Models/{Entity}.php
+- [ ] T0XX [P] [USN] Create Validator in app/Validators/{Entity}Validator.php
+- [ ] T0XX [USN] Implement Service{Entity} with CRUD methods
+- [ ] T0XX [USN] Add audit logging for write operations
+- [ ] T0XX [USN] Create Controller with Hashids routing
+- [ ] T0XX [P] [USN] Create views (index, create, edit)
+- [ ] T0XX [USN] Test CRUD operations end-to-end
+```
+
+**For Commission/Voting Features**:
+```markdown
+### Phase X: User Story N - [Vote/Commission]
+- [ ] T0XX [USN] Add session to sessions_commission (if new)
+- [ ] T0XX [USN] Add vote tracking table (migration)
+- [ ] T0XX [P] [USN] Implement vote logic with round limit (3 max)
+- [ ] T0XX [USN] Check unanimity calculation
+- [ ] T0XX [USN] Add escalation trigger on round 3 failure
+- [ ] T0XX [P] [USN] Send notifications for vote rounds
+- [ ] T0XX [USN] Generate PV with signatures
+- [ ] T0XX [USN] Test vote scenarios (unanimity, escalation)
+```
+
+**For Financial Operations**:
+```markdown
+### Phase X: User Story N - [Payment/Pénalité]
+- [ ] T0XX [USN] Add financial record table (if needed)
+- [ ] T0XX [P] [USN] Implement calculation logic in Service{Finance}
+- [ ] T0XX [USN] Validate payment status in workflow gate
+- [ ] T0XX [USN] Generate reçu PDF with TCPDF
+- [ ] T0XX [USN] Archive reçu with SHA256
+- [ ] T0XX [P] [USN] Send confirmation email
+- [ ] T0XX [USN] Update student financial dashboard
+- [ ] T0XX [USN] Test payment flow and reçu generation
+```
+
+### CheckMaster Quality Gates
+
+After each User Story phase, include verification tasks:
+
+```markdown
+### Phase X+1: User Story N - Quality Assurance
+- [ ] T0XX [P] [USN] Run PHPStan level 6+ analysis
+- [ ] T0XX [P] [USN] Run PHP-CS-Fixer for PSR-12
+- [ ] T0XX [P] [USN] Verify ServiceAudit calls on writes
+- [ ] T0XX [P] [USN] Check Hashids usage in URLs
+- [ ] T0XX [P] [USN] Verify prepared statements (no raw SQL)
+- [ ] T0XX [P] [USN] Test permission checks
+- [ ] T0XX [P] [USN] Validate e() escaping in views
+- [ ] T0XX [USN] Integration test for complete user flow
+```
 
 ## Outline
 
