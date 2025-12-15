@@ -1,0 +1,305 @@
+/**
+ * CheckMaster Components - Cards
+ * ===============================
+ * Styles pour les cartes
+ * Version: 1.0.0
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BASE CARD
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.card {
+    background-color: var(--color-white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--color-gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.card-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-gray-900);
+    margin: 0;
+}
+
+.card-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-500);
+    margin-top: var(--space-1);
+}
+
+.card-body {
+    padding: var(--space-5);
+}
+
+.card-footer {
+    padding: var(--space-4) var(--space-5);
+    border-top: 1px solid var(--color-gray-100);
+    background-color: var(--color-gray-50);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARD VARIANTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Card with border instead of shadow */
+.card-bordered {
+    box-shadow: none;
+    border: 1px solid var(--color-gray-200);
+}
+
+/* Card with hover effect */
+.card-hover {
+    transition: var(--transition-fast);
+    cursor: pointer;
+}
+
+.card-hover:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+/* Flat card (no shadow, no border) */
+.card-flat {
+    box-shadow: none;
+    background-color: var(--color-gray-50);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STAT CARD (KPI)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.stat-card {
+    background-color: var(--color-white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-5);
+}
+
+.stat-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: var(--space-3);
+}
+
+.stat-card-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-lg);
+    background-color: var(--color-primary-100);
+    color: var(--color-primary-700);
+}
+
+.stat-card-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.stat-card-value {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-gray-900);
+    line-height: 1;
+    margin-bottom: var(--space-1);
+}
+
+.stat-card-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-500);
+}
+
+.stat-card-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    padding: var(--space-0-5) var(--space-2);
+    border-radius: var(--radius-full);
+}
+
+.stat-card-trend.is-positive {
+    background-color: var(--color-success-100);
+    color: var(--color-success-700);
+}
+
+.stat-card-trend.is-negative {
+    background-color: var(--color-error-100);
+    color: var(--color-error-700);
+}
+
+.stat-card-trend.is-neutral {
+    background-color: var(--color-gray-100);
+    color: var(--color-gray-600);
+}
+
+/* Stat card color variants */
+.stat-card.stat-primary .stat-card-icon {
+    background-color: var(--color-primary-100);
+    color: var(--color-primary-700);
+}
+
+.stat-card.stat-success .stat-card-icon {
+    background-color: var(--color-success-100);
+    color: var(--color-success-700);
+}
+
+.stat-card.stat-warning .stat-card-icon {
+    background-color: var(--color-warning-100);
+    color: var(--color-warning-700);
+}
+
+.stat-card.stat-error .stat-card-icon {
+    background-color: var(--color-error-100);
+    color: var(--color-error-700);
+}
+
+.stat-card.stat-info .stat-card-icon {
+    background-color: var(--color-info-100);
+    color: var(--color-info-700);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DOSSIER CARD (Student File)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dossier-card {
+    background-color: var(--color-white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-4);
+    display: flex;
+    gap: var(--space-4);
+    transition: var(--transition-fast);
+}
+
+.dossier-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.dossier-card-avatar {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-primary-100);
+    color: var(--color-primary-700);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-weight-semibold);
+}
+
+.dossier-card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.dossier-card-name {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-gray-900);
+    margin-bottom: var(--space-1);
+}
+
+.dossier-card-info {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-500);
+}
+
+.dossier-card-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIST CARD
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.list-card {
+    background-color: var(--color-white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+}
+
+.list-card-header {
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--color-gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.list-card-title {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-gray-900);
+}
+
+.list-card-item {
+    padding: var(--space-3) var(--space-5);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    border-bottom: 1px solid var(--color-gray-100);
+    transition: var(--transition-fast);
+}
+
+.list-card-item:last-child {
+    border-bottom: none;
+}
+
+.list-card-item:hover {
+    background-color: var(--color-gray-50);
+}
+
+.list-card-item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EMPTY STATE CARD
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.empty-state {
+    text-align: center;
+    padding: var(--space-12) var(--space-6);
+}
+
+.empty-state-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--space-4);
+    color: var(--color-gray-300);
+}
+
+.empty-state-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-gray-900);
+    margin-bottom: var(--space-2);
+}
+
+.empty-state-description {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-500);
+    margin-bottom: var(--space-6);
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}

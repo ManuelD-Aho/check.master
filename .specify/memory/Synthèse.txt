@@ -34,9 +34,9 @@ Pas de limite sur le nombre de tours de vote
 Pas de gestion des absences des membres de commission/jury
 Pas de suppléants prévus
 Pas de délai maximum entre les étapes
-4. Notifications Email Implicites
-Les envois d'emails sont mentionnés mais non systématisés
-Pas de gestion des bounces ou emails non délivrés
+4. Notifications Email Implicites (RÉSOLU)
+Les envois d'emails sont maintenant gérés par une file d'attente robuste (NotificationQueue) et un historique complet (NotificationHistorique).
+Le système gère les retours et les tentatives multiples.
 5. Gestion des Cas Limites Absente
 Abandon en cours de processus ?
 Décès ou départ d'un encadreur ?

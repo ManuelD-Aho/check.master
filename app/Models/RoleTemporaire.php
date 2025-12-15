@@ -7,9 +7,9 @@ namespace App\Models;
 use App\Orm\Model;
 
 /**
- * Modèle Rôle Temporaire
+ * Modèle RoleTemporaire
  * 
- * Représente un rôle temporaire attribué à un utilisateur.
+ * Représente un rôle temporaire attribué à un utilisateur (ex: Président Jury).
  * Table: roles_temporaires
  */
 class RoleTemporaire extends Model
@@ -29,63 +29,172 @@ class RoleTemporaire extends Model
     ];
 
     /**
-     * Codes de rôles temporaires connus
+     * Codes de rôles temporaires
      */
     public const ROLE_PRESIDENT_JURY = 'president_jury';
+    public const ROLE_MEMBRE_JURY = 'membre_jury';
+    public const ROLE_RAPPORTEUR = 'rapporteur';
+    public const ROLE_SUPERVISEUR = 'superviseur';
 
     /**
-     * Vérifie si le rôle est actuellement valide
+     * Vérifie si le rôle est actuellement actif
      */
-    public function estValide(): bool
+    public function estActif(): bool
     {
         if (!$this->actif) {
             return false;
         }
 
         $now = time();
-        $debut = strtotime($this->valide_de);
-        $fin = strtotime($this->valide_jusqu_a);
+        $valideDe = strtotime($this->valide_de);
+        $valideJusqua = strtotime($this->valide_jusqu_a);
 
-        return $now >= $debut && $now <= $fin;
+        return $now >= $valideDe && $now <= $valideJusqua;
     }
 
     /**
-     * Retourne les permissions JSON décodées
+     * Retourne les permissions sous forme de tableau
      */
     public function getPermissions(): array
     {
-        if ($this->permissions_json === null) {
+        if (empty($this->permissions_json)) {
             return [];
         }
+
         return json_decode($this->permissions_json, true) ?? [];
     }
 
     /**
-     * Récupère les rôles temporaires actifs d'un utilisateur
+     * Vérifie si le rôle a une permission spécifique
      */
-    public static function getRolesActifsUtilisateur(int $userId): array
+    public function aPermission(string $permission): bool
     {
-        $sql = "SELECT * FROM roles_temporaires 
-                WHERE utilisateur_id = :user_id 
-                AND actif = 1 
-                AND valide_de <= NOW() 
-                AND valide_jusqu_a >= NOW()";
-        $stmt = self::raw($sql, ['user_id' => $userId]);
-        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        return array_map(function (array $row) {
-            return new self($row);
-        }, $rows);
+        $permissions = $this->getPermissions();
+        return in_array($permission, $permissions, true);
     }
 
     /**
-     * Révoque tous les rôles temporaires expirés
+     * Retourne l'utilisateur associé
      */
-    public static function revoquerExpires(): int
+    public function getUtilisateur(): ?Utilisateur
     {
-        $sql = "UPDATE roles_temporaires SET actif = 0 
-                WHERE actif = 1 AND valide_jusqu_a < NOW()";
-        $stmt = self::raw($sql);
-        return $stmt->rowCount();
+        if ($this->utilisateur_id === null) {
+            return null;
+        }
+        return Utilisateur::find((int) $this->utilisateur_id);
+    }
+
+    /**
+     * Désactive le rôle
+     */
+    public function desactiver(): void
+    {
+        $this->actif = false;
+        $this->save();
+    }
+
+    /**
+     * Crée un nouveau rôle temporaire
+     */
+    public static function creer(
+        int $utilisateurId,
+        string $roleCode,
+        array $permissions,
+        ?string $contexteType = null,
+        ?int $contexteId = null,
+        ?int $dureeJours = 30,
+        ?int $creePar = null
+    ): self {
+        // Désactiver les rôles précédents du même type/contexte
+        self::desactiverPrecedents($utilisateurId, $roleCode, $contexteType, $contexteId);
+
+        $now = time();
+        $role = new self([
+            'utilisateur_id' => $utilisateurId,
+            'role_code' => $roleCode,
+            'contexte_type' => $contexteType,
+            'contexte_id' => $contexteId,
+            'permissions_json' => json_encode($permissions),
+            'actif' => true,
+            'valide_de' => date('Y-m-d H:i:s', $now),
+            'valide_jusqu_a' => date('Y-m-d H:i:s', $now + ($dureeJours * 86400)),
+            'cree_par' => $creePar,
+        ]);
+        $role->save();
+        return $role;
+    }
+
+    /**
+     * Désactive les rôles précédents similaires
+     */
+    private static function desactiverPrecedents(
+        int $utilisateurId,
+        string $roleCode,
+        ?string $contexteType,
+        ?int $contexteId
+    ): void {
+        $conditions = [
+            'utilisateur_id' => $utilisateurId,
+            'role_code' => $roleCode,
+            'actif' => true,
+        ];
+
+        if ($contexteType !== null) {
+            $conditions['contexte_type'] = $contexteType;
+        }
+
+        if ($contexteId !== null) {
+            $conditions['contexte_id'] = $contexteId;
+        }
+
+        $roles = self::where($conditions);
+        foreach ($roles as $role) {
+            $role->desactiver();
+        }
+    }
+
+    /**
+     * Retourne les rôles actifs d'un utilisateur
+     *
+     * @return self[]
+     */
+    public static function rolesActifs(int $utilisateurId): array
+    {
+        $roles = self::where([
+            'utilisateur_id' => $utilisateurId,
+            'actif' => true,
+        ]);
+
+        return array_filter($roles, fn($r) => $r->estActif());
+    }
+
+    /**
+     * Vérifie si un utilisateur a un rôle spécifique actif
+     */
+    public static function utilisateurARole(int $utilisateurId, string $roleCode): bool
+    {
+        $roles = self::where([
+            'utilisateur_id' => $utilisateurId,
+            'role_code' => $roleCode,
+            'actif' => true,
+        ]);
+
+        foreach ($roles as $role) {
+            if ($role->estActif()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Prolonge la validité du rôle
+     */
+    public function prolonger(int $jours): void
+    {
+        $currentExpire = strtotime($this->valide_jusqu_a);
+        $this->valide_jusqu_a = date('Y-m-d H:i:s', $currentExpire + ($jours * 86400));
+        $this->save();
     }
 }

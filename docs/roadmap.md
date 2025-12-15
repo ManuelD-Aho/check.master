@@ -107,7 +107,7 @@ Requête → Routeur (Hashids) → Middleware → Contrôleur → Service → Mo
 │  □ 0.2 Exécuter migration 001_create_complete_database.sql     │
 │  □ 0.3 Configurer autoload PSR-4                                │
 │  □ 0.4 Installer dépendances Composer                           │
-│  □ 0.5 Configurer .gitignore, .env                              │
+│  □ 0.5 Configurer .gitignore                                    │
 │  □ 0.6 Setup PHPStan, PHP-CS-Fixer                              │
 │  □ 0.7 Créer structure dossiers MVC++                           │
 └─────────────────────────────────────────────────────────────────┘

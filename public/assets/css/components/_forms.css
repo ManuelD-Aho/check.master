@@ -1,0 +1,405 @@
+/**
+ * CheckMaster Components - Forms
+ * ===============================
+ * Styles pour tous les champs de formulaire
+ * Version: 1.0.0
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FORM GROUP
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.form-group {
+    margin-bottom: var(--space-5);
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LABEL
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.form-label {
+    display: block;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-gray-700);
+    margin-bottom: var(--space-2);
+}
+
+.form-label.required::after {
+    content: ' *';
+    color: var(--color-error-500);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TEXT INPUT & TEXTAREA
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.form-input,
+.form-textarea,
+.form-select {
+    display: block;
+    width: 100%;
+    padding: var(--space-2-5) var(--space-3);
+    font-size: var(--font-size-base);
+    font-family: inherit;
+    line-height: 1.5;
+    color: var(--color-gray-900);
+    background-color: var(--color-white);
+    border: 2px solid var(--color-gray-200);
+    border-radius: var(--radius-lg);
+    transition: var(--transition-fast);
+    appearance: none;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: var(--color-gray-400);
+}
+
+/* Focus state */
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--color-accent-500);
+    box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.1);
+}
+
+/* Disabled state */
+.form-input:disabled,
+.form-textarea:disabled,
+.form-select:disabled {
+    background-color: var(--color-gray-100);
+    color: var(--color-gray-500);
+    cursor: not-allowed;
+}
+
+/* Readonly state */
+.form-input:read-only {
+    background-color: var(--color-gray-50);
+}
+
+/* Error state */
+.form-input.is-error,
+.form-textarea.is-error,
+.form-select.is-error {
+    border-color: var(--color-error-500);
+}
+
+.form-input.is-error:focus,
+.form-textarea.is-error:focus,
+.form-select.is-error:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Success state */
+.form-input.is-success,
+.form-textarea.is-success,
+.form-select.is-success {
+    border-color: var(--color-success-500);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INPUT WITH ICON
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.form-input-wrapper {
+    position: relative;
+}
+
+.form-input-wrapper .form-input {
+    padding-left: var(--space-10);
+}
+
+.form-input-wrapper .form-input.has-icon-right {
+    padding-left: var(--space-3);
+    padding-right: var(--space-10);
+}
+
+.form-input-icon {
+    position: absolute;
+    left: var(--space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-gray-400);
+    pointer-events: none;
+}
+
+.form-input-icon.icon-right {
+    left: auto;
+    right: var(--space-3);
+}
+
+.form-input-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SELECT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.form-select {
+    padding-right: var(--space-10);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--space-3) center;
+    background-size: 20px;
+    cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TEXTAREA
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.form-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.form-textarea.no-resize {
+    resize: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CHECKBOX & RADIO
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.form-check {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    cursor: pointer;
+}
+
+.form-check-input {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    background-color: var(--color-white);
+    border: 2px solid var(--color-gray-300);
+    appearance: none;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.form-check-input[type="checkbox"] {
+    border-radius: var(--radius-md);
+}
+
+.form-check-input[type="radio"] {
+    border-radius: var(--radius-full);
+}
+
+.form-check-input:focus {
+    outline: none;
+    border-color: var(--color-accent-500);
+    box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.1);
+}
+
+.form-check-input:checked {
+    background-color: var(--color-primary-700);
+    border-color: var(--color-primary-700);
+}
+
+.form-check-input[type="checkbox"]:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.form-check-input[type="radio"]:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Ccircle cx='4' cy='4' r='4' fill='white'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.form-check-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-700);
+}
+
+.form-check-input:disabled {
+    background-color: var(--color-gray-100);
+    cursor: not-allowed;
+}
+
+.form-check-input:disabled+.form-check-label {
+    color: var(--color-gray-400);
+    cursor: not-allowed;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOGGLE / SWITCH
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.form-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    cursor: pointer;
+}
+
+.form-toggle-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.form-toggle-track {
+    width: 44px;
+    height: 24px;
+    background-color: var(--color-gray-300);
+    border-radius: var(--radius-full);
+    transition: var(--transition-fast);
+}
+
+.form-toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background-color: var(--color-white);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-fast);
+}
+
+.form-toggle-input:checked+.form-toggle-track {
+    background-color: var(--color-primary-700);
+}
+
+.form-toggle-input:checked+.form-toggle-track+.form-toggle-thumb {
+    left: 22px;
+}
+
+.form-toggle-input:focus+.form-toggle-track {
+    box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.2);
+}
+
+.form-toggle-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-700);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HELPER TEXT & ERROR MESSAGE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.form-hint {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-500);
+    margin-top: var(--space-1-5);
+}
+
+.form-error {
+    font-size: var(--font-size-sm);
+    color: var(--color-error-600);
+    margin-top: var(--space-1-5);
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.form-error::before {
+    content: '⚠';
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INPUT SIZES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.form-input-sm,
+.form-select-sm {
+    padding: var(--space-1-5) var(--space-2-5);
+    font-size: var(--font-size-sm);
+}
+
+.form-input-lg,
+.form-select-lg {
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-size-lg);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FILE INPUT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.form-file {
+    position: relative;
+}
+
+.form-file-input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.form-file-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-8);
+    background-color: var(--color-gray-50);
+    border: 2px dashed var(--color-gray-300);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    transition: var(--transition-fast);
+    cursor: pointer;
+}
+
+.form-file-label:hover {
+    background-color: var(--color-gray-100);
+    border-color: var(--color-primary-400);
+}
+
+.form-file-label.is-dragover {
+    background-color: var(--color-primary-50);
+    border-color: var(--color-primary-500);
+}
+
+.form-file-icon {
+    width: 48px;
+    height: 48px;
+    color: var(--color-gray-400);
+    margin-bottom: var(--space-3);
+}
+
+.form-file-text {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-600);
+}
+
+.form-file-text strong {
+    color: var(--color-primary-700);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FORM GRID
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.form-row {
+    display: grid;
+    gap: var(--space-4);
+}
+
+@media (min-width: 640px) {
+    .form-row-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .form-row-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}

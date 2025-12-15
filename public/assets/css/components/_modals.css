@@ -1,0 +1,299 @@
+/**
+ * CheckMaster Components - Modals
+ * ================================
+ * Styles pour les modales et dialogues
+ * Version: 1.0.0
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MODAL BACKDROP
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-backdrop);
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--duration-200) var(--ease-out),
+        visibility var(--duration-200) var(--ease-out);
+}
+
+.modal-backdrop.is-open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MODAL CONTAINER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.modal {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    max-height: calc(100vh - var(--space-8));
+    background-color: var(--color-white);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-2xl);
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.95) translateY(-10px);
+    opacity: 0;
+    transition: transform var(--duration-200) var(--ease-out),
+        opacity var(--duration-200) var(--ease-out);
+}
+
+.modal-backdrop.is-open .modal {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+/* Modal sizes */
+.modal-sm {
+    max-width: 400px;
+}
+
+.modal-lg {
+    max-width: 700px;
+}
+
+.modal-xl {
+    max-width: 900px;
+}
+
+.modal-full {
+    max-width: calc(100vw - var(--space-8));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MODAL HEADER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-5) var(--space-6);
+    border-bottom: 1px solid var(--color-gray-100);
+    flex-shrink: 0;
+}
+
+.modal-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-gray-900);
+    margin: 0;
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-lg);
+    color: var(--color-gray-400);
+    transition: var(--transition-fast);
+}
+
+.modal-close:hover {
+    background-color: var(--color-gray-100);
+    color: var(--color-gray-600);
+}
+
+.modal-close svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MODAL BODY
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.modal-body {
+    padding: var(--space-6);
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modal-body p {
+    color: var(--color-gray-600);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MODAL FOOTER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-6);
+    border-top: 1px solid var(--color-gray-100);
+    background-color: var(--color-gray-50);
+    border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+    flex-shrink: 0;
+}
+
+.modal-footer-left {
+    justify-content: flex-start;
+}
+
+.modal-footer-between {
+    justify-content: space-between;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CONFIRM DIALOG
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.modal-confirm {
+    text-align: center;
+    max-width: 420px;
+}
+
+.modal-confirm .modal-header {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.modal-confirm .modal-body {
+    padding-top: var(--space-3);
+}
+
+.modal-confirm-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto var(--space-4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+}
+
+.modal-confirm-icon.icon-danger {
+    background-color: var(--color-error-100);
+    color: var(--color-error-600);
+}
+
+.modal-confirm-icon.icon-warning {
+    background-color: var(--color-warning-100);
+    color: var(--color-warning-600);
+}
+
+.modal-confirm-icon.icon-success {
+    background-color: var(--color-success-100);
+    color: var(--color-success-600);
+}
+
+.modal-confirm-icon.icon-info {
+    background-color: var(--color-info-100);
+    color: var(--color-info-600);
+}
+
+.modal-confirm-icon svg {
+    width: 28px;
+    height: 28px;
+}
+
+.modal-confirm .modal-footer {
+    justify-content: center;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SLIDEOUT / DRAWER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.slideout-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-backdrop);
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--duration-300) var(--ease-out),
+        visibility var(--duration-300) var(--ease-out);
+}
+
+.slideout-backdrop.is-open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.slideout {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--z-modal);
+    width: 100%;
+    max-width: 480px;
+    background-color: var(--color-white);
+    box-shadow: var(--shadow-2xl);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform var(--duration-300) var(--ease-out);
+}
+
+.slideout-backdrop.is-open .slideout {
+    transform: translateX(0);
+}
+
+.slideout-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--color-gray-100);
+}
+
+.slideout-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-gray-900);
+}
+
+.slideout-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-5);
+}
+
+.slideout-footer {
+    padding: var(--space-4) var(--space-5);
+    border-top: 1px solid var(--color-gray-100);
+    display: flex;
+    gap: var(--space-3);
+    justify-content: flex-end;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE FULLSCREEN MODAL
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 639px) {
+    .modal-backdrop {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .modal {
+        max-width: none;
+        max-height: 90vh;
+        border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    }
+
+    .modal-fullscreen-mobile {
+        max-height: 100vh;
+        border-radius: 0;
+    }
+}

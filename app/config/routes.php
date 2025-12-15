@@ -1,0 +1,32 @@
+<?php
+
+/**
+ * Définition des routes de l'application
+ * Utilise AltoRouter
+ * @var \AltoRouter $router
+ */
+
+// Authentification
+$router->map('GET|POST', '/', 'AuthController#login', 'login');
+$router->map('GET', '/logout', 'AuthController#logout', 'logout');
+$router->map('GET|POST', '/forgot-password', 'AuthController#forgotPassword', 'forgot_password');
+
+// Dashboard
+$router->map('GET', '/dashboard', 'DashboardController#index', 'dashboard');
+
+// Gestion Utilisateurs
+$router->map('GET', '/users', 'UsersController#index', 'users_list');
+$router->map('GET|POST', '/users/create', 'UsersController#create', 'users_create');
+$router->map('GET|POST', '/users/[i:id]/edit', 'UsersController#edit', 'users_edit');
+$router->map('POST', '/users/[i:id]/delete', 'UsersController#delete', 'users_delete');
+
+// Etudiants
+$router->map('GET', '/etudiants', 'EtudiantsController#index', 'etudiants_list');
+$router->map('GET', '/etudiants/[i:id]', 'EtudiantsController#show', 'etudiants_show');
+
+// Soutenances
+$router->map('GET', '/soutenances', 'SoutenancesController#index', 'soutenances_list');
+$router->map('GET', '/soutenances/planning', 'SoutenancesController#planning', 'soutenances_planning');
+
+// API Routes
+$router->map('GET', '/api/users', 'Api\UsersController#index', 'api_users');

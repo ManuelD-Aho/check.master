@@ -1,0 +1,274 @@
+/**
+ * CheckMaster Components - Badges
+ * ================================
+ * Styles pour les badges et tags
+ * Version: 1.0.0
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BASE BADGE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-0-5) var(--space-2);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+    border-radius: var(--radius-default);
+    white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BADGE VARIANTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.badge-default {
+    background-color: var(--color-gray-100);
+    color: var(--color-gray-700);
+}
+
+.badge-primary {
+    background-color: var(--color-primary-100);
+    color: var(--color-primary-800);
+}
+
+.badge-accent {
+    background-color: var(--color-accent-100);
+    color: var(--color-accent-600);
+}
+
+.badge-success {
+    background-color: var(--color-success-100);
+    color: var(--color-success-700);
+}
+
+.badge-warning {
+    background-color: var(--color-warning-100);
+    color: var(--color-warning-700);
+}
+
+.badge-error {
+    background-color: var(--color-error-100);
+    color: var(--color-error-700);
+}
+
+.badge-info {
+    background-color: var(--color-info-100);
+    color: var(--color-info-700);
+}
+
+/* Solid variants */
+.badge-solid-primary {
+    background-color: var(--color-primary-700);
+    color: var(--color-white);
+}
+
+.badge-solid-success {
+    background-color: var(--color-success-500);
+    color: var(--color-white);
+}
+
+.badge-solid-warning {
+    background-color: var(--color-warning-500);
+    color: var(--color-white);
+}
+
+.badge-solid-error {
+    background-color: var(--color-error-500);
+    color: var(--color-white);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BADGE SIZES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.badge-sm {
+    padding: var(--space-0-5) var(--space-1-5);
+    font-size: 0.625rem;
+}
+
+.badge-lg {
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--font-size-sm);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BADGE SHAPES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.badge-pill {
+    border-radius: var(--radius-full);
+    padding-left: var(--space-2-5);
+    padding-right: var(--space-2-5);
+}
+
+.badge-dot {
+    padding: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+}
+
+.badge-dot.badge-lg {
+    width: 12px;
+    height: 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BADGE WITH DOT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.badge-with-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.badge-with-dot::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background-color: currentColor;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   WORKFLOW STATUS BADGES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.badge-state {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-full);
+    background-color: var(--color-gray-100);
+    color: var(--color-gray-700);
+}
+
+.badge-state::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background-color: currentColor;
+}
+
+/* Workflow states */
+.badge-state-inscrit {
+    background-color: rgba(156, 163, 175, 0.15);
+    color: var(--color-state-inscrit);
+}
+
+.badge-state-candidature {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--color-state-candidature);
+}
+
+.badge-state-scolarite {
+    background-color: rgba(139, 92, 246, 0.1);
+    color: var(--color-state-scolarite);
+}
+
+.badge-state-communication {
+    background-color: rgba(236, 72, 153, 0.1);
+    color: var(--color-state-communication);
+}
+
+.badge-state-commission {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--color-state-commission);
+}
+
+.badge-state-valide {
+    background-color: rgba(34, 197, 94, 0.1);
+    color: var(--color-state-valide);
+}
+
+.badge-state-soutenance {
+    background-color: rgba(6, 182, 212, 0.1);
+    color: var(--color-state-soutenance);
+}
+
+.badge-state-diplome {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--color-state-diplome);
+}
+
+.badge-state-rejete {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--color-state-rejete);
+}
+
+.badge-state-escalade {
+    background-color: rgba(220, 38, 38, 0.1);
+    color: var(--color-state-escalade);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COUNT BADGE (Notification bubble)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.badge-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 var(--space-1-5);
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-semibold);
+    line-height: 1;
+    border-radius: var(--radius-full);
+    background-color: var(--color-error-500);
+    color: var(--color-white);
+}
+
+.badge-count-primary {
+    background-color: var(--color-primary-700);
+}
+
+.badge-count-accent {
+    background-color: var(--color-accent-500);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REMOVABLE BADGE / TAG
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--font-size-sm);
+    background-color: var(--color-gray-100);
+    border-radius: var(--radius-default);
+    color: var(--color-gray-700);
+}
+
+.tag-remove {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    color: var(--color-gray-400);
+    transition: var(--transition-fast);
+}
+
+.tag-remove:hover {
+    background-color: var(--color-gray-200);
+    color: var(--color-gray-600);
+}
+
+.tag-remove svg {
+    width: 12px;
+    height: 12px;
+}

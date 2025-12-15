@@ -5,138 +5,162 @@ declare(strict_types=1);
 namespace App\Validators;
 
 /**
- * Validateur pour les mots de passe
+ * Validateur Mot de Passe
  * 
- * Vérifie la politique de mots de passe:
- * - Minimum 8 caractères
- * - Au moins 1 majuscule
- * - Au moins 1 chiffre
- * - Au moins 1 caractère spécial
+ * Valide la force et la conformité d'un mot de passe.
  */
 class PasswordValidator
 {
-    private const MIN_LENGTH = 8;
-    private array $erreurs = [];
+    private array $errors = [];
+    private int $minLength;
+    private bool $requireUppercase;
+    private bool $requireLowercase;
+    private bool $requireNumber;
+    private bool $requireSpecial;
 
-    /**
-     * Valide un mot de passe selon la politique de sécurité
-     */
-    public function valider(string $password): bool
-    {
-        $this->erreurs = [];
-
-        // Vérifier la longueur minimale
-        if (strlen($password) < self::MIN_LENGTH) {
-            $this->erreurs[] = 'Le mot de passe doit contenir au moins ' . self::MIN_LENGTH . ' caractères.';
-        }
-
-        // Vérifier la présence d'une majuscule
-        if (!preg_match('/[A-Z]/', $password)) {
-            $this->erreurs[] = 'Le mot de passe doit contenir au moins une majuscule.';
-        }
-
-        // Vérifier la présence d'un chiffre
-        if (!preg_match('/[0-9]/', $password)) {
-            $this->erreurs[] = 'Le mot de passe doit contenir au moins un chiffre.';
-        }
-
-        // Vérifier la présence d'un caractère spécial
-        if (!preg_match('/[^a-zA-Z0-9]/', $password)) {
-            $this->erreurs[] = 'Le mot de passe doit contenir au moins un caractère spécial.';
-        }
-
-        return empty($this->erreurs);
+    public function __construct(
+        int $minLength = 8,
+        bool $requireUppercase = true,
+        bool $requireLowercase = true,
+        bool $requireNumber = true,
+        bool $requireSpecial = false
+    ) {
+        $this->minLength = $minLength;
+        $this->requireUppercase = $requireUppercase;
+        $this->requireLowercase = $requireLowercase;
+        $this->requireNumber = $requireNumber;
+        $this->requireSpecial = $requireSpecial;
     }
 
     /**
-     * Valide la confirmation du mot de passe
+     * Valide un mot de passe
      */
-    public function validerConfirmation(string $password, string $confirmation): bool
+    public function validate(string $password): bool
     {
-        if ($password !== $confirmation) {
-            $this->erreurs[] = 'Les mots de passe ne correspondent pas.';
+        $this->errors = [];
+
+        if (strlen($password) < $this->minLength) {
+            $this->errors[] = "Le mot de passe doit contenir au moins {$this->minLength} caractères";
+        }
+
+        if ($this->requireUppercase && !preg_match('/[A-Z]/', $password)) {
+            $this->errors[] = 'Le mot de passe doit contenir au moins une majuscule';
+        }
+
+        if ($this->requireLowercase && !preg_match('/[a-z]/', $password)) {
+            $this->errors[] = 'Le mot de passe doit contenir au moins une minuscule';
+        }
+
+        if ($this->requireNumber && !preg_match('/[0-9]/', $password)) {
+            $this->errors[] = 'Le mot de passe doit contenir au moins un chiffre';
+        }
+
+        if ($this->requireSpecial && !preg_match('/[!@#$%^&*(),.?":{}|<>]/', $password)) {
+            $this->errors[] = 'Le mot de passe doit contenir au moins un caractère spécial';
+        }
+
+        return empty($this->errors);
+    }
+
+    /**
+     * Valide un changement de mot de passe
+     */
+    public function validateChange(
+        string $currentPassword,
+        string $newPassword,
+        string $confirmPassword,
+        string $hashedCurrent
+    ): bool {
+        $this->errors = [];
+
+        // Vérifier le mot de passe actuel
+        if (!password_verify($currentPassword, $hashedCurrent)) {
+            $this->errors['current'] = 'Le mot de passe actuel est incorrect';
             return false;
         }
+
+        // Vérifier que le nouveau est différent
+        if ($currentPassword === $newPassword) {
+            $this->errors['new'] = 'Le nouveau mot de passe doit être différent de l\'actuel';
+            return false;
+        }
+
+        // Valider le nouveau mot de passe
+        if (!$this->validate($newPassword)) {
+            $this->errors['new'] = $this->getFirstError();
+            return false;
+        }
+
+        // Vérifier la confirmation
+        if ($newPassword !== $confirmPassword) {
+            $this->errors['confirm'] = 'Les mots de passe ne correspondent pas';
+            return false;
+        }
+
         return true;
     }
 
     /**
-     * Retourne toutes les erreurs
+     * Calcule le score de force (0-100)
      */
-    public function getErreurs(): array
+    public function getStrengthScore(string $password): int
     {
-        return $this->erreurs;
-    }
+        $score = 0;
 
-    /**
-     * Retourne les erreurs formatées en chaîne
-     */
-    public function getErreursFormatees(): string
-    {
-        return implode(' ', $this->erreurs);
-    }
+        // Longueur
+        $score += min(30, strlen($password) * 3);
 
-    /**
-     * Vérifie si le mot de passe est trop commun
-     */
-    public function estMotDePasseCommun(string $password): bool
-    {
-        $motsDePasseCommuns = [
-            'password',
-            'Password1!',
-            '12345678',
-            'azerty123',
-            'qwerty123',
-            'admin123',
-            'Letmein1!',
-            'Welcome1!',
-            'Changeme1!',
-            'P@ssw0rd',
-        ];
-
-        return in_array($password, $motsDePasseCommuns, true);
-    }
-
-    /**
-     * Calcule la force du mot de passe (0-100)
-     */
-    public function calculerForce(string $password): int
-    {
-        $force = 0;
-
-        // Points pour la longueur
-        $longueur = strlen($password);
-        $force += min(30, $longueur * 3);
-
-        // Points pour les majuscules
+        // Majuscules
         if (preg_match('/[A-Z]/', $password)) {
-            $force += 15;
+            $score += 15;
         }
 
-        // Points pour les minuscules
+        // Minuscules
         if (preg_match('/[a-z]/', $password)) {
-            $force += 10;
+            $score += 15;
         }
 
-        // Points pour les chiffres
+        // Chiffres
         if (preg_match('/[0-9]/', $password)) {
-            $force += 15;
+            $score += 20;
         }
 
-        // Points pour les caractères spéciaux
-        if (preg_match('/[^a-zA-Z0-9]/', $password)) {
-            $force += 20;
+        // Caractères spéciaux
+        if (preg_match('/[!@#$%^&*(),.?":{}|<>]/', $password)) {
+            $score += 20;
         }
 
-        // Points bonus pour diversité
-        if (
-            $longueur >= 12 && preg_match('/[A-Z]/', $password)
-            && preg_match('/[0-9]/', $password)
-            && preg_match('/[^a-zA-Z0-9]/', $password)
-        ) {
-            $force += 10;
-        }
+        return min(100, $score);
+    }
 
-        return min(100, $force);
+    /**
+     * Retourne le niveau de force
+     */
+    public function getStrengthLevel(string $password): string
+    {
+        $score = $this->getStrengthScore($password);
+
+        return match (true) {
+            $score >= 80 => 'fort',
+            $score >= 60 => 'moyen',
+            $score >= 40 => 'faible',
+            default => 'très_faible',
+        };
+    }
+
+    /**
+     * Retourne les erreurs
+     */
+    public function getErrors(): array
+    {
+        return $this->errors;
+    }
+
+    /**
+     * Retourne la première erreur
+     */
+    public function getFirstError(): ?string
+    {
+        return reset($this->errors) ?: null;
     }
 }

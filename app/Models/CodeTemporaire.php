@@ -7,9 +7,9 @@ namespace App\Models;
 use App\Orm\Model;
 
 /**
- * Modèle Code Temporaire
+ * Modèle CodeTemporaire
  * 
- * Représente un code d'accès temporaire (ex: Président Jury).
+ * Représente un code temporaire (vérification, reset password, président jury).
  * Table: codes_temporaires
  */
 class CodeTemporaire extends Model
@@ -28,58 +28,33 @@ class CodeTemporaire extends Model
     ];
 
     /**
-     * Types de codes temporaires
+     * Types de codes
      */
     public const TYPE_PRESIDENT_JURY = 'president_jury';
     public const TYPE_RESET_PASSWORD = 'reset_password';
     public const TYPE_VERIFICATION = 'verification';
 
     /**
-     * Caractères autorisés pour génération (sans 0/O, 1/I pour éviter confusion)
+     * Durées par défaut (en secondes)
      */
-    private const CHARS_AUTORISES = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    public const DUREE_PRESIDENT_JURY = 86400;  // 24h
+    public const DUREE_RESET_PASSWORD = 3600;    // 1h
+    public const DUREE_VERIFICATION = 600;       // 10min
 
     /**
-     * Génère un code aléatoire de 8 caractères
-     */
-    public static function genererCode(): string
-    {
-        $code = '';
-        $max = strlen(self::CHARS_AUTORISES) - 1;
-
-        for ($i = 0; $i < 8; $i++) {
-            $code .= self::CHARS_AUTORISES[random_int(0, $max)];
-        }
-
-        return $code;
-    }
-
-    /**
-     * Hash un code pour stockage sécurisé
-     */
-    public static function hasherCode(string $code): string
-    {
-        return password_hash($code, PASSWORD_ARGON2ID);
-    }
-
-    /**
-     * Vérifie un code contre son hash
-     */
-    public static function verifierCode(string $code, string $hash): bool
-    {
-        return password_verify($code, $hash);
-    }
-
-    /**
-     * Vérifie si le code est dans sa période de validité
+     * Vérifie si le code est valide
      */
     public function estValide(): bool
     {
-        $now = time();
-        $debut = strtotime($this->valide_de);
-        $fin = strtotime($this->valide_jusqu_a);
+        if ($this->utilise) {
+            return false;
+        }
 
-        return $now >= $debut && $now <= $fin && !$this->utilise;
+        $now = time();
+        $valideDe = strtotime($this->valide_de);
+        $valideJusqua = strtotime($this->valide_jusqu_a);
+
+        return $now >= $valideDe && $now <= $valideJusqua;
     }
 
     /**
@@ -89,20 +64,104 @@ class CodeTemporaire extends Model
     {
         $this->utilise = true;
         $this->utilise_a = date('Y-m-d H:i:s');
+        $this->save();
     }
 
     /**
-     * Trouve un code valide par utilisateur et type
+     * Vérifie un code en clair contre le hash stocké
      */
-    public static function findCodeValide(int $userId, string $type): ?self
+    public function verifier(string $code): bool
     {
-        $results = self::where([
-            'utilisateur_id' => $userId,
+        if (!$this->estValide()) {
+            return false;
+        }
+        return password_verify($code, $this->code_hash);
+    }
+
+    /**
+     * Génère un code numérique aléatoire
+     */
+    public static function genererCode(int $longueur = 6): string
+    {
+        $code = '';
+        for ($i = 0; $i < $longueur; $i++) {
+            $code .= random_int(0, 9);
+        }
+        return $code;
+    }
+
+    /**
+     * Crée un nouveau code temporaire
+     */
+    public static function creer(
+        int $utilisateurId,
+        string $type,
+        ?int $soutenanceId = null,
+        ?int $duree = null
+    ): array {
+        // Invalider les codes précédents du même type
+        self::invaliderPrecedents($utilisateurId, $type);
+
+        // Déterminer la durée
+        $duree = $duree ?? match ($type) {
+            self::TYPE_PRESIDENT_JURY => self::DUREE_PRESIDENT_JURY,
+            self::TYPE_RESET_PASSWORD => self::DUREE_RESET_PASSWORD,
+            self::TYPE_VERIFICATION => self::DUREE_VERIFICATION,
+            default => 3600,
+        };
+
+        // Générer le code en clair et le hash
+        $codeEnClair = self::genererCode();
+        $codeHash = password_hash($codeEnClair, PASSWORD_ARGON2ID);
+
+        $now = time();
+        $code = new self([
+            'utilisateur_id' => $utilisateurId,
+            'soutenance_id' => $soutenanceId,
+            'code_hash' => $codeHash,
             'type' => $type,
-            'utilise' => 0,
+            'valide_de' => date('Y-m-d H:i:s', $now),
+            'valide_jusqu_a' => date('Y-m-d H:i:s', $now + $duree),
+            'utilise' => false,
+        ]);
+        $code->save();
+
+        // Retourner le modèle ET le code en clair (pour envoi par email/SMS)
+        return [
+            'model' => $code,
+            'code' => $codeEnClair,
+        ];
+    }
+
+    /**
+     * Invalide les codes précédents du même type pour un utilisateur
+     */
+    public static function invaliderPrecedents(int $utilisateurId, string $type): void
+    {
+        $codes = self::where([
+            'utilisateur_id' => $utilisateurId,
+            'type' => $type,
+            'utilise' => false,
         ]);
 
-        foreach ($results as $code) {
+        foreach ($codes as $code) {
+            $code->utilise = true;
+            $code->save();
+        }
+    }
+
+    /**
+     * Trouve un code valide pour un utilisateur et un type
+     */
+    public static function trouverValide(int $utilisateurId, string $type): ?self
+    {
+        $codes = self::where([
+            'utilisateur_id' => $utilisateurId,
+            'type' => $type,
+            'utilise' => false,
+        ]);
+
+        foreach ($codes as $code) {
             if ($code->estValide()) {
                 return $code;
             }
@@ -112,13 +171,12 @@ class CodeTemporaire extends Model
     }
 
     /**
-     * Révoque tous les codes expirés
+     * Retourne le temps restant avant expiration (en secondes)
      */
-    public static function revoquerExpires(): int
+    public function tempsRestant(): int
     {
-        $sql = "UPDATE codes_temporaires SET utilise = 1 
-                WHERE utilise = 0 AND valide_jusqu_a < NOW()";
-        $stmt = self::raw($sql);
-        return $stmt->rowCount();
+        $expire = strtotime($this->valide_jusqu_a);
+        $remaining = $expire - time();
+        return max(0, $remaining);
     }
 }

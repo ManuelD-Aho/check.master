@@ -1,0 +1,294 @@
+/**
+ * CheckMaster Modules - Authentication
+ * =====================================
+ * Login and auth pages styles
+ * Version: 1.0.0
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AUTH LAYOUT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.auth-layout {
+    min-height: 100vh;
+    display: flex;
+    background: linear-gradient(135deg, var(--color-primary-900) 0%, var(--color-primary-700) 100%);
+}
+
+/* Decorative background */
+.auth-layout::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        radial-gradient(circle at 20% 80%, rgba(56, 178, 172, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(56, 178, 172, 0.1) 0%, transparent 40%);
+    pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AUTH CONTAINER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.auth-container {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-6);
+    position: relative;
+    z-index: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AUTH CARD
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    background-color: var(--color-white);
+    border-radius: var(--radius-3xl);
+    box-shadow: var(--shadow-2xl);
+    overflow: hidden;
+    animation: scaleIn var(--duration-300) var(--ease-out);
+}
+
+.auth-card-header {
+    padding: var(--space-8) var(--space-8) var(--space-6);
+    text-align: center;
+}
+
+.auth-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    margin-bottom: var(--space-4);
+    background: linear-gradient(135deg, var(--color-primary-800) 0%, var(--color-primary-700) 100%);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-primary);
+}
+
+.auth-logo svg,
+.auth-logo img {
+    width: 40px;
+    height: 40px;
+    color: var(--color-white);
+}
+
+.auth-title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-gray-900);
+    margin: 0 0 var(--space-2);
+}
+
+.auth-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-500);
+    margin: 0;
+}
+
+.auth-card-body {
+    padding: 0 var(--space-8) var(--space-8);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AUTH FORM
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.auth-form .form-group {
+    margin-bottom: var(--space-5);
+}
+
+.auth-form .form-input {
+    padding: var(--space-3-5) var(--space-4);
+    font-size: var(--font-size-base);
+    border-radius: var(--radius-xl);
+    background-color: var(--color-gray-50);
+    border-color: transparent;
+}
+
+.auth-form .form-input:focus {
+    background-color: var(--color-white);
+    border-color: var(--color-accent-500);
+}
+
+.auth-form .form-input-wrapper .form-input {
+    padding-left: var(--space-12);
+}
+
+.auth-form .form-input-icon {
+    left: var(--space-4);
+    color: var(--color-gray-400);
+}
+
+.auth-form .btn-primary {
+    width: 100%;
+    padding: var(--space-3-5);
+    font-size: var(--font-size-base);
+    border-radius: var(--radius-xl);
+}
+
+/* Remember me / Forgot password */
+.auth-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-6);
+    font-size: var(--font-size-sm);
+}
+
+.auth-forgot-link {
+    color: var(--color-primary-700);
+    font-weight: var(--font-weight-medium);
+}
+
+.auth-forgot-link:hover {
+    color: var(--color-primary-800);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AUTH ERROR MESSAGE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.auth-error {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    margin-bottom: var(--space-5);
+    background-color: var(--color-error-50);
+    border: 1px solid var(--color-error-200);
+    border-radius: var(--radius-lg);
+    color: var(--color-error-700);
+    font-size: var(--font-size-sm);
+    animation: shake 0.5s ease-in-out;
+}
+
+.auth-error-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--color-error-500);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AUTH FOOTER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.auth-card-footer {
+    padding: var(--space-4) var(--space-8);
+    background-color: var(--color-gray-50);
+    border-top: 1px solid var(--color-gray-100);
+    text-align: center;
+}
+
+.auth-footer-text {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-500);
+}
+
+.auth-footer-text a {
+    color: var(--color-primary-700);
+    font-weight: var(--font-weight-medium);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PASSWORD INPUT WITH TOGGLE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.password-toggle {
+    position: absolute;
+    right: var(--space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-gray-400);
+    border-radius: var(--radius-md);
+    transition: var(--transition-fast);
+}
+
+.password-toggle:hover {
+    color: var(--color-gray-600);
+    background-color: var(--color-gray-100);
+}
+
+.password-toggle svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PASSWORD STRENGTH INDICATOR
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.password-strength {
+    display: flex;
+    gap: var(--space-1);
+    margin-top: var(--space-2);
+}
+
+.password-strength-bar {
+    flex: 1;
+    height: 4px;
+    background-color: var(--color-gray-200);
+    border-radius: var(--radius-full);
+    transition: var(--transition-fast);
+}
+
+.password-strength.strength-weak .password-strength-bar:nth-child(1) {
+    background-color: var(--color-error-500);
+}
+
+.password-strength.strength-fair .password-strength-bar:nth-child(-n+2) {
+    background-color: var(--color-warning-500);
+}
+
+.password-strength.strength-good .password-strength-bar:nth-child(-n+3) {
+    background-color: var(--color-success-400);
+}
+
+.password-strength.strength-strong .password-strength-bar {
+    background-color: var(--color-success-500);
+}
+
+.password-strength-text {
+    font-size: var(--font-size-xs);
+    margin-top: var(--space-1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 479px) {
+    .auth-container {
+        padding: var(--space-4);
+    }
+
+    .auth-card {
+        border-radius: var(--radius-2xl);
+    }
+
+    .auth-card-header {
+        padding: var(--space-6) var(--space-5) var(--space-4);
+    }
+
+    .auth-card-body {
+        padding: 0 var(--space-5) var(--space-6);
+    }
+
+    .auth-card-footer {
+        padding: var(--space-4) var(--space-5);
+    }
+}

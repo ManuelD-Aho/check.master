@@ -210,6 +210,44 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
 
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /notifications:
+    get:
+      summary: List user notifications
+      tags: [Notifications]
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+
+  /notifications/{id}/read:
+    post:
+      summary: Mark notification as read
+      tags: [Notifications]
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Notification marked as read
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
 components:
   schemas:
     User:
@@ -292,6 +330,26 @@ components:
         date_depot:
           type: string
           format: date-time
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [info, succes, avertissement, erreur, systeme]
+        titre:
+          type: string
+        contenu:
+          type: string
+        lue:
+          type: boolean
+        date_creation:
+          type: string
+          format: date-time
+        lien:
+          type: string
 
     SuccessResponse:
       type: object

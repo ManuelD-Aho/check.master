@@ -1,0 +1,310 @@
+/**
+ * CheckMaster Components - Tables
+ * ================================
+ * Styles pour les tableaux de données
+ * Version: 1.0.0
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TABLE WRAPPER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.table-wrapper {
+    background-color: var(--color-white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.table-header {
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--color-gray-100);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.table-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-gray-900);
+}
+
+.table-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BASE TABLE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
+}
+
+.table th,
+.table td {
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.table th {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-gray-600);
+    background-color: var(--color-gray-50);
+    border-bottom: 1px solid var(--color-gray-200);
+    white-space: nowrap;
+}
+
+.table td {
+    color: var(--color-gray-900);
+    border-bottom: 1px solid var(--color-gray-100);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TABLE VARIANTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Striped rows */
+.table-striped tbody tr:nth-child(even) {
+    background-color: var(--color-gray-50);
+}
+
+/* Hoverable rows */
+.table-hover tbody tr {
+    transition: var(--transition-fast);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--color-primary-50);
+}
+
+/* Bordered table */
+.table-bordered th,
+.table-bordered td {
+    border: 1px solid var(--color-gray-200);
+}
+
+/* Compact table */
+.table-compact th,
+.table-compact td {
+    padding: var(--space-2) var(--space-3);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SORTABLE COLUMNS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: var(--space-8);
+}
+
+.table th.sortable::after {
+    content: '';
+    position: absolute;
+    right: var(--space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Cpath d='M8 9l4-4 4 4'/%3E%3Cpath d='M16 15l-4 4-4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.5;
+}
+
+.table th.sortable:hover::after {
+    opacity: 1;
+}
+
+.table th.sortable.sort-asc::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231a365d' stroke-width='2'%3E%3Cpath d='M12 5v14M5 12l7-7 7 7'/%3E%3C/svg%3E");
+    opacity: 1;
+}
+
+.table th.sortable.sort-desc::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231a365d' stroke-width='2'%3E%3Cpath d='M12 5v14M19 12l-7 7-7-7'/%3E%3C/svg%3E");
+    opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SELECTABLE ROWS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.table th.col-select,
+.table td.col-select {
+    width: 48px;
+    padding-left: var(--space-4);
+    padding-right: var(--space-2);
+}
+
+.table tbody tr.is-selected {
+    background-color: var(--color-primary-50);
+}
+
+.table tbody tr.is-selected td {
+    border-bottom-color: var(--color-primary-100);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACTIONS COLUMN
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.table th.col-actions,
+.table td.col-actions {
+    width: 120px;
+    text-align: right;
+    padding-right: var(--space-4);
+}
+
+.table-row-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.table-row-actions .btn {
+    opacity: 0.7;
+}
+
+.table-row-actions .btn:hover {
+    opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TABLE FOOTER (Pagination)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.table-footer {
+    padding: var(--space-3) var(--space-5);
+    border-top: 1px solid var(--color-gray-100);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    background-color: var(--color-gray-50);
+}
+
+.table-info {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-600);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STATUS INDICATORS IN TABLE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.table-status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.table-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+}
+
+.table-status-dot.status-active {
+    background-color: var(--color-success-500);
+}
+
+.table-status-dot.status-inactive {
+    background-color: var(--color-gray-400);
+}
+
+.table-status-dot.status-pending {
+    background-color: var(--color-warning-500);
+}
+
+.table-status-dot.status-error {
+    background-color: var(--color-error-500);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE TABLE (Card View on Mobile)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+    .table-responsive-cards thead {
+        display: none;
+    }
+
+    .table-responsive-cards tbody tr {
+        display: block;
+        padding: var(--space-4);
+        margin-bottom: var(--space-3);
+        background-color: var(--color-white);
+        border: 1px solid var(--color-gray-200);
+        border-radius: var(--radius-lg);
+    }
+
+    .table-responsive-cards tbody td {
+        display: flex;
+        justify-content: space-between;
+        padding: var(--space-2) 0;
+        border: none;
+        border-bottom: 1px solid var(--color-gray-100);
+    }
+
+    .table-responsive-cards tbody td:last-child {
+        border-bottom: none;
+    }
+
+    .table-responsive-cards tbody td::before {
+        content: attr(data-label);
+        font-weight: var(--font-weight-medium);
+        color: var(--color-gray-600);
+        margin-right: var(--space-3);
+    }
+
+    .table-responsive-cards td.col-actions {
+        justify-content: flex-end;
+        padding-top: var(--space-3);
+    }
+
+    .table-responsive-cards td.col-actions::before {
+        display: none;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EMPTY TABLE STATE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.table-empty {
+    padding: var(--space-12) var(--space-6);
+    text-align: center;
+}
+
+.table-empty-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto var(--space-3);
+    color: var(--color-gray-300);
+}
+
+.table-empty-text {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-500);
+}

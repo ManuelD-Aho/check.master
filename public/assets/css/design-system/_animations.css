@@ -1,0 +1,358 @@
+/**
+ * CheckMaster Design System - Animations
+ * =======================================
+ * Keyframes et transitions prédéfinies
+ * Version: 1.0.0
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   KEYFRAMES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Fade In */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Fade Out */
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+/* Slide In from Top */
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Slide In from Bottom */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Slide In from Left */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Slide In from Right */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Scale In */
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Scale Out */
+@keyframes scaleOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+/* Spin */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Pulse */
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Bounce */
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(-5%);
+        animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+
+    50% {
+        transform: translateY(0);
+        animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+}
+
+/* Shake */
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-4px);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(4px);
+    }
+}
+
+/* Skeleton Loading */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANIMATION CLASSES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.animate-fade-in {
+    animation: fadeIn var(--duration-200) var(--ease-out);
+}
+
+.animate-fade-out {
+    animation: fadeOut var(--duration-200) var(--ease-in);
+}
+
+.animate-slide-in-down {
+    animation: slideInDown var(--duration-300) var(--ease-out);
+}
+
+.animate-slide-in-up {
+    animation: slideInUp var(--duration-300) var(--ease-out);
+}
+
+.animate-slide-in-left {
+    animation: slideInLeft var(--duration-300) var(--ease-out);
+}
+
+.animate-slide-in-right {
+    animation: slideInRight var(--duration-300) var(--ease-out);
+}
+
+.animate-scale-in {
+    animation: scaleIn var(--duration-200) var(--ease-out);
+}
+
+.animate-scale-out {
+    animation: scaleOut var(--duration-150) var(--ease-in);
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-bounce {
+    animation: bounce 1s infinite;
+}
+
+.animate-shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SKELETON LOADER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.skeleton {
+    background: linear-gradient(90deg,
+            var(--color-gray-200) 25%,
+            var(--color-gray-100) 50%,
+            var(--color-gray-200) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-md);
+}
+
+.skeleton-text {
+    height: 1em;
+    margin-bottom: var(--space-2);
+}
+
+.skeleton-title {
+    height: 1.5em;
+    width: 60%;
+    margin-bottom: var(--space-3);
+}
+
+.skeleton-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+}
+
+.skeleton-button {
+    height: 40px;
+    width: 120px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TRANSITION CLASSES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.transition-none {
+    transition: none;
+}
+
+.transition-all {
+    transition: var(--transition-default);
+}
+
+.transition-fast {
+    transition: var(--transition-fast);
+}
+
+.transition-slow {
+    transition: var(--transition-slow);
+}
+
+.transition-colors {
+    transition: color var(--duration-200) var(--ease-in-out),
+        background-color var(--duration-200) var(--ease-in-out),
+        border-color var(--duration-200) var(--ease-in-out);
+}
+
+.transition-opacity {
+    transition: opacity var(--duration-200) var(--ease-in-out);
+}
+
+.transition-transform {
+    transition: transform var(--duration-200) var(--ease-out);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TRANSFORM UTILITIES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.scale-100 {
+    transform: scale(1);
+}
+
+.scale-95 {
+    transform: scale(0.95);
+}
+
+.scale-105 {
+    transform: scale(1.05);
+}
+
+.translate-y-0 {
+    transform: translateY(0);
+}
+
+.translate-y-1 {
+    transform: translateY(0.25rem);
+}
+
+.-translate-y-1 {
+    transform: translateY(-0.25rem);
+}
+
+.translate-y-2 {
+    transform: translateY(0.5rem);
+}
+
+.-translate-y-2 {
+    transform: translateY(-0.5rem);
+}
+
+.rotate-0 {
+    transform: rotate(0deg);
+}
+
+.rotate-90 {
+    transform: rotate(90deg);
+}
+
+.rotate-180 {
+    transform: rotate(180deg);
+}
+
+.-rotate-90 {
+    transform: rotate(-90deg);
+}

@@ -1,0 +1,306 @@
+/**
+ * CheckMaster Modules - Workflow
+ * ================================
+ * Workflow visualization styles
+ * Version: 1.0.0
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   WORKFLOW TIMELINE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.workflow-timeline {
+    position: relative;
+    padding-left: var(--space-8);
+}
+
+.workflow-timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--color-gray-200);
+}
+
+.workflow-step {
+    position: relative;
+    padding-bottom: var(--space-6);
+}
+
+.workflow-step:last-child {
+    padding-bottom: 0;
+}
+
+.workflow-step-indicator {
+    position: absolute;
+    left: calc(-1 * var(--space-8) + 4px);
+    top: 2px;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-white);
+    border: 2px solid var(--color-gray-300);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.workflow-step.is-completed .workflow-step-indicator {
+    background-color: var(--color-success-500);
+    border-color: var(--color-success-500);
+    color: var(--color-white);
+}
+
+.workflow-step.is-current .workflow-step-indicator {
+    background-color: var(--color-primary-700);
+    border-color: var(--color-primary-700);
+    color: var(--color-white);
+    box-shadow: 0 0 0 4px rgba(26, 54, 93, 0.2);
+}
+
+.workflow-step.is-error .workflow-step-indicator {
+    background-color: var(--color-error-500);
+    border-color: var(--color-error-500);
+    color: var(--color-white);
+}
+
+.workflow-step-indicator svg {
+    width: 14px;
+    height: 14px;
+}
+
+.workflow-step-content {
+    padding-top: var(--space-0-5);
+}
+
+.workflow-step-title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-gray-900);
+    margin-bottom: var(--space-1);
+}
+
+.workflow-step.is-pending .workflow-step-title {
+    color: var(--color-gray-500);
+}
+
+.workflow-step-description {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-500);
+}
+
+.workflow-step-meta {
+    font-size: var(--font-size-xs);
+    color: var(--color-gray-400);
+    margin-top: var(--space-1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   WORKFLOW HORIZONTAL
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.workflow-horizontal {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    position: relative;
+}
+
+.workflow-horizontal::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    height: 2px;
+    background-color: var(--color-gray-200);
+}
+
+.workflow-horizontal .workflow-step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    padding-bottom: 0;
+}
+
+.workflow-horizontal .workflow-step-indicator {
+    position: relative;
+    left: auto;
+    top: auto;
+    margin: 0 auto var(--space-3);
+}
+
+/* Progress line */
+.workflow-horizontal .workflow-step.is-completed::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    right: -50%;
+    height: 2px;
+    background-color: var(--color-success-500);
+}
+
+.workflow-horizontal .workflow-step:last-child::after {
+    display: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   WORKFLOW CARD
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.workflow-card {
+    background-color: var(--color-white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.workflow-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--color-gray-100);
+}
+
+.workflow-card-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.workflow-card-body {
+    padding: var(--space-5);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   WORKFLOW ACTIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.workflow-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-gray-100);
+}
+
+.workflow-action-primary {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   VOTE INTERFACE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.vote-options {
+    display: flex;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+}
+
+.vote-option {
+    flex: 1;
+    padding: var(--space-4);
+    background-color: var(--color-gray-50);
+    border: 2px solid var(--color-gray-200);
+    border-radius: var(--radius-xl);
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.vote-option:hover {
+    border-color: var(--color-gray-300);
+    background-color: var(--color-gray-100);
+}
+
+.vote-option.is-selected {
+    border-color: var(--color-primary-500);
+    background-color: var(--color-primary-50);
+}
+
+.vote-option.vote-approve.is-selected {
+    border-color: var(--color-success-500);
+    background-color: var(--color-success-50);
+}
+
+.vote-option.vote-reject.is-selected {
+    border-color: var(--color-error-500);
+    background-color: var(--color-error-50);
+}
+
+.vote-option-icon {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto var(--space-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    background-color: var(--color-gray-200);
+    color: var(--color-gray-600);
+}
+
+.vote-option.vote-approve .vote-option-icon {
+    background-color: var(--color-success-100);
+    color: var(--color-success-600);
+}
+
+.vote-option.vote-reject .vote-option-icon {
+    background-color: var(--color-error-100);
+    color: var(--color-error-600);
+}
+
+.vote-option.vote-revise .vote-option-icon {
+    background-color: var(--color-warning-100);
+    color: var(--color-warning-600);
+}
+
+.vote-option-label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-gray-700);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   VOTE SUMMARY
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.vote-summary {
+    display: flex;
+    gap: var(--space-6);
+    padding: var(--space-4);
+    background-color: var(--color-gray-50);
+    border-radius: var(--radius-lg);
+}
+
+.vote-summary-item {
+    text-align: center;
+}
+
+.vote-summary-count {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-gray-900);
+}
+
+.vote-summary-label {
+    font-size: var(--font-size-xs);
+    color: var(--color-gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.vote-summary-item.is-approve .vote-summary-count {
+    color: var(--color-success-600);
+}
+
+.vote-summary-item.is-reject .vote-summary-count {
+    color: var(--color-error-600);
+}

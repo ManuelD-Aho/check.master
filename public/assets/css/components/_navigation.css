@@ -1,0 +1,361 @@
+/**
+ * CheckMaster Components - Navigation
+ * =====================================
+ * Styles pour tabs, breadcrumbs, pagination, dropdown
+ * Version: 1.0.0
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TABS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tabs {
+    display: flex;
+    border-bottom: 1px solid var(--color-gray-200);
+    gap: var(--space-1);
+}
+
+.tab {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-gray-600);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: var(--transition-fast);
+    white-space: nowrap;
+}
+
+.tab:hover {
+    color: var(--color-gray-900);
+}
+
+.tab.is-active {
+    color: var(--color-primary-700);
+    border-bottom-color: var(--color-primary-700);
+}
+
+.tab-count {
+    font-size: var(--font-size-xs);
+    padding: var(--space-0-5) var(--space-1-5);
+    background-color: var(--color-gray-100);
+    border-radius: var(--radius-full);
+    color: var(--color-gray-600);
+}
+
+.tab.is-active .tab-count {
+    background-color: var(--color-primary-100);
+    color: var(--color-primary-700);
+}
+
+/* Pill tabs */
+.tabs-pills {
+    border-bottom: none;
+    background-color: var(--color-gray-100);
+    padding: var(--space-1);
+    border-radius: var(--radius-lg);
+    gap: var(--space-1);
+}
+
+.tabs-pills .tab {
+    border-bottom: none;
+    margin-bottom: 0;
+    border-radius: var(--radius-md);
+    padding: var(--space-2) var(--space-3);
+}
+
+.tabs-pills .tab.is-active {
+    background-color: var(--color-white);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BREADCRUMBS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    font-size: var(--font-size-sm);
+}
+
+.breadcrumb-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-gray-500);
+}
+
+.breadcrumb-item a {
+    color: var(--color-gray-500);
+    text-decoration: none;
+    transition: var(--transition-fast);
+}
+
+.breadcrumb-item a:hover {
+    color: var(--color-primary-700);
+}
+
+.breadcrumb-item:last-child {
+    color: var(--color-gray-900);
+    font-weight: var(--font-weight-medium);
+}
+
+.breadcrumb-separator {
+    color: var(--color-gray-300);
+}
+
+.breadcrumb-separator svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PAGINATION
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.pagination-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 var(--space-2);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-gray-700);
+    background-color: var(--color-white);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-lg);
+    transition: var(--transition-fast);
+}
+
+.pagination-item:hover:not(.is-disabled):not(.is-active) {
+    background-color: var(--color-gray-50);
+    border-color: var(--color-gray-300);
+}
+
+.pagination-item.is-active {
+    background-color: var(--color-primary-700);
+    border-color: var(--color-primary-700);
+    color: var(--color-white);
+}
+
+.pagination-item.is-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-item svg {
+    width: 16px;
+    height: 16px;
+}
+
+.pagination-ellipsis {
+    padding: 0 var(--space-2);
+    color: var(--color-gray-400);
+}
+
+/* Simple pagination (prev/next only) */
+.pagination-simple {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.pagination-simple-info {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-600);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DROPDOWN
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + var(--space-1));
+    left: 0;
+    z-index: var(--z-dropdown);
+    min-width: 200px;
+    padding: var(--space-1);
+    background-color: var(--color-white);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity var(--duration-150) var(--ease-out),
+        visibility var(--duration-150) var(--ease-out),
+        transform var(--duration-150) var(--ease-out);
+}
+
+.dropdown.is-open .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-menu-right {
+    left: auto;
+    right: 0;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-700);
+    border-radius: var(--radius-md);
+    transition: var(--transition-fast);
+}
+
+.dropdown-item:hover {
+    background-color: var(--color-gray-100);
+}
+
+.dropdown-item.is-active {
+    background-color: var(--color-primary-50);
+    color: var(--color-primary-700);
+}
+
+.dropdown-item.is-danger {
+    color: var(--color-error-600);
+}
+
+.dropdown-item.is-danger:hover {
+    background-color: var(--color-error-50);
+}
+
+.dropdown-item svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.dropdown-divider {
+    height: 1px;
+    margin: var(--space-1) 0;
+    background-color: var(--color-gray-100);
+}
+
+.dropdown-header {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STEPPER / PROGRESS STEPS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.stepper {
+    display: flex;
+    align-items: center;
+}
+
+.stepper-item {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.stepper-indicator {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    background-color: var(--color-gray-200);
+    color: var(--color-gray-500);
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+}
+
+.stepper-item.is-completed .stepper-indicator {
+    background-color: var(--color-success-500);
+    color: var(--color-white);
+}
+
+.stepper-item.is-active .stepper-indicator {
+    background-color: var(--color-primary-700);
+    color: var(--color-white);
+}
+
+.stepper-content {
+    margin-left: var(--space-3);
+    display: none;
+}
+
+.stepper-title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-gray-900);
+}
+
+.stepper-line {
+    flex: 1;
+    height: 2px;
+    background-color: var(--color-gray-200);
+    margin: 0 var(--space-3);
+}
+
+.stepper-item.is-completed+.stepper-item .stepper-line,
+.stepper-item.is-completed .stepper-line {
+    background-color: var(--color-success-500);
+}
+
+/* Vertical stepper */
+.stepper-vertical {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.stepper-vertical .stepper-item {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.stepper-vertical .stepper-content {
+    display: block;
+    margin-left: 0;
+    margin-top: var(--space-2);
+}
+
+.stepper-vertical .stepper-line {
+    width: 2px;
+    height: var(--space-8);
+    margin: var(--space-2) 0;
+    margin-left: 15px;
+}
+
+@media (min-width: 768px) {
+    .stepper-content {
+        display: block;
+    }
+}

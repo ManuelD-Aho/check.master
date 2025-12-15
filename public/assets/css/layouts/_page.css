@@ -1,0 +1,292 @@
+/**
+ * CheckMaster Layouts - Page Structure
+ * =====================================
+ * Main page layout structure
+ * Version: 1.0.0
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   APP LAYOUT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.app-main {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    transition: margin-left var(--duration-300) var(--ease-in-out);
+}
+
+.sidebar.is-collapsed~.app-main {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+@media (max-width: 1023px) {
+    .app-main {
+        margin-left: 0;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PAGE STRUCTURE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.page-content {
+    flex: 1;
+    padding: var(--space-6);
+    background-color: var(--color-gray-50);
+}
+
+@media (max-width: 639px) {
+    .page-content {
+        padding: var(--space-4);
+    }
+}
+
+/* Page header */
+.page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+.page-header-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.page-title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-gray-900);
+    margin: 0;
+}
+
+.page-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-500);
+    margin-top: var(--space-1);
+}
+
+.page-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-shrink: 0;
+}
+
+@media (max-width: 639px) {
+    .page-header {
+        flex-direction: column;
+    }
+
+    .page-actions {
+        width: 100%;
+    }
+
+    .page-actions .btn {
+        flex: 1;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SECTION
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.section {
+    margin-bottom: var(--space-8);
+}
+
+.section:last-child {
+    margin-bottom: 0;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.section-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-gray-900);
+    margin: 0;
+}
+
+.section-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-500);
+    margin-top: var(--space-1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.footer {
+    padding: var(--space-4) var(--space-6);
+    background-color: var(--color-white);
+    border-top: 1px solid var(--color-gray-200);
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-500);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+}
+
+.footer a {
+    color: var(--color-gray-600);
+}
+
+.footer a:hover {
+    color: var(--color-primary-700);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DASHBOARD GRID
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dashboard-grid {
+    display: grid;
+    gap: var(--space-6);
+}
+
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+}
+
+@media (min-width: 768px) {
+    .dashboard-stats {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.dashboard-row {
+    display: grid;
+    gap: var(--space-6);
+}
+
+@media (min-width: 1024px) {
+    .dashboard-row {
+        grid-template-columns: 2fr 1fr;
+    }
+
+    .dashboard-row.reverse {
+        grid-template-columns: 1fr 2fr;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SPLIT LAYOUT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.split-layout {
+    display: grid;
+    gap: var(--space-6);
+}
+
+@media (min-width: 768px) {
+    .split-layout {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .split-layout-sidebar {
+        grid-template-columns: 300px 1fr;
+    }
+
+    .split-layout-sidebar-right {
+        grid-template-columns: 1fr 300px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CENTERED LAYOUT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.centered-layout {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    background-color: var(--color-gray-50);
+}
+
+.centered-box {
+    width: 100%;
+    max-width: 440px;
+}
+
+.centered-box-lg {
+    max-width: 560px;
+}
+
+.centered-box-xl {
+    max-width: 720px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOOLBAR
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background-color: var(--color-white);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-4);
+}
+
+.toolbar-search {
+    flex: 1;
+    min-width: 200px;
+}
+
+.toolbar-filters {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-left: auto;
+}
+
+@media (max-width: 639px) {
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .toolbar-search {
+        width: 100%;
+    }
+
+    .toolbar-actions {
+        margin-left: 0;
+        justify-content: flex-end;
+    }
+}

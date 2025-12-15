@@ -15,6 +15,8 @@ use PDOStatement;
  */
 abstract class Model
 {
+    use Relations;
+
     protected static ?PDO $pdo = null;
     protected string $table = '';
     protected string $primaryKey = 'id';
@@ -246,8 +248,8 @@ abstract class Model
         $setClauses = array_map(fn($col) => "{$col} = :{$col}", array_keys($data));
         $data['__id'] = $id;
 
-        $sql = "UPDATE {$this->table} SET " . implode(', ', $setClauses) . 
-               " WHERE {$this->primaryKey} = :__id";
+        $sql = "UPDATE {$this->table} SET " . implode(', ', $setClauses) .
+            " WHERE {$this->primaryKey} = :__id";
         $stmt = static::getConnection()->prepare($sql);
         return $stmt->execute($data);
     }
@@ -279,7 +281,7 @@ abstract class Model
     public static function count(array $conditions = []): int
     {
         $instance = new static();
-        
+
         if (empty($conditions)) {
             $sql = "SELECT COUNT(*) FROM {$instance->table}";
             $stmt = static::getConnection()->query($sql);

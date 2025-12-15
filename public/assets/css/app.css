@@ -1,0 +1,77 @@
+/**
+ * CheckMaster - Main CSS Entry Point
+ * ====================================
+ * Imports all design system, components, layouts, and modules
+ * Version: 1.0.0
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   1. DESIGN SYSTEM FOUNDATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+@import 'design-system/_tokens.css';
+@import 'design-system/_reset.css';
+@import 'design-system/_typography.css';
+@import 'design-system/_utilities.css';
+@import 'design-system/_animations.css';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2. LAYOUTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+@import 'layouts/_grid.css';
+@import 'layouts/_sidebar.css';
+@import 'layouts/_header.css';
+@import 'layouts/_page.css';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3. COMPONENTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+@import 'components/_buttons.css';
+@import 'components/_forms.css';
+@import 'components/_cards.css';
+@import 'components/_tables.css';
+@import 'components/_modals.css';
+@import 'components/_alerts.css';
+@import 'components/_badges.css';
+@import 'components/_navigation.css';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4. MODULE SPECIFIC STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+@import 'modules/_auth.css';
+@import 'modules/_workflow.css';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   5. PRINT STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media print {
+
+    .sidebar,
+    .header,
+    .no-print {
+        display: none !important;
+    }
+
+    .app-main {
+        margin-left: 0 !important;
+    }
+
+    .page-content {
+        padding: 0;
+        background: none;
+    }
+
+    .card {
+        box-shadow: none;
+        border: 1px solid var(--color-gray-300);
+    }
+
+    body {
+        font-size: 12pt;
+        line-height: 1.4;
+        background: white;
+    }
+
+    a[href]::after {
+        content: none;
+    }
+}

@@ -1,0 +1,301 @@
+/**
+ * CheckMaster Components - Alerts
+ * ================================
+ * Styles pour les alertes et notifications toast
+ * Version: 1.0.0
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INLINE ALERTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.alert {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+}
+
+.alert-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+}
+
+.alert-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.alert-title {
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--space-1);
+}
+
+.alert-dismiss {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    opacity: 0.7;
+    transition: var(--transition-fast);
+}
+
+.alert-dismiss:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.alert-dismiss svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Alert variants */
+.alert-success {
+    background-color: var(--color-success-50);
+    border: 1px solid var(--color-success-200);
+    color: var(--color-success-800);
+}
+
+.alert-success .alert-icon {
+    color: var(--color-success-600);
+}
+
+.alert-warning {
+    background-color: var(--color-warning-50);
+    border: 1px solid var(--color-warning-200);
+    color: var(--color-warning-800);
+}
+
+.alert-warning .alert-icon {
+    color: var(--color-warning-600);
+}
+
+.alert-error {
+    background-color: var(--color-error-50);
+    border: 1px solid var(--color-error-200);
+    color: var(--color-error-800);
+}
+
+.alert-error .alert-icon {
+    color: var(--color-error-600);
+}
+
+.alert-info {
+    background-color: var(--color-info-50);
+    border: 1px solid var(--color-info-200);
+    color: var(--color-info-800);
+}
+
+.alert-info .alert-icon {
+    color: var(--color-info-600);
+}
+
+.alert-neutral {
+    background-color: var(--color-gray-100);
+    border: 1px solid var(--color-gray-200);
+    color: var(--color-gray-800);
+}
+
+.alert-neutral .alert-icon {
+    color: var(--color-gray-600);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOAST NOTIFICATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.toast-container {
+    position: fixed;
+    top: var(--space-4);
+    right: var(--space-4);
+    z-index: var(--z-toast);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    max-width: 400px;
+    width: 100%;
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background-color: var(--color-white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    pointer-events: auto;
+    animation: slideInRight var(--duration-300) var(--ease-out);
+}
+
+.toast.is-leaving {
+    animation: fadeOut var(--duration-200) var(--ease-in) forwards;
+}
+
+.toast-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+}
+
+.toast-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.toast-title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-gray-900);
+}
+
+.toast-message {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-600);
+    margin-top: var(--space-1);
+}
+
+.toast-close {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    color: var(--color-gray-400);
+    transition: var(--transition-fast);
+}
+
+.toast-close:hover {
+    background-color: var(--color-gray-100);
+    color: var(--color-gray-600);
+}
+
+.toast-close svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Toast variants */
+.toast-success .toast-icon {
+    color: var(--color-success-500);
+}
+
+.toast-warning .toast-icon {
+    color: var(--color-warning-500);
+}
+
+.toast-error .toast-icon {
+    color: var(--color-error-500);
+}
+
+.toast-info .toast-icon {
+    color: var(--color-info-500);
+}
+
+/* Toast with progress bar */
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background-color: var(--color-primary-500);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    animation: toastProgress 5s linear forwards;
+}
+
+@keyframes toastProgress {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BANNER ALERTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-5);
+    text-align: center;
+    font-size: var(--font-size-sm);
+}
+
+.banner-success {
+    background-color: var(--color-success-500);
+    color: var(--color-white);
+}
+
+.banner-warning {
+    background-color: var(--color-warning-500);
+    color: var(--color-white);
+}
+
+.banner-error {
+    background-color: var(--color-error-500);
+    color: var(--color-white);
+}
+
+.banner-info {
+    background-color: var(--color-info-500);
+    color: var(--color-white);
+}
+
+.banner a {
+    color: inherit;
+    font-weight: var(--font-weight-semibold);
+    text-decoration: underline;
+}
+
+.banner-dismiss {
+    color: inherit;
+    opacity: 0.8;
+}
+
+.banner-dismiss:hover {
+    opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FLASH MESSAGES (Session)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.flash-messages {
+    margin-bottom: var(--space-5);
+}
+
+.flash-messages .alert {
+    margin-bottom: var(--space-3);
+}
+
+.flash-messages .alert:last-child {
+    margin-bottom: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 639px) {
+    .toast-container {
+        left: var(--space-4);
+        right: var(--space-4);
+        max-width: none;
+    }
+}

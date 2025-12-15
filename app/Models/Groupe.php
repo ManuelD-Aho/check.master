@@ -9,7 +9,7 @@ use App\Orm\Model;
 /**
  * Modèle Groupe
  * 
- * Représente un groupe d'utilisateurs avec niveau hiérarchique.
+ * Représente un groupe de permissions (rôle).
  * Table: groupes
  */
 class Groupe extends Model
@@ -24,6 +24,68 @@ class Groupe extends Model
     ];
 
     /**
+     * Retourne les permissions du groupe
+     *
+     * @return Permission[]
+     */
+    public function getPermissions(): array
+    {
+        return Permission::where(['groupe_id' => $this->getId()]);
+    }
+
+    /**
+     * Retourne les utilisateurs de ce groupe
+     *
+     * @return Utilisateur[]
+     */
+    public function getUtilisateurs(): array
+    {
+        $sql = "SELECT u.* FROM utilisateurs u
+                INNER JOIN utilisateurs_groupes ug ON ug.utilisateur_id = u.id_utilisateur
+                WHERE ug.groupe_id = :groupe_id";
+
+        $stmt = self::raw($sql, ['groupe_id' => $this->getId()]);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(function (array $row) {
+            $model = new Utilisateur($row);
+            $model->exists = true;
+            return $model;
+        }, $rows);
+    }
+
+    /**
+     * Vérifie si le groupe a une permission sur une ressource
+     */
+    public function aPermission(string $codeRessource, string $action): bool
+    {
+        $sql = "SELECT p.* FROM permissions p
+                INNER JOIN ressources r ON r.id_ressource = p.ressource_id
+                WHERE p.groupe_id = :groupe_id AND r.code_ressource = :code";
+
+        $stmt = self::raw($sql, [
+            'groupe_id' => $this->getId(),
+            'code' => $codeRessource,
+        ]);
+
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if (!$row) {
+            return false;
+        }
+
+        return match ($action) {
+            'lire' => (bool) ($row['peut_lire'] ?? false),
+            'creer' => (bool) ($row['peut_creer'] ?? false),
+            'modifier' => (bool) ($row['peut_modifier'] ?? false),
+            'supprimer' => (bool) ($row['peut_supprimer'] ?? false),
+            'exporter' => (bool) ($row['peut_exporter'] ?? false),
+            'valider' => (bool) ($row['peut_valider'] ?? false),
+            default => false,
+        };
+    }
+
+    /**
      * Vérifie si le groupe est actif
      */
     public function estActif(): bool
@@ -32,25 +94,48 @@ class Groupe extends Model
     }
 
     /**
-     * Retourne les groupes actifs
+     * Retourne tous les groupes actifs
+     *
+     * @return self[]
      */
-    public static function getGroupesActifs(): array
+    public static function actifs(): array
     {
-        return self::where(['actif' => 1]);
+        return self::where(['actif' => true]);
+    }
+
+    /**
+     * Trouve un groupe par son nom
+     */
+    public static function findByNom(string $nom): ?self
+    {
+        return self::firstWhere(['nom_groupe' => $nom]);
     }
 
     /**
      * Retourne les groupes triés par niveau hiérarchique
+     *
+     * @return self[]
      */
-    public static function getAllTriesParNiveau(): array
+    public static function parHierarchie(): array
     {
         $sql = "SELECT * FROM groupes WHERE actif = 1 ORDER BY niveau_hierarchique ASC";
-        $stmt = self::raw($sql);
+        $stmt = self::raw($sql, []);
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         return array_map(function (array $row) {
             $model = new self($row);
+            $model->exists = true;
             return $model;
         }, $rows);
+    }
+
+    /**
+     * Compte le nombre d'utilisateurs dans ce groupe
+     */
+    public function compterUtilisateurs(): int
+    {
+        $sql = "SELECT COUNT(*) FROM utilisateurs_groupes WHERE groupe_id = :id";
+        $stmt = self::raw($sql, ['id' => $this->getId()]);
+        return (int) $stmt->fetchColumn();
     }
 }
