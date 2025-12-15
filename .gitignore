@@ -1,0 +1,47 @@
+# Composer
+/vendor/
+# Logs
+*.log
+logs/
+storage/logs/
+storage/logs/*.log
+
+# Cache
+cache/
+storage/cache/
+storage/cache/*.cache
+
+# Sessions
+storage/sessions/
+
+# Archives
+storage/archives/
+
+# Test coverage
+tests/coverage/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# PHPStan cache
+.phpstan.cache
+
+# PHPUnit cache
+.phpunit.result.cache

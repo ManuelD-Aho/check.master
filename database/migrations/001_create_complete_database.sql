@@ -326,15 +326,6 @@ CREATE TABLE IF NOT EXISTS ecue (
     INDEX idx_ue (ue_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert into migrations tracking
-INSERT INTO migrations (migration_name, executed_at) 
-VALUES ('001_create_complete_database', NOW())
-ON DUPLICATE KEY UPDATE executed_at = NOW();
-
--- =====================================================
--- SECTION 3: WORKFLOW & PROCESS (15 tables)
--- =====================================================
-
 -- Table: workflow_etats
 CREATE TABLE IF NOT EXISTS workflow_etats (
     id_etat INT PRIMARY KEY AUTO_INCREMENT,
@@ -982,9 +973,4 @@ CREATE TABLE IF NOT EXISTS migrations (
     executed_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =====================================================
--- Final migration tracking update
--- =====================================================
-INSERT INTO migrations (migration_name, executed_at) 
-VALUES ('001_create_complete_database', NOW())
-ON DUPLICATE KEY UPDATE executed_at = NOW();
+

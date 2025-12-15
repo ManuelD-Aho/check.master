@@ -1,0 +1,14 @@
+parameters:
+    level: 6
+    paths:
+        - app
+        - src
+    excludePaths:
+        - app/config
+        - storage
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        - '#Call to an undefined method App\\Orm\\Model::#'
+        - '#Access to an undefined property App\\Orm\\Model::#'
