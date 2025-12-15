@@ -1,30 +1,30 @@
 ---
-description: Execute the implementation planning workflow using the plan template to generate design artifacts for CheckMaster.
+description: Exécuter le workflow de planification implémentation utilisant le template plan pour générer des artefacts de conception pour CheckMaster.
 handoffs: 
-  - label: Create Tasks
+  - label: Créer Tâches
     agent: speckit.tasks
-    prompt: Break the plan into tasks for CheckMaster (PHP 8.0+ native MVC++, MySQL, DB-Driven)
+    prompt: Décomposer le plan en tâches pour CheckMaster (PHP 8.0+ MVC++ natif, MySQL, DB-Driven)
     send: true
-  - label: Create Checklist
+  - label: Créer Checklist
     agent: speckit.checklist
-    prompt: Create a CheckMaster checklist for the following domain...
+    prompt: Créer une checklist CheckMaster pour le domaine suivant...
 ---
 
-## User Input
+## Entrée Utilisateur
 
 ```text
 $ARGUMENTS
 ```
 
-You **MUST** consider the user input before proceeding (if not empty).
+Vous **DEVEZ** prendre en compte l'entrée utilisateur avant de procéder (si non vide).
 
-## CheckMaster Architecture Constraints (NON-NEGOTIABLE)
+## Contraintes Architecture CheckMaster (NON-NÉGOCIABLES)
 
 ### Stack Technique Imposée
-- **PHP**: 8.0+ strict types (`declare(strict_types=1);` mandatory)
-- **Database**: MySQL 8.0+ / MariaDB 10.5+
-- **Framework**: NONE - Native MVC++ architecture
-- **Dependencies**: Whitelist only (~12MB total):
+- **PHP** : 8.0+ types stricts (`declare(strict_types=1);` obligatoire)
+- **Base de données** : MySQL 8.0+ / MariaDB 10.5+
+- **Framework** : AUCUN - Architecture MVC++ native
+- **Dépendances** : Whitelist uniquement (~12MB total) :
   - hashids/hashids
   - symfony/validator
   - symfony/http-foundation
@@ -34,226 +34,226 @@ You **MUST** consider the user input before proceeding (if not empty).
   - phpoffice/phpspreadsheet
   - phpmailer/phpmailer
   - monolog/monolog
-- **Environment**: Windows (dev) + Linux mutualisé LWS (prod)
-- **NO Node.js, NO Redis required, NO heavy frameworks**
+- **Environnement** : Windows (dev) + Linux mutualisé LWS (prod)
+- **PAS de Node.js, PAS de Redis requis, PAS de frameworks lourds**
 
-### Architecture Layers (Strict Separation)
+### Couches Architecture (Séparation Stricte)
 ```
-Request → Router (Hashids) → Middleware Pipeline → Controller → Service → Model → Database
+Requête → Routeur (Hashids) → Pipeline Middleware → Contrôleur → Service → Modèle → Base de Données
 ```
 
-**Controller Rules**:
-- Max 50 lines per method
-- Validation + Service call + Response ONLY
-- ZERO business logic
-- Use Request wrapper (never $_POST/$_GET)
-- Return JsonResponse or View
+**Règles Contrôleur** :
+- Max 50 lignes par méthode
+- Validation + Appel Service + Réponse UNIQUEMENT
+- ZÉRO logique métier
+- Utiliser wrapper Request (jamais $_POST/$_GET)
+- Retourner JsonResponse ou View
 
-**Service Rules**:
-- Stateless, pure business logic
-- Constructor dependency injection
-- Must call ServiceAudit for write operations
-- Transactional for multi-table operations
-- Testable (mockable dependencies)
+**Règles Service** :
+- Stateless, logique métier pure
+- Injection dépendances par constructeur
+- Doit appeler ServiceAudit pour opérations écriture
+- Transactionnel pour opérations multi-tables
+- Testable (dépendances mockables)
 
-**Model Rules**:
-- Extend App\Orm\Model
-- Property types declared
-- Relations defined
-- No business logic
+**Règles Modèle** :
+- Étendre App\Orm\Model
+- Types propriétés déclarés
+- Relations définies
+- Pas de logique métier
 
-### Database Principles
-1. **DB-Driven Everything**: Configuration, permissions, workflows, menus, templates ALL in database
-2. **67 Tables Schema**: Use existing structure, add migrations for new tables
-3. **Naming**: `snake_case` tables/columns, Primary Key always `id_tablename`
-4. **Foreign Keys**: Explicit with ON DELETE RESTRICT
-5. **Indexes**: FK + search columns + fulltext where needed
-6. **Migrations**: Sequential numbered files `database/migrations/0XX_description.sql`
-7. **Never modify existing migrations** - always create new ones
+### Principes Base de Données
+1. **Tout DB-Driven** : Configuration, permissions, workflows, menus, templates TOUS en base de données
+2. **Schéma 67 Tables** : Utiliser structure existante, ajouter migrations pour nouvelles tables
+3. **Nommage** : Tables/colonnes `snake_case`, Clé Primaire toujours `id_nomtable`
+4. **Clés Étrangères** : Explicites avec ON DELETE RESTRICT
+5. **Index** : FK + colonnes recherche + fulltext où nécessaire
+6. **Migrations** : Fichiers numérotés séquentiellement `database/migrations/0XX_description.sql`
+7. **Ne jamais modifier migrations existantes** - toujours en créer de nouvelles
 
-### Security Mandates
-- **Passwords**: Argon2id only
-- **SQL**: Prepared statements mandatory
-- **URLs**: Hashids for all entity IDs (`/{module}/{hash}`)
-- **Output**: `e()` escaping helper for all views
-- **CSRF**: Tokens on all forms
-- **Rate Limiting**: On auth/sensitive endpoints
-- **Audit**: Double logging (Monolog file + pister table)
+### Mandats Sécurité
+- **Mots de passe** : Argon2id uniquement
+- **SQL** : Requêtes préparées obligatoires
+- **URLs** : Hashids pour tous les IDs entités (`/{module}/{hash}`)
+- **Sortie** : Helper échappement `e()` pour toutes les vues
+- **CSRF** : Tokens sur tous les formulaires
+- **Limitation Débit** : Sur endpoints auth/sensibles
+- **Audit** : Double logging (fichier Monolog + table pister)
 
-### CheckMaster-Specific Patterns
+### Patterns Spécifiques CheckMaster
 
-**Workflow Integration**:
-- Every feature touching candidature/rapport must consider workflow states
-- Use ServiceWorkflow::effectuerTransition() for state changes
-- Define allowed transitions in workflow_transitions table
-- Update workflow_historique with snapshots
+**Intégration Workflow** :
+- Chaque fonctionnalité touchant candidature/rapport doit considérer états workflow
+- Utiliser ServiceWorkflow::effectuerTransition() pour changements d'état
+- Définir transitions autorisées dans table workflow_transitions
+- Mettre à jour workflow_historique avec snapshots
 
-**Permission Checks**:
-- Check via ServicePermission::verifier($userId, $ressource, $action)
-- Cache permissions (5 min TTL, invalidate on changes)
-- Respect groupe_utilisateur → traitement → action mappings
-- Support rôles temporaires (président jury day-of access)
+**Vérifications Permissions** :
+- Vérifier via ServicePermission::verifier($userId, $ressource, $action)
+- Cache permissions (5 min TTL, invalider sur changements)
+- Respecter mappings groupe_utilisateur → traitement → action
+- Supporter rôles temporaires (accès président jury jour-J)
 
-**Notification Pattern**:
-- Use ServiceNotification::envoyer($template, $destinataires, $variables)
-- Multi-canal: Email primary + Messagerie interne backup
-- Track bounces → retry logic
-- Templates stored in notification_templates table
+**Pattern Notification** :
+- Utiliser ServiceNotification::envoyer($template, $destinataires, $variables)
+- Multi-canal : Email primaire + Messagerie interne backup
+- Traquer bounces → logique retry
+- Templates stockés dans table notification_templates
 
-**Document Generation**:
-- Simple documents: TCPDF
-- Complex documents (CSS3): mPDF  
-- Calculate SHA256 hash on generation
-- Store in archives with hash for integrity
-- Templates in `ressources/templates/pdf/`
+**Génération Documents** :
+- Documents simples : TCPDF
+- Documents complexes (CSS3) : mPDF
+- Calculer hash SHA256 à la génération
+- Stocker dans archives avec hash pour intégrité
+- Templates dans `ressources/templates/pdf/`
 
-**Configuration Access**:
+**Accès Configuration** :
 - ServiceParametres::get('cle.config', $default)
-- Cache configuration (invalidate on admin changes)
-- ~170 parameters organized by prefix (workflow.*, notify.*, etc.)
+- Cache configuration (invalider sur changements admin)
+- ~170 paramètres organisés par préfixe (workflow.*, notify.*, etc.)
 
-## Outline
+## Aperçu
 
-1. **Setup**: Run `.specify/scripts/powershell/setup-plan.ps1 -Json` from repo root and parse JSON for FEATURE_SPEC, IMPL_PLAN, SPECS_DIR, BRANCH. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+1. **Setup** : Exécuter `.specify/scripts/powershell/setup-plan.ps1 -Json` depuis racine repo et parser JSON pour FEATURE_SPEC, IMPL_PLAN, SPECS_DIR, BRANCH. Pour apostrophes dans args comme "J'organise", utiliser syntaxe échappement : ex 'J'\''organise' (ou guillemets si possible : "J'organise").
 
-2. **Load context**: Read FEATURE_SPEC and `.specify/memory/constitution.md`. Load IMPL_PLAN template (already copied).
+2. **Charger contexte** : Lire FEATURE_SPEC et `.specify/memory/constitution.md`. Charger template IMPL_PLAN (déjà copié).
 
-3. **Execute plan workflow**: Follow the structure in IMPL_PLAN template to:
-   - Fill Technical Context (mark unknowns as "NEEDS CLARIFICATION")
-   - Fill Constitution Check section from constitution
-   - Evaluate gates (ERROR if violations unjustified)
-   - Phase 0: Generate research.md (resolve all NEEDS CLARIFICATION)
-   - Phase 1: Generate data-model.md, contracts/, quickstart.md
-   - Phase 1: Update agent context by running the agent script
-   - Re-evaluate Constitution Check post-design
+3. **Exécuter workflow plan** : Suivre la structure dans template IMPL_PLAN pour :
+   - Remplir Contexte Technique (marquer inconnus comme "NÉCESSITE CLARIFICATION")
+   - Remplir section Vérification Constitution depuis constitution
+   - Évaluer gates (ERREUR si violations non justifiées)
+   - Phase 0 : Générer research.md (résoudre tous NÉCESSITE CLARIFICATION)
+   - Phase 1 : Générer data-model.md, contracts/, quickstart.md
+   - Phase 1 : Mettre à jour contexte agent en exécutant le script agent
+   - Ré-évaluer Vérification Constitution post-conception
 
-4. **Stop and report**: Command ends after Phase 2 planning. Report branch, IMPL_PLAN path, and generated artifacts.
+4. **Arrêter et rapporter** : Commande termine après planification Phase 2. Rapporter branche, chemin IMPL_PLAN, et artefacts générés.
 
 ## Phases
 
-### Phase 0: Outline & Research
+### Phase 0 : Esquisse & Recherche
 
-1. **Extract unknowns from Technical Context** above:
-   - For each NEEDS CLARIFICATION → research task
-   - For each dependency → best practices task
-   - For each integration → patterns task
+1. **Extraire inconnus depuis Contexte Technique** ci-dessus :
+   - Pour chaque NÉCESSITE CLARIFICATION → tâche recherche
+   - Pour chaque dépendance → tâche meilleures pratiques
+   - Pour chaque intégration → tâche patterns
 
-2. **Generate and dispatch research agents**:
+2. **Générer et dispatcher agents recherche** :
 
    ```text
-   For each unknown in Technical Context:
-     Task: "Research {unknown} for {feature context}"
-   For each technology choice:
-     Task: "Find best practices for {tech} in {domain}"
+   Pour chaque inconnu dans Contexte Technique :
+     Tâche : "Rechercher {inconnu} pour {contexte fonctionnalité}"
+   Pour chaque choix technologie :
+     Tâche : "Trouver meilleures pratiques pour {tech} dans {domaine}"
    ```
 
-3. **Consolidate findings** in `research.md` using format:
-   - Decision: [what was chosen]
-   - Rationale: [why chosen]
-   - Alternatives considered: [what else evaluated]
+3. **Consolider résultats** dans `research.md` utilisant format :
+   - Décision : [ce qui a été choisi]
+   - Rationale : [pourquoi choisi]
+   - Alternatives considérées : [quoi d'autre évalué]
 
-**Output**: research.md with all NEEDS CLARIFICATION resolved
+**Sortie** : research.md avec tous NÉCESSITE CLARIFICATION résolus
 
-### Phase 1: Design & Contracts
+### Phase 1 : Conception & Contrats
 
-**Prerequisites:** `research.md` complete
+**Prérequis :** `research.md` complet
 
-1. **Extract entities from feature spec** → `data-model.md`:
-   - Entity name, fields, relationships
-   - Validation rules from requirements
-   - State transitions if applicable
+1. **Extraire entités depuis spec fonctionnalité** → `data-model.md` :
+   - Nom entité, champs, relations
+   - Règles validation depuis exigences
+   - Transitions d'état si applicable
 
-2. **Generate API contracts** from functional requirements:
-   - For each user action → endpoint
-   - Use standard REST/GraphQL patterns
-   - Output OpenAPI/GraphQL schema to `/contracts/`
+2. **Générer contrats API** depuis exigences fonctionnelles :
+   - Pour chaque action utilisateur → endpoint
+   - Utiliser patterns REST/GraphQL standard
+   - Produire schéma OpenAPI/GraphQL vers `/contracts/`
 
-3. **Agent context update**:
-   - Run `.specify/scripts/powershell/update-agent-context.ps1 -AgentType copilot`
-   - These scripts detect which AI agent is in use
-   - Update the appropriate agent-specific context file
-   - Add only new technology from current plan
-   - Preserve manual additions between markers
+3. **Mise à jour contexte agent** :
+   - Exécuter `.specify/scripts/powershell/update-agent-context.ps1 -AgentType copilot`
+   - Ces scripts détectent quel agent AI est utilisé
+   - Mettre à jour le fichier contexte spécifique agent approprié
+   - Ajouter uniquement nouvelle technologie depuis plan actuel
+   - Préserver ajouts manuels entre marqueurs
 
-**Output**: data-model.md, /contracts/*, quickstart.md, agent-specific file
+**Sortie** : data-model.md, /contracts/*, quickstart.md, fichier spécifique agent
 
-## Key rules
+## Règles Clés
 
-- Use absolute paths
-- ERROR on gate failures or unresolved clarifications
-- **CheckMaster Constitution Check**: Every plan MUST verify:
-  - [ ] No Node.js/NPM dependencies
-  - [ ] No logic in Controllers (max 50 lines)
-  - [ ] Hashids used for all public IDs
-  - [ ] ServiceAudit called for write operations
-  - [ ] ServicePermission checked before actions
-  - [ ] Workflows use ServiceWorkflow transitions
-  - [ ] Documents calculate SHA256 hashes
+- Utiliser chemins absolus
+- ERREUR sur échecs gate ou clarifications non résolues
+- **Vérification Constitution CheckMaster** : Chaque plan DOIT vérifier :
+  - [ ] Pas de dépendances Node.js/NPM
+  - [ ] Pas de logique dans Contrôleurs (max 50 lignes)
+  - [ ] Hashids utilisés pour tous les IDs publics
+  - [ ] ServiceAudit appelé pour opérations écriture
+  - [ ] ServicePermission vérifié avant actions
+  - [ ] Workflows utilisent transitions ServiceWorkflow
+  - [ ] Documents calculent hashes SHA256
   - [ ] Configuration via ServiceParametres (DB)
   - [ ] Notifications via ServiceNotification
-  - [ ] All SQL uses prepared statements
-  - [ ] Passwords use Argon2id
-  - [ ] Views use `e()` escaping
-  - [ ] New tables have sequential migrations
-  - [ ] Services are stateless and testable
+  - [ ] Tout SQL utilise requêtes préparées
+  - [ ] Mots de passe utilisent Argon2id
+  - [ ] Vues utilisent échappement `e()`
+  - [ ] Nouvelles tables ont migrations séquentielles
+  - [ ] Services sont stateless et testables
 
-### CheckMaster Tables Reference (67 tables)
+### Référence Tables CheckMaster (67 tables)
 
-**Core Authentication & Users**:
+**Authentification & Utilisateurs Core** :
 - utilisateurs, sessions_actives, codes_temporaires
 - groupes, utilisateurs_groupes, roles_temporaires
 - ressources, permissions, permissions_cache
 
-**Academic Entities**:
+**Entités Académiques** :
 - etudiants, enseignants, personnel_admin
 - entreprises, specialites, grades, fonctions
 - annee_academique, semestre, niveau_etude, ue, ecue
 
-**Workflow & Process**:
+**Workflow & Processus** :
 - workflow_etats, workflow_transitions, workflow_historique, workflow_alertes
 - dossiers_etudiants, candidatures, rapports_etudiants
 - sessions_commission, votes_commission, annotations_rapport
 - jury_membres, soutenances, notes_soutenance
 - escalades, escalades_actions, escalade_niveaux
 
-**Financial**:
+**Financier** :
 - paiements, penalites, exonerations
 
-**Communications**:
+**Communications** :
 - notification_templates, notifications_queue, notifications_historique
 - email_bounces, messages_internes
 
-**Documents & Archives**:
+**Documents & Archives** :
 - documents_generes, archives, historique_entites
 - critere_evaluation, mentions, decisions_jury
 
-**Configuration & Audit**:
+**Configuration & Audit** :
 - configuration_systeme, traitement, action, rattacher
-- pister (audit trail)
+- pister (piste audit)
 
-**Référentiels**:
+**Référentiels** :
 - roles_jury, statut_jury, salles
 - type_utilisateur, groupe_utilisateur, niveau_acces_donnees
 - niveau_approbation
 
-### Data Model Template (data-model.md)
+### Template Modèle Données (data-model.md)
 
 ```markdown
-# Data Model: [Feature Name]
+# Modèle Données : [Nom Fonctionnalité]
 
-## Tables Impacted
+## Tables Impactées
 
-### Existing Tables Modified
-- **Table**: `table_name`
-  - **Changes**: Add column `new_column VARCHAR(255)`
-  - **Migration**: `database/migrations/0XX_add_new_column.sql`
-  - **Reason**: [Why needed for feature]
+### Tables Existantes Modifiées
+- **Table** : `nom_table`
+  - **Changements** : Ajouter colonne `nouvelle_colonne VARCHAR(255)`
+  - **Migration** : `database/migrations/0XX_ajout_nouvelle_colonne.sql`
+  - **Raison** : [Pourquoi nécessaire pour fonctionnalité]
 
-### New Tables Created
-#### `new_table_name`
+### Nouvelles Tables Créées
+#### `nom_nouvelle_table`
 ```sql
-CREATE TABLE new_table_name (
-    id_new_table INT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE nom_nouvelle_table (
+    id_nouvelle_table INT PRIMARY KEY AUTO_INCREMENT,
     libelle VARCHAR(100) NOT NULL,
     description TEXT,
     actif BOOLEAN DEFAULT TRUE,
@@ -263,34 +263,34 @@ CREATE TABLE new_table_name (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
-**Purpose**: [Table purpose]
-**Relationships**: 
-- FK to `autre_table(id_autre)`
-**Constraints**: [Business rules]
+**Objectif** : [Objectif table]
+**Relations** : 
+- FK vers `autre_table(id_autre)`
+**Contraintes** : [Règles métier]
 
-## Entity Relationships
+## Relations Entités
 
 ```
-[Draw relationships using ASCII or describe]
+[Dessiner relations en ASCII ou décrire]
 ```
 
-## Workflow States (if applicable)
+## États Workflow (si applicable)
 
-- **Current State**: `state_name`
-- **New States**: `new_state_1`, `new_state_2`
-- **Transitions**:
-  - `state_1` → `state_2` (Trigger: [event], Condition: [rule])
+- **État Actuel** : `nom_etat`
+- **Nouveaux États** : `nouvel_etat_1`, `nouvel_etat_2`
+- **Transitions** :
+  - `etat_1` → `etat_2` (Déclencheur : [événement], Condition : [règle])
 
-## Data Validation Rules
+## Règles Validation Données
 
-- Field `x`: Required, max 100 chars, alphanumeric
-- Field `y`: Optional, must match `/regex/`
-- Field `z`: Foreign key must exist in table_ref
+- Champ `x` : Requis, max 100 caractères, alphanumérique
+- Champ `y` : Optionnel, doit correspondre à `/regex/`
+- Champ `z` : Clé étrangère doit exister dans table_ref
 ```
 
-### Contracts Template (contracts/)
+### Template Contrats (contracts/)
 
-For each Controller endpoint:
+Pour chaque endpoint Contrôleur :
 
 ```php
 /**
@@ -298,36 +298,36 @@ For each Controller endpoint:
  * @middleware AuthMiddleware, PermissionMiddleware
  * @permission traitement_id=XX, action_id=YY
  * 
- * @param array $data Request body
+ * @param array $data Corps requête
  * @return JsonResponse
  * 
- * @throws ValidationException Invalid input
- * @throws NotFoundException Entity not found
- * @throws ForbiddenException Permission denied
+ * @throws ValidationException Entrée invalide
+ * @throws NotFoundException Entité non trouvée
+ * @throws ForbiddenException Permission refusée
  */
-public function actionName(array $data): JsonResponse;
+public function nomAction(array $data): JsonResponse;
 ```
 
-### Research Artifacts (research.md)
+### Artefacts Recherche (research.md)
 
-Document technical decisions:
+Documenter décisions techniques :
 
 ```markdown
-# Research: [Feature Name]
+# Recherche : [Nom Fonctionnalité]
 
-## Decision 1: [Topic]
-**Chosen**: [Solution]
-**Rationale**: [Why chosen over alternatives]
-**Alternatives Considered**: 
-- Option A: [Pros/Cons]
-- Option B: [Pros/Cons]
-**Impact**: [What this affects]
+## Décision 1 : [Sujet]
+**Choisi** : [Solution]
+**Rationale** : [Pourquoi choisi par rapport aux alternatives]
+**Alternatives Considérées** : 
+- Option A : [Avantages/Inconvénients]
+- Option B : [Avantages/Inconvénients]
+**Impact** : [Ce que cela affecte]
 
-## Integration Points
-- Service X: [How feature integrates]
-- Table Y: [Data dependencies]
+## Points Intégration
+- Service X : [Comment fonctionnalité s'intègre]
+- Table Y : [Dépendances données]
 
-## Unknowns Resolved
-- Question: [Original uncertainty]
-- Resolution: [How resolved]
+## Inconnus Résolus
+- Question : [Incertitude originale]
+- Résolution : [Comment résolu]
 ```

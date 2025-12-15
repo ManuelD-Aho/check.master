@@ -1,353 +1,353 @@
 ---
-description: Create or update the feature specification from a natural language feature description for CheckMaster.
+description: Créer ou mettre à jour la spécification fonctionnalité depuis une description en langage naturel pour CheckMaster.
 handoffs: 
-  - label: Build Technical Plan
+  - label: Créer Plan Technique
     agent: speckit.plan
-    prompt: Create a plan for the spec. I am building with CheckMaster architecture (PHP 8.0+ native MVC++, MySQL, DB-Driven configuration).
-  - label: Clarify Spec Requirements
+    prompt: Créer un plan pour la spec. Je construis avec l'architecture CheckMaster (PHP 8.0+ MVC++ natif, MySQL, configuration DB-Driven).
+  - label: Clarifier Exigences Spec
     agent: speckit.clarify
-    prompt: Clarify specification requirements for CheckMaster
+    prompt: Clarifier les exigences de spécification pour CheckMaster
     send: true
 ---
 
-## User Input
+## Entrée Utilisateur
 
 ```text
 $ARGUMENTS
 ```
 
-You **MUST** consider the user input before proceeding (if not empty).
+Vous **DEVEZ** prendre en compte l'entrée utilisateur avant de procéder (si non vide).
 
-## Outline
+## Aperçu
 
-The text the user typed after `/speckit.specify` in the triggering message **is** the feature description. Assume you always have it available in this conversation even if `$ARGUMENTS` appears literally below. Do not ask the user to repeat it unless they provided an empty command.
+Le texte que l'utilisateur a tapé après `/speckit.specify` dans le message déclencheur **est** la description de la fonctionnalité. Supposez que vous l'avez toujours disponible dans cette conversation même si `$ARGUMENTS` apparaît littéralement ci-dessous. Ne demandez pas à l'utilisateur de la répéter sauf s'il a fourni une commande vide.
 
-Given that feature description, do this:
+Étant donné cette description de fonctionnalité, faire ceci :
 
-1. **Generate a concise short name** (2-4 words) for the branch:
-   - Analyze the feature description and extract the most meaningful keywords
-   - Create a 2-4 word short name that captures the essence of the feature
-   - Use action-noun format when possible (e.g., "add-user-auth", "fix-payment-bug")
-   - Preserve technical terms and acronyms (OAuth2, API, JWT, etc.)
-   - Keep it concise but descriptive enough to understand the feature at a glance
-   - Examples:
-     - "I want to add user authentication" → "user-auth"
-     - "Implement OAuth2 integration for the API" → "oauth2-api-integration"
-     - "Create a dashboard for analytics" → "analytics-dashboard"
-     - "Fix payment processing timeout bug" → "fix-payment-timeout"
+1. **Générer un nom court concis** (2-4 mots) pour la branche :
+   - Analyser la description de fonctionnalité et extraire les mots-clés les plus significatifs
+   - Créer un nom court de 2-4 mots qui capture l'essence de la fonctionnalité
+   - Utiliser le format action-nom quand possible (ex : "ajouter-auth-utilisateur", "corriger-bug-paiement")
+   - Préserver termes techniques et acronymes (OAuth2, API, JWT, etc.)
+   - Garder concis mais suffisamment descriptif pour comprendre la fonctionnalité d'un coup d'œil
+   - Exemples :
+     - "Je veux ajouter l'authentification utilisateur" → "auth-utilisateur"
+     - "Implémenter l'intégration OAuth2 pour l'API" → "integration-oauth2-api"
+     - "Créer un tableau de bord pour les analytics" → "tableau-bord-analytics"
+     - "Corriger le bug de timeout du traitement paiement" → "corriger-timeout-paiement"
 
-2. **Check for existing branches before creating new one**:
+2. **Vérifier les branches existantes avant d'en créer une nouvelle** :
 
-   a. First, fetch all remote branches to ensure we have the latest information:
+   a. D'abord, récupérer toutes les branches distantes pour s'assurer d'avoir les dernières informations :
 
       ```bash
       git fetch --all --prune
       ```
 
-   b. Find the highest feature number across all sources for the short-name:
-      - Remote branches: `git ls-remote --heads origin | grep -E 'refs/heads/[0-9]+-<short-name>$'`
-      - Local branches: `git branch | grep -E '^[* ]*[0-9]+-<short-name>$'`
-      - Specs directories: Check for directories matching `specs/[0-9]+-<short-name>`
+   b. Trouver le numéro de fonctionnalité le plus élevé à travers toutes les sources pour le nom-court :
+      - Branches distantes : `git ls-remote --heads origin | grep -E 'refs/heads/[0-9]+-<nom-court>$'`
+      - Branches locales : `git branch | grep -E '^[* ]*[0-9]+-<nom-court>$'`
+      - Répertoires specs : Vérifier les répertoires correspondant à `specs/[0-9]+-<nom-court>`
 
-   c. Determine the next available number:
-      - Extract all numbers from all three sources
-      - Find the highest number N
-      - Use N+1 for the new branch number
+   c. Déterminer le prochain numéro disponible :
+      - Extraire tous les numéros des trois sources
+      - Trouver le numéro le plus élevé N
+      - Utiliser N+1 pour le nouveau numéro de branche
 
-   d. Run the script `.specify/scripts/powershell/create-new-feature.ps1 -Json "$ARGUMENTS"` with the calculated number and short-name:
-      - Pass `--number N+1` and `--short-name "your-short-name"` along with the feature description
-      - Bash example: `.specify/scripts/powershell/create-new-feature.ps1 -Json "$ARGUMENTS" --json --number 5 --short-name "user-auth" "Add user authentication"`
-      - PowerShell example: `.specify/scripts/powershell/create-new-feature.ps1 -Json "$ARGUMENTS" -Json -Number 5 -ShortName "user-auth" "Add user authentication"`
+   d. Exécuter le script `.specify/scripts/powershell/create-new-feature.ps1 -Json "$ARGUMENTS"` avec le numéro calculé et le nom-court :
+      - Passer `--number N+1` et `--short-name "votre-nom-court"` avec la description fonctionnalité
+      - Exemple Bash : `.specify/scripts/powershell/create-new-feature.ps1 -Json "$ARGUMENTS" --json --number 5 --short-name "auth-utilisateur" "Ajouter authentification utilisateur"`
+      - Exemple PowerShell : `.specify/scripts/powershell/create-new-feature.ps1 -Json "$ARGUMENTS" -Json -Number 5 -ShortName "auth-utilisateur" "Ajouter authentification utilisateur"`
 
-   **IMPORTANT**:
-   - Check all three sources (remote branches, local branches, specs directories) to find the highest number
-   - Only match branches/directories with the exact short-name pattern
-   - If no existing branches/directories found with this short-name, start with number 1
-   - You must only ever run this script once per feature
-   - The JSON is provided in the terminal as output - always refer to it to get the actual content you're looking for
-   - The JSON output will contain BRANCH_NAME and SPEC_FILE paths
-   - For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot")
+   **IMPORTANT** :
+   - Vérifier les trois sources (branches distantes, branches locales, répertoires specs) pour trouver le numéro le plus élevé
+   - Ne matcher que les branches/répertoires avec le pattern exact nom-court
+   - Si aucune branche/répertoire existant trouvé avec ce nom-court, commencer avec numéro 1
+   - Vous ne devez exécuter ce script qu'une seule fois par fonctionnalité
+   - Le JSON est fourni dans le terminal en sortie - toujours s'y référer pour obtenir le contenu réel recherché
+   - La sortie JSON contiendra les chemins BRANCH_NAME et SPEC_FILE
+   - Pour apostrophes dans args comme "J'ajoute", utiliser syntaxe échappement : ex 'J'\''ajoute' (ou guillemets si possible : "J'ajoute")
 
-3. Load `.specify/templates/spec-template.md` to understand required sections.
+3. Charger `.specify/templates/spec-template.md` pour comprendre les sections requises.
 
-4. Follow this execution flow:
+4. Suivre ce flux d'exécution :
 
-    1. Parse user description from Input
-       If empty: ERROR "No feature description provided"
-    2. Extract key concepts from description
-       Identify: actors, actions, data, constraints
-    3. For unclear aspects:
-       - Make informed guesses based on context and industry standards
-       - Only mark with [NEEDS CLARIFICATION: specific question] if:
-         - The choice significantly impacts feature scope or user experience
-         - Multiple reasonable interpretations exist with different implications
-         - No reasonable default exists
-       - **LIMIT: Maximum 3 [NEEDS CLARIFICATION] markers total**
-       - Prioritize clarifications by impact: scope > security/privacy > user experience > technical details
-    4. Fill User Scenarios & Testing section
-       If no clear user flow: ERROR "Cannot determine user scenarios"
-    5. Generate Functional Requirements
-       Each requirement must be testable
-       Use reasonable defaults for unspecified details (document assumptions in Assumptions section)
-    6. Define Success Criteria
-       Create measurable, technology-agnostic outcomes
-       Include both quantitative metrics (time, performance, volume) and qualitative measures (user satisfaction, task completion)
-       Each criterion must be verifiable without implementation details
-    7. Identify Key Entities (if data involved)
-    8. Return: SUCCESS (spec ready for planning)
+    1. Parser description utilisateur depuis Entrée
+       Si vide : ERREUR "Aucune description de fonctionnalité fournie"
+    2. Extraire concepts clés de la description
+       Identifier : acteurs, actions, données, contraintes
+    3. Pour aspects flous :
+       - Faire des suppositions informées basées sur contexte et standards industrie
+       - Ne marquer avec [NÉCESSITE CLARIFICATION : question spécifique] que si :
+         - Le choix impacte significativement le périmètre fonctionnalité ou l'expérience utilisateur
+         - Plusieurs interprétations raisonnables existent avec implications différentes
+         - Aucun défaut raisonnable n'existe
+       - **LIMITE : Maximum 3 marqueurs [NÉCESSITE CLARIFICATION] au total**
+       - Prioriser clarifications par impact : périmètre > sécurité/confidentialité > expérience utilisateur > détails techniques
+    4. Remplir section Scénarios Utilisateurs & Tests
+       Si pas de flux utilisateur clair : ERREUR "Impossible de déterminer les scénarios utilisateurs"
+    5. Générer Exigences Fonctionnelles
+       Chaque exigence doit être testable
+       Utiliser des défauts raisonnables pour détails non spécifiés (documenter hypothèses dans section Hypothèses)
+    6. Définir Critères de Succès
+       Créer résultats mesurables, agnostiques technologie
+       Inclure métriques quantitatives (temps, performance, volume) et mesures qualitatives (satisfaction utilisateur, complétion tâche)
+       Chaque critère doit être vérifiable sans détails implémentation
+    7. Identifier Entités Clés (si données impliquées)
+    8. Retourner : SUCCÈS (spec prête pour planification)
 
-5. Write the specification to SPEC_FILE using the template structure, replacing placeholders with concrete details derived from the feature description (arguments) while preserving section order and headings.
+5. Écrire la spécification dans SPEC_FILE utilisant la structure template, remplaçant placeholders par détails concrets dérivés de la description fonctionnalité (arguments) tout en préservant ordre et titres des sections.
 
-6. **Specification Quality Validation**: After writing the initial spec, validate it against quality criteria:
+6. **Validation Qualité Spécification** : Après écriture de la spec initiale, la valider contre les critères qualité :
 
-   a. **Create Spec Quality Checklist**: Generate a checklist file at `FEATURE_DIR/checklists/requirements.md` using the checklist template structure with these validation items:
+   a. **Créer Checklist Qualité Spec** : Générer un fichier checklist à `FEATURE_DIR/checklists/requirements.md` utilisant la structure template checklist avec ces éléments validation :
 
       ```markdown
-      # Specification Quality Checklist: [FEATURE NAME]
+      # Checklist Qualité Spécification : [NOM FONCTIONNALITÉ]
       
-      **Purpose**: Validate specification completeness and quality before proceeding to planning
-      **Created**: [DATE]
-      **Feature**: [Link to spec.md]
+      **Objectif** : Valider complétude et qualité spécification avant de procéder à la planification
+      **Créé** : [DATE]
+      **Fonctionnalité** : [Lien vers spec.md]
       
-      ## Content Quality
+      ## Qualité Contenu
       
-      - [ ] No implementation details (languages, frameworks, APIs)
-      - [ ] Focused on user value and business needs
-      - [ ] Written for non-technical stakeholders
-      - [ ] All mandatory sections completed
+      - [ ] Pas de détails implémentation (langages, frameworks, APIs)
+      - [ ] Focus sur valeur utilisateur et besoins métier
+      - [ ] Écrit pour parties prenantes non-techniques
+      - [ ] Toutes les sections obligatoires complétées
       
-      ## Requirement Completeness
+      ## Complétude Exigences
       
-      - [ ] No [NEEDS CLARIFICATION] markers remain
-      - [ ] Requirements are testable and unambiguous
-      - [ ] Success criteria are measurable
-      - [ ] Success criteria are technology-agnostic (no implementation details)
-      - [ ] All acceptance scenarios are defined
-      - [ ] Edge cases are identified
-      - [ ] Scope is clearly bounded
-      - [ ] Dependencies and assumptions identified
+      - [ ] Aucun marqueur [NÉCESSITE CLARIFICATION] ne reste
+      - [ ] Exigences sont testables et non ambiguës
+      - [ ] Critères succès sont mesurables
+      - [ ] Critères succès sont agnostiques technologie (pas de détails implémentation)
+      - [ ] Tous les scénarios acceptation sont définis
+      - [ ] Cas limites sont identifiés
+      - [ ] Périmètre est clairement délimité
+      - [ ] Dépendances et hypothèses identifiées
       
-      ## Feature Readiness
+      ## Préparation Fonctionnalité
       
-      - [ ] All functional requirements have clear acceptance criteria
-      - [ ] User scenarios cover primary flows
-      - [ ] Feature meets measurable outcomes defined in Success Criteria
-      - [ ] No implementation details leak into specification
+      - [ ] Toutes les exigences fonctionnelles ont critères acceptation clairs
+      - [ ] Scénarios utilisateur couvrent flux primaires
+      - [ ] Fonctionnalité atteint résultats mesurables définis dans Critères Succès
+      - [ ] Aucun détail implémentation ne fuite dans spécification
       
       ## Notes
       
-      - Items marked incomplete require spec updates before `/speckit.clarify` or `/speckit.plan`
+      - Éléments marqués incomplets nécessitent mises à jour spec avant `/speckit.clarify` ou `/speckit.plan`
       ```
 
-   b. **Run Validation Check**: Review the spec against each checklist item:
-      - For each item, determine if it passes or fails
-      - Document specific issues found (quote relevant spec sections)
+   b. **Exécuter Vérification Validation** : Revoir la spec contre chaque élément checklist :
+      - Pour chaque élément, déterminer s'il passe ou échoue
+      - Documenter problèmes spécifiques trouvés (citer sections spec pertinentes)
 
-   c. **Handle Validation Results**:
+   c. **Gérer Résultats Validation** :
 
-      - **If all items pass**: Mark checklist complete and proceed to step 6
+      - **Si tous les éléments passent** : Marquer checklist complète et procéder à étape 6
 
-      - **If items fail (excluding [NEEDS CLARIFICATION])**:
-        1. List the failing items and specific issues
-        2. Update the spec to address each issue
-        3. Re-run validation until all items pass (max 3 iterations)
-        4. If still failing after 3 iterations, document remaining issues in checklist notes and warn user
+      - **Si éléments échouent (excluant [NÉCESSITE CLARIFICATION])** :
+        1. Lister les éléments échoués et problèmes spécifiques
+        2. Mettre à jour la spec pour adresser chaque problème
+        3. Ré-exécuter validation jusqu'à ce que tous les éléments passent (max 3 itérations)
+        4. Si toujours en échec après 3 itérations, documenter problèmes restants dans notes checklist et avertir utilisateur
 
-      - **If [NEEDS CLARIFICATION] markers remain**:
-        1. Extract all [NEEDS CLARIFICATION: ...] markers from the spec
-        2. **LIMIT CHECK**: If more than 3 markers exist, keep only the 3 most critical (by scope/security/UX impact) and make informed guesses for the rest
-        3. For each clarification needed (max 3), present options to user in this format:
+      - **Si marqueurs [NÉCESSITE CLARIFICATION] restent** :
+        1. Extraire tous les marqueurs [NÉCESSITE CLARIFICATION : ...] de la spec
+        2. **VÉRIFICATION LIMITE** : Si plus de 3 marqueurs existent, garder uniquement les 3 plus critiques (par impact périmètre/sécurité/UX) et faire des suppositions informées pour le reste
+        3. Pour chaque clarification nécessaire (max 3), présenter options à l'utilisateur dans ce format :
 
            ```markdown
-           ## Question [N]: [Topic]
+           ## Question [N] : [Sujet]
            
-           **Context**: [Quote relevant spec section]
+           **Contexte** : [Citer section spec pertinente]
            
-           **What we need to know**: [Specific question from NEEDS CLARIFICATION marker]
+           **Ce que nous devons savoir** : [Question spécifique du marqueur NÉCESSITE CLARIFICATION]
            
-           **Suggested Answers**:
+           **Réponses Suggérées** :
            
-           | Option | Answer | Implications |
-           |--------|--------|--------------|
-           | A      | [First suggested answer] | [What this means for the feature] |
-           | B      | [Second suggested answer] | [What this means for the feature] |
-           | C      | [Third suggested answer] | [What this means for the feature] |
-           | Custom | Provide your own answer | [Explain how to provide custom input] |
+           | Option | Réponse | Implications |
+           |--------|---------|--------------|
+           | A      | [Première réponse suggérée] | [Ce que cela signifie pour la fonctionnalité] |
+           | B      | [Deuxième réponse suggérée] | [Ce que cela signifie pour la fonctionnalité] |
+           | C      | [Troisième réponse suggérée] | [Ce que cela signifie pour la fonctionnalité] |
+           | Libre  | Fournir votre propre réponse | [Expliquer comment fournir entrée personnalisée] |
            
-           **Your choice**: _[Wait for user response]_
+           **Votre choix** : _[Attendre réponse utilisateur]_
            ```
 
-        4. **CRITICAL - Table Formatting**: Ensure markdown tables are properly formatted:
-           - Use consistent spacing with pipes aligned
-           - Each cell should have spaces around content: `| Content |` not `|Content|`
-           - Header separator must have at least 3 dashes: `|--------|`
-           - Test that the table renders correctly in markdown preview
-        5. Number questions sequentially (Q1, Q2, Q3 - max 3 total)
-        6. Present all questions together before waiting for responses
-        7. Wait for user to respond with their choices for all questions (e.g., "Q1: A, Q2: Custom - [details], Q3: B")
-        8. Update the spec by replacing each [NEEDS CLARIFICATION] marker with the user's selected or provided answer
-        9. Re-run validation after all clarifications are resolved
+        4. **CRITIQUE - Formatage Table** : S'assurer que les tables markdown sont correctement formatées :
+           - Utiliser espacement cohérent avec pipes alignés
+           - Chaque cellule doit avoir espaces autour du contenu : `| Contenu |` pas `|Contenu|`
+           - Séparateur en-tête doit avoir au moins 3 tirets : `|--------|`
+           - Tester que la table se rend correctement en aperçu markdown
+        5. Numéroter questions séquentiellement (Q1, Q2, Q3 - max 3 total)
+        6. Présenter toutes les questions ensemble avant d'attendre les réponses
+        7. Attendre que l'utilisateur réponde avec ses choix pour toutes les questions (ex : "Q1 : A, Q2 : Libre - [détails], Q3 : B")
+        8. Mettre à jour la spec en remplaçant chaque marqueur [NÉCESSITE CLARIFICATION] par la réponse sélectionnée ou fournie par l'utilisateur
+        9. Ré-exécuter validation après résolution de toutes les clarifications
 
-   d. **Update Checklist**: After each validation iteration, update the checklist file with current pass/fail status
+   d. **Mettre à jour Checklist** : Après chaque itération validation, mettre à jour le fichier checklist avec statut pass/fail actuel
 
-7. Report completion with branch name, spec file path, checklist results, and readiness for the next phase (`/speckit.clarify` or `/speckit.plan`).
+7. Rapporter complétion avec nom de branche, chemin fichier spec, résultats checklist, et préparation pour la phase suivante (`/speckit.clarify` ou `/speckit.plan`).
 
-**NOTE:** The script creates and checks out the new branch and initializes the spec file before writing.
+**NOTE :** Le script crée et checkout la nouvelle branche et initialise le fichier spec avant écriture.
 
-## CheckMaster Domain Knowledge
+## Connaissance Domaine CheckMaster
 
-### System Context
-CheckMaster is a comprehensive academic management system for Master's thesis supervision at UFR MI. Understanding this context is critical for writing meaningful specifications.
+### Contexte Système
+CheckMaster est un système complet de gestion académique pour la supervision des mémoires de Master à l'UFR MI. Comprendre ce contexte est critique pour écrire des spécifications significatives.
 
-**Core Workflow States**:
+**États Workflow Principaux** :
 - INSCRIT → CANDIDATURE_SOUMISE → VERIFICATION_SCOLARITE → FILTRE_COMMUNICATION → EN_ATTENTE_COMMISSION → EN_EVALUATION_COMMISSION → RAPPORT_VALIDE → ATTENTE_AVIS_ENCADREUR → PRET_POUR_JURY → JURY_EN_CONSTITUTION → SOUTENANCE_PLANIFIEE → SOUTENANCE_EN_COURS → SOUTENANCE_TERMINEE → DIPLOME_DELIVRE
 
-**Key Business Rules**:
-1. **Gate Critique**: Report writing is BLOCKED until candidature_validee state
-2. **Commission Unanimity**: 3 voting rounds maximum, then escalation to Dean
-3. **Audit Trail**: All critical actions must be traceable with before/after snapshots
-4. **Financial Prerequisites**: Students must clear payments before candidature validation
-5. **Role Temporaire**: Jury presidents get temporary menu access only on defense day
-6. **Hashids Routing**: All entity IDs must be masked in URLs for security
+**Règles Métier Clés** :
+1. **Gate Critique** : Rédaction rapport BLOQUÉE jusqu'à état candidature_validée
+2. **Unanimité Commission** : 3 tours de vote maximum, puis escalade au Doyen
+3. **Piste Audit** : Toutes les actions critiques doivent être traçables avec snapshots avant/après
+4. **Prérequis Financiers** : Étudiants doivent régler paiements avant validation candidature
+5. **Rôle Temporaire** : Présidents jury obtiennent accès menu temporaire uniquement le jour de la soutenance
+6. **Routage Hashids** : Tous les IDs entités doivent être masqués dans URLs pour sécurité
 
-**System Actors**:
-- **Administrateur** (Group 5): Full system control, configuration, user management
-- **Scolarité** (Group 8): Student records, payments, candidature validation  
-- **Communication** (Group 7): Report format verification
-- **Commission** (Group 11): Report content evaluation and validation
-- **Président Commission**: Commission management, jury constitution
-- **Enseignant** (Group 9/10/12): Filière management, niveau management, or simple teaching
-- **Président Jury** (Temporary role): Defense day note entry
-- **Étudiant** (Group 13): Report writing, candidature submission
-- **Secrétaire** (Group 6): Administrative document management
+**Acteurs Système** :
+- **Administrateur** (Groupe 5) : Contrôle complet système, configuration, gestion utilisateurs
+- **Scolarité** (Groupe 8) : Dossiers étudiants, paiements, validation candidature
+- **Communication** (Groupe 7) : Vérification format rapport
+- **Commission** (Groupe 11) : Évaluation contenu rapport et validation
+- **Président Commission** : Gestion commission, constitution jury
+- **Enseignant** (Groupe 9/10/12) : Gestion filière, gestion niveau, ou enseignement simple
+- **Président Jury** (Rôle temporaire) : Saisie notes jour de soutenance
+- **Étudiant** (Groupe 13) : Rédaction rapport, soumission candidature
+- **Secrétaire** (Groupe 6) : Gestion documents administratifs
 
-**Key Entities**:
-- etudiants (num_etu VARCHAR(20) unique, non-autogenerated like CI01552852)
-- dossiers_etudiants (workflow_etat tracking)
+**Entités Clés** :
+- etudiants (num_etu VARCHAR(20) unique, non-autogénéré comme CI01552852)
+- dossiers_etudiants (suivi workflow_etat)
 - rapports_etudiants (versioning, annotations)
-- candidatures (stage info, validation states)
-- sessions_commission (monthly sessions, vote rounds)
-- jury_membres (roles: président, rapporteur, examinateur, directeur, maître stage)
-- soutenances (planning, conflict detection)
+- candidatures (info stage, états validation)
+- sessions_commission (sessions mensuelles, tours de vote)
+- jury_membres (rôles : président, rapporteur, examinateur, directeur, maître stage)
+- soutenances (planification, détection conflits)
 - paiements (tranches, pénalités, reçus)
-- utilisateurs (linked to etudiants/enseignants/personnel_admin)
+- utilisateurs (liés à etudiants/enseignants/personnel_admin)
 
-**Critical Features**:
-- **13 Document Types**: Reçus, PV, Bulletins, Attestations, Convocations (mPDF/TCPDF)
-- **71 Email Templates**: Automated notifications at every workflow transition
-- **27 Désactivable Features**: Escalade, signatures électroniques, messagerie, etc.
-- **~170 Configuration Parameters**: DB-driven (etablissement.*, workflow.*, notify.*, etc.)
-- **21 Référentiels**: Grades, fonctions, spécialités, critères évaluation, mentions
+**Fonctionnalités Critiques** :
+- **13 Types Documents** : Reçus, PV, Bulletins, Attestations, Convocations (mPDF/TCPDF)
+- **71 Templates Email** : Notifications automatisées à chaque transition workflow
+- **27 Fonctionnalités Désactivables** : Escalade, signatures électroniques, messagerie, etc.
+- **~170 Paramètres Configuration** : DB-driven (etablissement.*, workflow.*, notify.*, etc.)
+- **21 Référentiels** : Grades, fonctions, spécialités, critères évaluation, mentions
 
-**Security & Compliance**:
-- Argon2id password hashing mandatory
-- CSRF protection on all forms
-- Rate limiting on sensitive routes
-- SHA256 integrity for archived documents
-- Audit table with Monolog dual logging
-- Prepared statements only (no raw SQL)
+**Sécurité & Conformité** :
+- Hachage mot de passe Argon2id obligatoire
+- Protection CSRF sur tous les formulaires
+- Limitation débit sur routes sensibles
+- Intégrité SHA256 pour documents archivés
+- Table audit avec double logging Monolog
+- Requêtes préparées uniquement (pas de SQL brut)
 
-### Specification Context for CheckMaster
+### Contexte Spécification pour CheckMaster
 
-When writing specs for CheckMaster features, consider:
+Lors de l'écriture de specs pour fonctionnalités CheckMaster, considérer :
 
-1. **Which workflow states are affected?** Map feature to candidature/rapport/soutenance lifecycle
-2. **Which user groups need access?** Check against 13 group permissions
-3. **What notifications are triggered?** Identify email/messagerie requirements
-4. **Are documents generated?** Specify PDF type (simple TCPDF vs complex mPDF)
-5. **Does it require workflow transition?** Define état_source → état_cible conditions
-6. **Financial impact?** Consider paiements, pénalités, reçus generation
-7. **Audit requirements?** Determine what gets logged with snapshots
-8. **Escalation scenarios?** Handle délais, absence, blocage cases
-9. **Configuration needs?** Check if new config parameters needed (workflow.*, notify.*, etc.)
-10. **Referentiel impact?** Identify if new reference data needed (immuable vs modifiable)
+1. **Quels états workflow sont affectés ?** Mapper fonctionnalité au cycle de vie candidature/rapport/soutenance
+2. **Quels groupes utilisateurs ont besoin d'accès ?** Vérifier contre 13 permissions groupes
+3. **Quelles notifications sont déclenchées ?** Identifier exigences email/messagerie
+4. **Des documents sont-ils générés ?** Spécifier type PDF (simple TCPDF vs complexe mPDF)
+5. **Cela nécessite-t-il transition workflow ?** Définir conditions état_source → état_cible
+6. **Impact financier ?** Considérer paiements, pénalités, génération reçus
+7. **Exigences audit ?** Déterminer ce qui est journalisé avec snapshots
+8. **Scénarios escalade ?** Gérer cas délais, absence, blocage
+9. **Besoins configuration ?** Vérifier si nouveaux paramètres config nécessaires (workflow.*, notify.*, etc.)
+10. **Impact référentiel ?** Identifier si nouvelles données référence nécessaires (immuable vs modifiable)
 
-### Common CheckMaster Patterns
+### Patterns Communs CheckMaster
 
-**Candidature Flow**:
+**Flux Candidature** :
 ```
-Student submits → Scolarité validates (payments check) → Communication approves (format) → 
-Report writing UNLOCKED → Student writes → Submits → Commission evaluates → Validates
-```
-
-**Commission Vote**:
-```
-Tour 1 (48h) → Unanimity? Yes=Validate, No=Tour 2 (48h) → 
-Unanimity? Yes=Validate, No=Tour 3 (24h) → Unanimity? Yes=Validate, No=Escalate to Dean
+Étudiant soumet → Scolarité valide (vérification paiements) → Communication approuve (format) → 
+Rédaction rapport DÉBLOQUÉE → Étudiant rédige → Soumet → Commission évalue → Valide
 ```
 
-**Document Generation**:
+**Vote Commission** :
 ```
-Action trigger → ServicePdf::generer($type, $data) → PDF created → 
-Calculate SHA256 → Archive → Notification with download link
-```
-
-**Notification Pattern**:
-```
-Event → ServiceNotification::send($template, $destinataires, $variables) →
-Queue → Worker sends (Email primary, Messagerie backup) → Track bounces → Archive historique
+Tour 1 (48h) → Unanimité ? Oui=Valider, Non=Tour 2 (48h) → 
+Unanimité ? Oui=Valider, Non=Tour 3 (24h) → Unanimité ? Oui=Valider, Non=Escalade au Doyen
 ```
 
-## General Guidelines
+**Génération Documents** :
+```
+Déclencheur action → ServicePdf::generer($type, $data) → PDF créé → 
+Calculer SHA256 → Archiver → Notification avec lien téléchargement
+```
 
-## Quick Guidelines
+**Pattern Notification** :
+```
+Événement → ServiceNotification::send($template, $destinataires, $variables) →
+File → Worker envoie (Email primaire, Messagerie backup) → Traquer bounces → Archiver historique
+```
 
-- Focus on **WHAT** users need and **WHY**.
-- Avoid HOW to implement (no tech stack, APIs, code structure).
-- Written for business stakeholders, not developers.
-- DO NOT create any checklists that are embedded in the spec. That will be a separate command.
-- **For CheckMaster**: Always consider which workflow state(s) are impacted and which user groups need permissions.
+## Directives Générales
 
-### Section Requirements
+## Directives Rapides
 
-- **Mandatory sections**: Must be completed for every feature
-- **Optional sections**: Include only when relevant to the feature
-- When a section doesn't apply, remove it entirely (don't leave as "N/A")
+- Focus sur **QUOI** les utilisateurs ont besoin et **POURQUOI**.
+- Éviter COMMENT implémenter (pas de stack technique, APIs, structure code).
+- Écrit pour parties prenantes métier, pas développeurs.
+- NE PAS créer de checklists intégrées dans la spec. Ce sera une commande séparée.
+- **Pour CheckMaster** : Toujours considérer quel(s) état(s) workflow sont impactés et quels groupes utilisateurs ont besoin de permissions.
 
-### For AI Generation
+### Exigences Sections
 
-When creating this spec from a user prompt:
+- **Sections obligatoires** : Doivent être complétées pour chaque fonctionnalité
+- **Sections optionnelles** : Inclure uniquement quand pertinent pour la fonctionnalité
+- Quand une section ne s'applique pas, la supprimer entièrement (ne pas laisser comme "N/A")
 
-1. **Make informed guesses**: Use context, industry standards, and common patterns to fill gaps
-2. **Document assumptions**: Record reasonable defaults in the Assumptions section
-3. **Limit clarifications**: Maximum 3 [NEEDS CLARIFICATION] markers - use only for critical decisions that:
-   - Significantly impact feature scope or user experience
-   - Have multiple reasonable interpretations with different implications
-   - Lack any reasonable default
-4. **Prioritize clarifications**: scope > security/privacy > user experience > technical details
-5. **Think like a tester**: Every vague requirement should fail the "testable and unambiguous" checklist item
-6. **Common areas needing clarification** (only if no reasonable default exists):
-   - Feature scope and boundaries (include/exclude specific use cases)
-   - User types and permissions (if multiple conflicting interpretations possible)
-   - Security/compliance requirements (when legally/financially significant)
+### Pour Génération IA
 
-**Examples of reasonable defaults** (don't ask about these):
+Lors de la création de cette spec depuis un prompt utilisateur :
 
-- Data retention: Industry-standard practices for the domain
-- Performance targets: Standard web/mobile app expectations unless specified
-- Error handling: User-friendly messages with appropriate fallbacks
-- Authentication method: Standard session-based or OAuth2 for web apps
-- Integration patterns: RESTful APIs unless specified otherwise
+1. **Faire des suppositions informées** : Utiliser contexte, standards industrie, et patterns communs pour combler les lacunes
+2. **Documenter hypothèses** : Enregistrer défauts raisonnables dans la section Hypothèses
+3. **Limiter clarifications** : Maximum 3 marqueurs [NÉCESSITE CLARIFICATION] - utiliser uniquement pour décisions critiques qui :
+   - Impactent significativement périmètre fonctionnalité ou expérience utilisateur
+   - Ont plusieurs interprétations raisonnables avec implications différentes
+   - Manquent de tout défaut raisonnable
+4. **Prioriser clarifications** : périmètre > sécurité/confidentialité > expérience utilisateur > détails techniques
+5. **Penser comme un testeur** : Chaque exigence vague doit échouer à l'élément checklist "testable et non ambigu"
+6. **Domaines communs nécessitant clarification** (uniquement si pas de défaut raisonnable existe) :
+   - Périmètre et limites fonctionnalité (inclure/exclure cas d'usage spécifiques)
+   - Types utilisateurs et permissions (si plusieurs interprétations conflictuelles possibles)
+   - Exigences sécurité/conformité (quand légalement/financièrement significatif)
 
-### Success Criteria Guidelines
+**Exemples de défauts raisonnables** (ne pas demander à propos de ceux-ci) :
 
-Success criteria must be:
+- Rétention données : Pratiques standard industrie pour le domaine
+- Cibles performance : Attentes apps web/mobile standard sauf si spécifié
+- Gestion erreurs : Messages conviviaux avec fallbacks appropriés
+- Méthode authentification : Session standard ou OAuth2 pour apps web
+- Patterns intégration : APIs RESTful sauf si spécifié autrement
 
-1. **Measurable**: Include specific metrics (time, percentage, count, rate)
-2. **Technology-agnostic**: No mention of frameworks, languages, databases, or tools
-3. **User-focused**: Describe outcomes from user/business perspective, not system internals
-4. **Verifiable**: Can be tested/validated without knowing implementation details
+### Directives Critères Succès
 
-**Good examples**:
+Les critères succès doivent être :
 
-- "Users can complete checkout in under 3 minutes"
-- "System supports 10,000 concurrent users"
-- "95% of searches return results in under 1 second"
-- "Task completion rate improves by 40%"
+1. **Mesurables** : Inclure métriques spécifiques (temps, pourcentage, compte, taux)
+2. **Agnostiques technologie** : Aucune mention de frameworks, langages, bases de données, ou outils
+3. **Focus utilisateur** : Décrire résultats depuis perspective utilisateur/métier, pas internes système
+4. **Vérifiables** : Peuvent être testés/validés sans connaître détails implémentation
 
-**Bad examples** (implementation-focused):
+**Bons exemples** :
 
-- "API response time is under 200ms" (too technical, use "Users see results instantly")
-- "Database can handle 1000 TPS" (implementation detail, use user-facing metric)
-- "React components render efficiently" (framework-specific)
-- "Redis cache hit rate above 80%" (technology-specific)
+- "Les utilisateurs peuvent compléter le checkout en moins de 3 minutes"
+- "Le système supporte 10 000 utilisateurs simultanés"
+- "95% des recherches retournent résultats en moins de 1 seconde"
+- "Le taux de complétion de tâche améliore de 40%"
+
+**Mauvais exemples** (focus implémentation) :
+
+- "Le temps de réponse API est sous 200ms" (trop technique, utiliser "Les utilisateurs voient les résultats instantanément")
+- "La base de données peut gérer 1000 TPS" (détail implémentation, utiliser métrique côté utilisateur)
+- "Les composants React rendent efficacement" (spécifique framework)
+- "Le taux de cache Redis au-dessus de 80%" (spécifique technologie)

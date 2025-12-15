@@ -1,42 +1,42 @@
 ---
-description: Execute the CheckMaster implementation plan by processing and executing all tasks defined in tasks.md (PHP 8.0+ MVC++)
+description: Exécuter le plan d'implémentation CheckMaster en traitant et exécutant toutes les tâches définies dans tasks.md (PHP 8.0+ MVC++)
 ---
 
-## User Input
+## Entrée Utilisateur
 
 ```text
 $ARGUMENTS
 ```
 
-You **MUST** consider the user input before proceeding (if not empty).
+Vous **DEVEZ** prendre en compte l'entrée utilisateur avant de procéder (si non vide).
 
-## CheckMaster Implementation Standards (MANDATORY)
+## Standards Implémentation CheckMaster (OBLIGATOIRES)
 
-### Code Quality Gates - Every Task Must Pass
+### Gates Qualité Code - Chaque Tâche Doit Passer
 
-**PHP Code Style**:
+**Style Code PHP** :
 ```bash
-# Must pass before considering task complete
+# Doit passer avant de considérer tâche complète
 composer run fix       # PHP-CS-Fixer (PSR-12)
-composer run stan      # PHPStan level 6+
-composer run test      # PHPUnit (if tests exist)
+composer run stan      # PHPStan niveau 6+
+composer run test      # PHPUnit (si tests existent)
 ```
 
-**Mandatory Patterns**:
-1. **Strict Types**: Every PHP file starts with `<?php\n\ndeclare(strict_types=1);`
-2. **Type Hints**: 100% typed (parameters, returns, properties)
-3. **Request Wrapper**: Use `Request` class, never `$_POST`/`$_GET`
-4. **Escaping**: Use `e()` helper for output, never raw `echo`
-5. **SQL**: Prepared statements only, NO string concatenation
-6. **Audit**: Call `ServiceAudit::log()` for all write operations
-7. **Hashids**: Use for all entity IDs in URLs
-8. **Permissions**: Check via `ServicePermission::verifier()` before actions
-9. **Transactions**: Use for multi-table operations
-10. **Exceptions**: Typed exceptions (ValidationException, NotFoundException, etc.)
+**Patterns Obligatoires** :
+1. **Types Stricts** : Chaque fichier PHP commence par `<?php\n\ndeclare(strict_types=1);`
+2. **Type Hints** : 100% typé (paramètres, retours, propriétés)
+3. **Wrapper Request** : Utiliser classe `Request`, jamais `$_POST`/`$_GET`
+4. **Échappement** : Utiliser helper `e()` pour sortie, jamais `echo` brut
+5. **SQL** : Requêtes préparées uniquement, PAS de concaténation chaînes
+6. **Audit** : Appeler `ServiceAudit::log()` pour toutes opérations écriture
+7. **Hashids** : Utiliser pour tous les IDs entités dans URLs
+8. **Permissions** : Vérifier via `ServicePermission::verifier()` avant actions
+9. **Transactions** : Utiliser pour opérations multi-tables
+10. **Exceptions** : Exceptions typées (ValidationException, NotFoundException, etc.)
 
-### CheckMaster Code Templates
+### Templates Code CheckMaster
 
-**Controller Template**:
+**Template Contrôleur** :
 ```php
 <?php
 
@@ -58,26 +58,26 @@ class {Feature}Controller
 
     public function action(int $id): JsonResponse
     {
-        // 1. Get data
+        // 1. Obtenir données
         $data = Request::all();
         
-        // 2. Validate
+        // 2. Valider
         $validator = new {Feature}Validator();
         $errors = $validator->validate($data);
         if ($errors) {
             throw new ValidationException($errors);
         }
         
-        // 3. Call service (business logic + audit + notifications)
+        // 3. Appeler service (logique métier + audit + notifications)
         $result = $this->service{Feature}->action($id, $data);
         
-        // 4. Return response
-        return JsonResponse::success($result, 'Action completed');
+        // 4. Retourner réponse
+        return JsonResponse::success($result, 'Action complétée');
     }
 }
 ```
 
-**Service Template**:
+**Template Service** :
 ```php
 <?php
 
@@ -96,31 +96,31 @@ class Service{Feature}
 {
     public function action(int $id, array $data): mixed
     {
-        // 1. Load entity
+        // 1. Charger entité
         $entity = {Entity}::find($id);
         if (!$entity) {
-            throw new NotFoundException('{Entity} not found');
+            throw new NotFoundException('{Entity} non trouvé');
         }
         
-        // 2. Business logic
+        // 2. Logique métier
         DB::beginTransaction();
         try {
-            // Perform operations
+            // Effectuer opérations
             $entity->field = $data['field'];
             $entity->save();
             
-            // 3. Audit trail
-            ServiceAudit::log('Action performed', '{entity}', $id, [
+            // 3. Piste audit
+            ServiceAudit::log('Action effectuée', '{entity}', $id, [
                 'before' => $snapshotBefore,
                 'after' => $entity->toArray()
             ]);
             
-            // 4. Workflow (if applicable)
+            // 4. Workflow (si applicable)
             if ($workflowChange) {
                 ServiceWorkflow::effectuerTransition($dossierId, 'transition_code', Auth::id());
             }
             
-            // 5. Notifications (if applicable)
+            // 5. Notifications (si applicable)
             ServiceNotification::envoyer('template_code', $destinataires, $variables);
             
             DB::commit();
@@ -134,7 +134,7 @@ class Service{Feature}
 }
 ```
 
-**Model Template**:
+**Template Modèle** :
 ```php
 <?php
 
@@ -146,8 +146,8 @@ use App\Orm\Model;
 
 class {Entity} extends Model
 {
-    protected string $table = '{table_name}';
-    protected string $primaryKey = 'id_{table_name}';
+    protected string $table = '{nom_table}';
+    protected string $primaryKey = 'id_{nom_table}';
     
     protected array $fillable = [
         'field1',
@@ -168,7 +168,7 @@ class {Entity} extends Model
 }
 ```
 
-**Validator Template**:
+**Template Validateur** :
 ```php
 <?php
 
@@ -211,15 +211,15 @@ class {Feature}Validator
 }
 ```
 
-**Migration Template**:
+**Template Migration** :
 ```sql
 -- Migration: 0XX_description.sql
--- Date: YYYY-MM-DD
--- Purpose: [Description]
+-- Date: AAAA-MM-JJ
+-- Objectif: [Description]
 
--- Create table
-CREATE TABLE IF NOT EXISTS table_name (
-    id_table_name INT PRIMARY KEY AUTO_INCREMENT,
+-- Créer table
+CREATE TABLE IF NOT EXISTS nom_table (
+    id_nom_table INT PRIMARY KEY AUTO_INCREMENT,
     field1 VARCHAR(255) NOT NULL,
     field2 TEXT,
     field3_json JSON,
@@ -227,78 +227,78 @@ CREATE TABLE IF NOT EXISTS table_name (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
-    -- Indexes
+    -- Index
     INDEX idx_field1 (field1),
     INDEX idx_actif (actif),
     
-    -- Foreign keys
+    -- Clés étrangères
     CONSTRAINT fk_table_other FOREIGN KEY (other_id) 
         REFERENCES other_table(id_other_table) 
         ON DELETE RESTRICT
         
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert into migrations tracking
+-- Insérer dans suivi migrations
 INSERT INTO migrations (migration_name, executed_at) 
 VALUES ('0XX_description', NOW());
 ```
 
-### CheckMaster-Specific Implementations
+### Implémentations Spécifiques CheckMaster
 
-**Workflow Integration**:
+**Intégration Workflow** :
 ```php
-// Check current state
+// Vérifier état actuel
 $dossier = DossierEtudiant::where(['etudiant_id' => $etudiantId])->first();
-if ($dossier->etat_actuel->code_etat !== 'expected_state') {
-    throw new ForbiddenException('Invalid workflow state');
+if ($dossier->etat_actuel->code_etat !== 'etat_attendu') {
+    throw new ForbiddenException('État workflow invalide');
 }
 
-// Perform transition
+// Effectuer transition
 ServiceWorkflow::effectuerTransition(
     $dossier->id_dossier,
-    'transition_code',
+    'code_transition',
     Auth::id(),
-    'Optional comment'
+    'Commentaire optionnel'
 );
 ```
 
-**Permission Checking**:
+**Vérification Permissions** :
 ```php
-// In Controller or Middleware
-if (!ServicePermission::verifier(Auth::id(), 'resource_code', 'action_code')) {
-    throw new ForbiddenException('Permission denied');
+// Dans Contrôleur ou Middleware
+if (!ServicePermission::verifier(Auth::id(), 'code_ressource', 'code_action')) {
+    throw new ForbiddenException('Permission refusée');
 }
 ```
 
-**Notification Sending**:
+**Envoi Notifications** :
 ```php
-ServiceNotification::envoyer('template_code', [
+ServiceNotification::envoyer('code_template', [
     'destinataires' => [$userId1, $userId2],
     'variables' => [
         'nom' => $etudiant->nom_etu,
         'date' => date('d/m/Y'),
-        'lien' => url('/path')
+        'lien' => url('/chemin')
     ]
 ]);
 ```
 
-**PDF Generation**:
+**Génération PDF** :
 ```php
-// Simple document (TCPDF)
+// Document simple (TCPDF)
 $pdf = ServicePdf::generer('recu_paiement', [
     'etudiant' => $etudiant,
     'montant' => $montant,
     'date' => date('d/m/Y')
 ]);
 
-// Complex document (mPDF)
+// Document complexe (mPDF)
 $pdf = ServicePdf::genererAvance('rapport_commission', [
     'session' => $session,
     'rapports' => $rapports,
     'membres' => $membres
 ], true); // true = mPDF
 
-// Archive with integrity
+// Archiver avec intégrité
 $hash = hash('sha256', $pdf);
 Archive::create([
     'type_document' => 'recu',
@@ -309,136 +309,136 @@ Archive::create([
 ]);
 ```
 
-**Configuration Access**:
+**Accès Configuration** :
 ```php
-// Read config
+// Lire config
 $smtpHost = ServiceParametres::get('notify.email.smtp_host', 'localhost');
 $delaiMax = ServiceParametres::get('workflow.sla.scolarite_days', 5);
 
-// Write config (admin only)
+// Écrire config (admin uniquement)
 ServiceParametres::set('workflow.escalade.enabled', true);
 ```
 
-## Outline
+## Aperçu
 
-1. Run `.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+1. Exécuter `.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` depuis racine repo et parser FEATURE_DIR et liste AVAILABLE_DOCS. Tous les chemins doivent être absolus. Pour apostrophes dans args comme "J'implémente", utiliser syntaxe échappement : ex 'J'\''implémente' (ou guillemets si possible : "J'implémente").
 
-2. **Check checklists status** (if FEATURE_DIR/checklists/ exists):
-   - Scan all checklist files in the checklists/ directory
-   - For each checklist, count:
-     - Total items: All lines matching `- [ ]` or `- [X]` or `- [x]`
-     - Completed items: Lines matching `- [X]` or `- [x]`
-     - Incomplete items: Lines matching `- [ ]`
-   - Create a status table:
+2. **Vérifier statut checklists** (si FEATURE_DIR/checklists/ existe) :
+   - Scanner tous les fichiers checklist dans le répertoire checklists/
+   - Pour chaque checklist, compter :
+     - Éléments totaux : Toutes les lignes correspondant à `- [ ]` ou `- [X]` ou `- [x]`
+     - Éléments complétés : Lignes correspondant à `- [X]` ou `- [x]`
+     - Éléments incomplets : Lignes correspondant à `- [ ]`
+   - Créer une table statut :
 
      ```text
-     | Checklist | Total | Completed | Incomplete | Status |
+     | Checklist | Total | Complétés | Incomplets | Statut |
      |-----------|-------|-----------|------------|--------|
      | ux.md     | 12    | 12        | 0          | ✓ PASS |
      | test.md   | 8     | 5         | 3          | ✗ FAIL |
      | security.md | 6   | 6         | 0          | ✓ PASS |
      ```
 
-   - Calculate overall status:
-     - **PASS**: All checklists have 0 incomplete items
-     - **FAIL**: One or more checklists have incomplete items
+   - Calculer statut global :
+     - **PASS** : Toutes les checklists ont 0 éléments incomplets
+     - **FAIL** : Une ou plusieurs checklists ont éléments incomplets
 
-   - **If any checklist is incomplete**:
-     - Display the table with incomplete item counts
-     - **STOP** and ask: "Some checklists are incomplete. Do you want to proceed with implementation anyway? (yes/no)"
-     - Wait for user response before continuing
-     - If user says "no" or "wait" or "stop", halt execution
-     - If user says "yes" or "proceed" or "continue", proceed to step 3
+   - **Si une checklist est incomplète** :
+     - Afficher la table avec comptages éléments incomplets
+     - **ARRÊTER** et demander : « Certaines checklists sont incomplètes. Voulez-vous procéder à l'implémentation quand même ? (oui/non) »
+     - Attendre réponse utilisateur avant de continuer
+     - Si utilisateur dit "non" ou "attendre" ou "stop", arrêter exécution
+     - Si utilisateur dit "oui" ou "procéder" ou "continuer", procéder à étape 3
 
-   - **If all checklists are complete**:
-     - Display the table showing all checklists passed
-     - Automatically proceed to step 3
+   - **Si toutes les checklists sont complètes** :
+     - Afficher la table montrant toutes checklists passées
+     - Procéder automatiquement à étape 3
 
-3. Load and analyze the implementation context:
-   - **REQUIRED**: Read tasks.md for the complete task list and execution plan
-   - **REQUIRED**: Read plan.md for tech stack, architecture, and file structure
-   - **IF EXISTS**: Read data-model.md for entities and relationships
-   - **IF EXISTS**: Read contracts/ for API specifications and test requirements
-   - **IF EXISTS**: Read research.md for technical decisions and constraints
-   - **IF EXISTS**: Read quickstart.md for integration scenarios
+3. Charger et analyser le contexte implémentation :
+   - **REQUIS** : Lire tasks.md pour la liste complète des tâches et le plan d'exécution
+   - **REQUIS** : Lire plan.md pour stack technique, architecture et structure fichiers
+   - **SI EXISTE** : Lire data-model.md pour entités et relations
+   - **SI EXISTE** : Lire contracts/ pour spécifications API et exigences tests
+   - **SI EXISTE** : Lire research.md pour décisions techniques et contraintes
+   - **SI EXISTE** : Lire quickstart.md pour scénarios intégration
 
-4. **Project Setup Verification**:
-   - **REQUIRED**: Create/verify ignore files based on actual project setup:
+4. **Vérification Setup Projet** :
+   - **REQUIS** : Créer/vérifier fichiers ignore basés sur setup projet réel :
 
-   **Detection & Creation Logic**:
-   - Check if the following command succeeds to determine if the repository is a git repo (create/verify .gitignore if so):
+   **Logique Détection & Création** :
+   - Vérifier si la commande suivante réussit pour déterminer si le repository est un repo git (créer/vérifier .gitignore si oui) :
 
      ```sh
      git rev-parse --git-dir 2>/dev/null
      ```
 
-   - Check if Dockerfile* exists or Docker in plan.md → create/verify .dockerignore
-   - Check if .eslintrc* exists → create/verify .eslintignore
-   - Check if eslint.config.* exists → ensure the config's `ignores` entries cover required patterns
-   - Check if .prettierrc* exists → create/verify .prettierignore
-   - Check if .npmrc or package.json exists → create/verify .npmignore (if publishing)
-   - Check if terraform files (*.tf) exist → create/verify .terraformignore
-   - Check if .helmignore needed (helm charts present) → create/verify .helmignore
+   - Vérifier si Dockerfile* existe ou Docker dans plan.md → créer/vérifier .dockerignore
+   - Vérifier si .eslintrc* existe → créer/vérifier .eslintignore
+   - Vérifier si eslint.config.* existe → s'assurer que les entrées `ignores` de la config couvrent patterns requis
+   - Vérifier si .prettierrc* existe → créer/vérifier .prettierignore
+   - Vérifier si .npmrc ou package.json existe → créer/vérifier .npmignore (si publication)
+   - Vérifier si fichiers terraform (*.tf) existent → créer/vérifier .terraformignore
+   - Vérifier si .helmignore nécessaire (charts helm présents) → créer/vérifier .helmignore
 
-   **If ignore file already exists**: Verify it contains essential patterns, append missing critical patterns only
-   **If ignore file missing**: Create with full pattern set for detected technology
+   **Si fichier ignore existe déjà** : Vérifier qu'il contient patterns essentiels, ajouter uniquement patterns critiques manquants
+   **Si fichier ignore manquant** : Créer avec ensemble complet patterns pour technologie détectée
 
-   **Common Patterns by Technology** (from plan.md tech stack):
-   - **Node.js/JavaScript/TypeScript**: `node_modules/`, `dist/`, `build/`, `*.log`, `.env*`
-   - **Python**: `__pycache__/`, `*.pyc`, `.venv/`, `venv/`, `dist/`, `*.egg-info/`
-   - **Java**: `target/`, `*.class`, `*.jar`, `.gradle/`, `build/`
-   - **C#/.NET**: `bin/`, `obj/`, `*.user`, `*.suo`, `packages/`
-   - **Go**: `*.exe`, `*.test`, `vendor/`, `*.out`
-   - **Ruby**: `.bundle/`, `log/`, `tmp/`, `*.gem`, `vendor/bundle/`
-   - **PHP**: `vendor/`, `*.log`, `*.cache`, `*.env`
-   - **Rust**: `target/`, `debug/`, `release/`, `*.rs.bk`, `*.rlib`, `*.prof*`, `.idea/`, `*.log`, `.env*`
-   - **Kotlin**: `build/`, `out/`, `.gradle/`, `.idea/`, `*.class`, `*.jar`, `*.iml`, `*.log`, `.env*`
-   - **C++**: `build/`, `bin/`, `obj/`, `out/`, `*.o`, `*.so`, `*.a`, `*.exe`, `*.dll`, `.idea/`, `*.log`, `.env*`
-   - **C**: `build/`, `bin/`, `obj/`, `out/`, `*.o`, `*.a`, `*.so`, `*.exe`, `Makefile`, `config.log`, `.idea/`, `*.log`, `.env*`
-   - **Swift**: `.build/`, `DerivedData/`, `*.swiftpm/`, `Packages/`
-   - **R**: `.Rproj.user/`, `.Rhistory`, `.RData`, `.Ruserdata`, `*.Rproj`, `packrat/`, `renv/`
-   - **Universal**: `.DS_Store`, `Thumbs.db`, `*.tmp`, `*.swp`, `.vscode/`, `.idea/`
+   **Patterns Communs par Technologie** (depuis stack technique plan.md) :
+   - **Node.js/JavaScript/TypeScript** : `node_modules/`, `dist/`, `build/`, `*.log`, `.env*`
+   - **Python** : `__pycache__/`, `*.pyc`, `.venv/`, `venv/`, `dist/`, `*.egg-info/`
+   - **Java** : `target/`, `*.class`, `*.jar`, `.gradle/`, `build/`
+   - **C#/.NET** : `bin/`, `obj/`, `*.user`, `*.suo`, `packages/`
+   - **Go** : `*.exe`, `*.test`, `vendor/`, `*.out`
+   - **Ruby** : `.bundle/`, `log/`, `tmp/`, `*.gem`, `vendor/bundle/`
+   - **PHP** : `vendor/`, `*.log`, `*.cache`, `*.env`
+   - **Rust** : `target/`, `debug/`, `release/`, `*.rs.bk`, `*.rlib`, `*.prof*`, `.idea/`, `*.log`, `.env*`
+   - **Kotlin** : `build/`, `out/`, `.gradle/`, `.idea/`, `*.class`, `*.jar`, `*.iml`, `*.log`, `.env*`
+   - **C++** : `build/`, `bin/`, `obj/`, `out/`, `*.o`, `*.so`, `*.a`, `*.exe`, `*.dll`, `.idea/`, `*.log`, `.env*`
+   - **C** : `build/`, `bin/`, `obj/`, `out/`, `*.o`, `*.a`, `*.so`, `*.exe`, `Makefile`, `config.log`, `.idea/`, `*.log`, `.env*`
+   - **Swift** : `.build/`, `DerivedData/`, `*.swiftpm/`, `Packages/`
+   - **R** : `.Rproj.user/`, `.Rhistory`, `.RData`, `.Ruserdata`, `*.Rproj`, `packrat/`, `renv/`
+   - **Universel** : `.DS_Store`, `Thumbs.db`, `*.tmp`, `*.swp`, `.vscode/`, `.idea/`
 
-   **Tool-Specific Patterns**:
-   - **Docker**: `node_modules/`, `.git/`, `Dockerfile*`, `.dockerignore`, `*.log*`, `.env*`, `coverage/`
-   - **ESLint**: `node_modules/`, `dist/`, `build/`, `coverage/`, `*.min.js`
-   - **Prettier**: `node_modules/`, `dist/`, `build/`, `coverage/`, `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`
-   - **Terraform**: `.terraform/`, `*.tfstate*`, `*.tfvars`, `.terraform.lock.hcl`
-   - **Kubernetes/k8s**: `*.secret.yaml`, `secrets/`, `.kube/`, `kubeconfig*`, `*.key`, `*.crt`
+   **Patterns Spécifiques Outils** :
+   - **Docker** : `node_modules/`, `.git/`, `Dockerfile*`, `.dockerignore`, `*.log*`, `.env*`, `coverage/`
+   - **ESLint** : `node_modules/`, `dist/`, `build/`, `coverage/`, `*.min.js`
+   - **Prettier** : `node_modules/`, `dist/`, `build/`, `coverage/`, `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`
+   - **Terraform** : `.terraform/`, `*.tfstate*`, `*.tfvars`, `.terraform.lock.hcl`
+   - **Kubernetes/k8s** : `*.secret.yaml`, `secrets/`, `.kube/`, `kubeconfig*`, `*.key`, `*.crt`
 
-5. Parse tasks.md structure and extract:
-   - **Task phases**: Setup, Tests, Core, Integration, Polish
-   - **Task dependencies**: Sequential vs parallel execution rules
-   - **Task details**: ID, description, file paths, parallel markers [P]
-   - **Execution flow**: Order and dependency requirements
+5. Parser structure tasks.md et extraire :
+   - **Phases tâches** : Setup, Tests, Core, Integration, Polish
+   - **Dépendances tâches** : Règles exécution séquentielle vs parallèle
+   - **Détails tâches** : ID, description, chemins fichiers, marqueurs parallèles [P]
+   - **Flux exécution** : Ordre et exigences dépendances
 
-6. Execute implementation following the task plan:
-   - **Phase-by-phase execution**: Complete each phase before moving to the next
-   - **Respect dependencies**: Run sequential tasks in order, parallel tasks [P] can run together  
-   - **Follow TDD approach**: Execute test tasks before their corresponding implementation tasks
-   - **File-based coordination**: Tasks affecting the same files must run sequentially
-   - **Validation checkpoints**: Verify each phase completion before proceeding
+6. Exécuter implémentation en suivant le plan de tâches :
+   - **Exécution phase par phase** : Compléter chaque phase avant de passer à la suivante
+   - **Respecter dépendances** : Exécuter tâches séquentielles dans l'ordre, tâches parallèles [P] peuvent s'exécuter ensemble
+   - **Suivre approche TDD** : Exécuter tâches test avant leurs tâches implémentation correspondantes
+   - **Coordination basée fichiers** : Tâches affectant mêmes fichiers doivent s'exécuter séquentiellement
+   - **Points contrôle validation** : Vérifier complétion chaque phase avant de procéder
 
-7. Implementation execution rules:
-   - **Setup first**: Initialize project structure, dependencies, configuration
-   - **Tests before code**: If you need to write tests for contracts, entities, and integration scenarios
-   - **Core development**: Implement models, services, CLI commands, endpoints
-   - **Integration work**: Database connections, middleware, logging, external services
-   - **Polish and validation**: Unit tests, performance optimization, documentation
+7. Règles exécution implémentation :
+   - **Setup d'abord** : Initialiser structure projet, dépendances, configuration
+   - **Tests avant code** : Si vous devez écrire tests pour contrats, entités et scénarios intégration
+   - **Développement core** : Implémenter modèles, services, commandes CLI, endpoints
+   - **Travail intégration** : Connexions base données, middleware, logging, services externes
+   - **Polish et validation** : Tests unitaires, optimisation performance, documentation
 
-8. Progress tracking and error handling:
-   - Report progress after each completed task
-   - Halt execution if any non-parallel task fails
-   - For parallel tasks [P], continue with successful tasks, report failed ones
-   - Provide clear error messages with context for debugging
-   - Suggest next steps if implementation cannot proceed
-   - **IMPORTANT** For completed tasks, make sure to mark the task off as [X] in the tasks file.
+8. Suivi progression et gestion erreurs :
+   - Rapporter progression après chaque tâche complétée
+   - Arrêter exécution si tâche non-parallèle échoue
+   - Pour tâches parallèles [P], continuer avec tâches réussies, rapporter celles échouées
+   - Fournir messages erreur clairs avec contexte pour debug
+   - Suggérer prochaines étapes si implémentation ne peut procéder
+   - **IMPORTANT** Pour tâches complétées, s'assurer de cocher la tâche [X] dans le fichier tasks.
 
-9. Completion validation:
-   - Verify all required tasks are completed
-   - Check that implemented features match the original specification
-   - Validate that tests pass and coverage meets requirements
-   - Confirm the implementation follows the technical plan
-   - Report final status with summary of completed work
+9. Validation complétion :
+   - Vérifier que toutes les tâches requises sont complétées
+   - Vérifier que fonctionnalités implémentées correspondent à la spécification originale
+   - Valider que tests passent et couverture atteint exigences
+   - Confirmer que l'implémentation suit le plan technique
+   - Rapporter statut final avec résumé du travail complété
 
-Note: This command assumes a complete task breakdown exists in tasks.md. If tasks are incomplete or missing, suggest running `/speckit.tasks` first to regenerate the task list.
+Note : Cette commande assume qu'une décomposition complète des tâches existe dans tasks.md. Si les tâches sont incomplètes ou manquantes, suggérer d'exécuter `/speckit.tasks` d'abord pour régénérer la liste des tâches.

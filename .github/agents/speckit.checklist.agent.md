@@ -1,468 +1,468 @@
 ---
-description: Generate a custom checklist for the current CheckMaster feature based on user requirements - validates requirement quality, not implementation.
+description: Générer une checklist personnalisée pour la fonctionnalité CheckMaster actuelle basée sur les exigences utilisateur - valide la qualité des exigences, pas l'implémentation.
 ---
 
-## Checklist Purpose: "Unit Tests for English"
+## Objectif Checklist : « Tests Unitaires pour le Français »
 
-**CRITICAL CONCEPT**: Checklists are **UNIT TESTS FOR REQUIREMENTS WRITING** - they validate the quality, clarity, and completeness of requirements in a given domain.
+**CONCEPT CRITIQUE** : Les checklists sont des **TESTS UNITAIRES POUR LA RÉDACTION D'EXIGENCES** - elles valident la qualité, clarté et complétude des exigences dans un domaine donné.
 
-**NOT for verification/testing**:
+**PAS pour vérification/test** :
 
-- ❌ NOT "Verify the button clicks correctly"
-- ❌ NOT "Test error handling works"
-- ❌ NOT "Confirm the API returns 200"
-- ❌ NOT checking if code/implementation matches the spec
+- ❌ PAS « Vérifier que le bouton clique correctement »
+- ❌ PAS « Tester que la gestion d'erreurs fonctionne »
+- ❌ PAS « Confirmer que l'API retourne 200 »
+- ❌ PAS vérifier si code/implémentation correspond à la spec
 
-**FOR requirements quality validation**:
+**POUR validation qualité exigences** :
 
-- ✅ "Are workflow state transitions defined for all candidature operations?" (completeness)
-- ✅ "Is 'validated by scolarité' quantified with specific criteria?" (clarity)
-- ✅ "Are permission requirements consistent across all admin actions?" (consistency)
-- ✅ "Are Hashids routing requirements defined for all entity URLs?" (coverage)
-- ✅ "Does the spec define what happens when ServiceWorkflow transition fails?" (edge cases)
+- ✅ « Les transitions d'état workflow sont-elles définies pour toutes les opérations candidature ? » (complétude)
+- ✅ « 'Validé par scolarité' est-il quantifié avec critères spécifiques ? » (clarté)
+- ✅ « Les exigences permissions sont-elles cohérentes pour toutes les actions admin ? » (cohérence)
+- ✅ « Les exigences routage Hashids sont-elles définies pour toutes les URLs entités ? » (couverture)
+- ✅ « La spec définit-elle ce qui se passe quand une transition ServiceWorkflow échoue ? » (cas limites)
 
-**Metaphor**: If your spec is code written in English, the checklist is its unit test suite. You're testing whether the requirements are well-written, complete, unambiguous, and ready for implementation - NOT whether the implementation works.
+**Métaphore** : Si votre spec est du code écrit en français, la checklist est sa suite de tests unitaires. Vous testez si les exigences sont bien écrites, complètes, non ambiguës et prêtes pour l'implémentation - PAS si l'implémentation fonctionne.
 
-## CheckMaster Domain-Specific Checklist Categories
+## Catégories Checklist Spécifiques au Domaine CheckMaster
 
-When generating checklists for CheckMaster features, consider these standard categories:
+Lors de la génération de checklists pour fonctionnalités CheckMaster, considérer ces catégories standard :
 
-### 1. Architecture Compliance Checklist (architecture.md)
+### 1. Checklist Conformité Architecture (architecture.md)
 
-Validates spec adherence to CheckMaster Constitution:
-
-```markdown
-- [ ] CHK001 Are all configuration requirements defined as DB parameters (not PHP constants)?
-- [ ] CHK002 Are all permission checks specified using groupe_utilisateur → traitement → action mappings?
-- [ ] CHK003 Are all entity IDs specified to use Hashids in URLs?
-- [ ] CHK004 Is Argon2id specified for any password handling?
-- [ ] CHK005 Are all SQL operations specified to use prepared statements?
-- [ ] CHK006 Is ServiceAudit logging specified for all write operations?
-- [ ] CHK007 Are Controller responsibilities limited to validation + service + response?
-- [ ] CHK008 Is business logic specified to reside in Services (not Controllers)?
-- [ ] CHK009 Are transactions specified for multi-table operations?
-- [ ] CHK010 Is dependency injection specified via constructor?
-```
-
-### 2. Workflow Checklist (workflow.md)
-
-Validates workflow-related requirements:
+Valide l'adhérence spec à la Constitution CheckMaster :
 
 ```markdown
-- [ ] CHK001 Are all affected workflow states explicitly listed?
-- [ ] CHK002 Is the source state defined for each transition?
-- [ ] CHK003 Is the target state defined for each transition?
-- [ ] CHK004 Are transition conditions specified (who can trigger, when)?
-- [ ] CHK005 Are workflow gates clearly defined (what blocks transition)?
-- [ ] CHK006 Is ServiceWorkflow::effectuerTransition specified for state changes?
-- [ ] CHK007 Are notification requirements defined for each transition?
-- [ ] CHK008 Is workflow_historique snapshot specified for audit?
-- [ ] CHK009 Are escalation scenarios defined for délai dépassés?
-- [ ] CHK010 Is rollback behavior specified if transition fails?
+- [ ] CHK001 Toutes les exigences configuration sont-elles définies comme paramètres DB (pas constantes PHP) ?
+- [ ] CHK002 Toutes les vérifications permissions sont-elles spécifiées via mappings groupe_utilisateur → traitement → action ?
+- [ ] CHK003 Tous les IDs entités sont-ils spécifiés pour utiliser Hashids dans URLs ?
+- [ ] CHK004 Argon2id est-il spécifié pour toute gestion de mot de passe ?
+- [ ] CHK005 Toutes les opérations SQL sont-elles spécifiées pour utiliser requêtes préparées ?
+- [ ] CHK006 La journalisation ServiceAudit est-elle spécifiée pour toutes les opérations d'écriture ?
+- [ ] CHK007 Les responsabilités Contrôleur sont-elles limitées à validation + service + réponse ?
+- [ ] CHK008 La logique métier est-elle spécifiée pour résider dans Services (pas Contrôleurs) ?
+- [ ] CHK009 Les transactions sont-elles spécifiées pour opérations multi-tables ?
+- [ ] CHK010 L'injection de dépendances est-elle spécifiée via constructeur ?
 ```
 
-### 3. Permission & Access Checklist (permissions.md)
+### 2. Checklist Workflow (workflow.md)
 
-Validates access control requirements:
+Valide les exigences liées au workflow :
 
 ```markdown
-- [ ] CHK001 Are all user groups needing access explicitly listed?
-- [ ] CHK002 Is each group mapped to a traitement entry?
-- [ ] CHK003 Are required actions (Consulter/Créer/Modifier/etc.) specified per group?
-- [ ] CHK004 Is ServicePermission::verifier specified before restricted actions?
-- [ ] CHK005 Are temporary roles defined with validity periods (if applicable)?
-- [ ] CHK006 Is fallback behavior specified for permission denial?
-- [ ] CHK007 Are permission cache invalidation rules defined?
-- [ ] CHK008 Is the resource code (traitement) clearly identified?
-- [ ] CHK009 Are admin override capabilities specified (if any)?
-- [ ] CHK010 Is audit logging specified for permission grants/revocations?
+- [ ] CHK001 Tous les états workflow affectés sont-ils explicitement listés ?
+- [ ] CHK002 L'état source est-il défini pour chaque transition ?
+- [ ] CHK003 L'état cible est-il défini pour chaque transition ?
+- [ ] CHK004 Les conditions de transition sont-elles spécifiées (qui peut déclencher, quand) ?
+- [ ] CHK005 Les gates workflow sont-elles clairement définies (ce qui bloque transition) ?
+- [ ] CHK006 ServiceWorkflow::effectuerTransition est-il spécifié pour changements d'état ?
+- [ ] CHK007 Les exigences notification sont-elles définies pour chaque transition ?
+- [ ] CHK008 Le snapshot workflow_historique est-il spécifié pour audit ?
+- [ ] CHK009 Les scénarios escalade sont-ils définis pour délais dépassés ?
+- [ ] CHK010 Le comportement rollback est-il spécifié si transition échoue ?
 ```
 
-### 4. Notification Checklist (notifications.md)
+### 3. Checklist Permissions & Accès (permissions.md)
 
-Validates communication requirements:
+Valide les exigences contrôle d'accès :
 
 ```markdown
-- [ ] CHK001 Are all notification triggers clearly defined?
-- [ ] CHK002 Is the notification template code specified?
-- [ ] CHK003 Are recipient roles/groups explicitly listed?
-- [ ] CHK004 Are email subject and body placeholders defined?
-- [ ] CHK005 Is messagerie interne backup specified?
-- [ ] CHK006 Is ServiceNotification::envoyer usage specified?
-- [ ] CHK007 Are notification variables (dynamic data) listed?
-- [ ] CHK008 Is bounce handling behavior specified?
-- [ ] CHK009 Are retry rules defined for failed sends?
-- [ ] CHK010 Is notification historique archiving specified?
+- [ ] CHK001 Tous les groupes utilisateurs nécessitant accès sont-ils explicitement listés ?
+- [ ] CHK002 Chaque groupe est-il mappé à une entrée traitement ?
+- [ ] CHK003 Les actions requises (Consulter/Créer/Modifier/etc.) sont-elles spécifiées par groupe ?
+- [ ] CHK004 ServicePermission::verifier est-il spécifié avant actions restreintes ?
+- [ ] CHK005 Les rôles temporaires sont-ils définis avec périodes validité (si applicable) ?
+- [ ] CHK006 Le comportement fallback est-il spécifié pour refus permission ?
+- [ ] CHK007 Les règles invalidation cache permissions sont-elles définies ?
+- [ ] CHK008 Le code ressource (traitement) est-il clairement identifié ?
+- [ ] CHK009 Les capacités override admin sont-elles spécifiées (si présentes) ?
+- [ ] CHK010 La journalisation audit est-elle spécifiée pour octrois/révocations permissions ?
 ```
 
-### 5. Document Generation Checklist (documents.md)
+### 4. Checklist Notifications (notifications.md)
 
-Validates PDF generation requirements:
+Valide les exigences communication :
 
 ```markdown
-- [ ] CHK001 Is document type clearly identified (reçu, PV, bulletin, etc.)?
-- [ ] CHK002 Is PDF engine (TCPDF vs mPDF) specified based on complexity?
-- [ ] CHK003 Are all document data requirements (variables) listed?
-- [ ] CHK004 Is PDF template location specified (ressources/templates/pdf/)?
-- [ ] CHK005 Is SHA256 hash calculation specified for archiving?
-- [ ] CHK006 Is archive table storage (archives) specified?
-- [ ] CHK007 Are download permissions (who can access) defined?
-- [ ] CHK008 Is regeneration capability specified (from snapshots)?
-- [ ] CHK009 Are document integrity verification rules defined?
-- [ ] CHK010 Is notification of document availability specified?
+- [ ] CHK001 Tous les déclencheurs notification sont-ils clairement définis ?
+- [ ] CHK002 Le code template notification est-il spécifié ?
+- [ ] CHK003 Les rôles/groupes destinataires sont-ils explicitement listés ?
+- [ ] CHK004 Le sujet et les placeholders corps email sont-ils définis ?
+- [ ] CHK005 Le backup messagerie interne est-il spécifié ?
+- [ ] CHK006 L'usage ServiceNotification::envoyer est-il spécifié ?
+- [ ] CHK007 Les variables notification (données dynamiques) sont-elles listées ?
+- [ ] CHK008 Le comportement gestion bounces est-il spécifié ?
+- [ ] CHK009 Les règles retry sont-elles définies pour envois échoués ?
+- [ ] CHK010 L'archivage notification_historique est-il spécifié ?
 ```
 
-### 6. Financial Operations Checklist (financial.md)
+### 5. Checklist Génération Documents (documents.md)
 
-Validates payment/pénalité requirements:
+Valide les exigences génération PDF :
 
 ```markdown
-- [ ] CHK001 Are calculation rules explicitly defined (formulas, amounts)?
-- [ ] CHK002 Is configuration source specified (finance.* parameters)?
-- [ ] CHK003 Are payment recording triggers defined?
-- [ ] CHK004 Is pénalité calculation logic specified (delays, rates)?
-- [ ] CHK005 Is reçu generation specified (TCPDF + archiving)?
-- [ ] CHK006 Are financial gate checks defined (workflow blockers)?
-- [ ] CHK007 Is payment status tracking specified?
-- [ ] CHK008 Is student financial dashboard update specified?
-- [ ] CHK009 Are exonération rules defined (if applicable)?
-- [ ] CHK010 Is financial audit logging specified?
+- [ ] CHK001 Le type document est-il clairement identifié (reçu, PV, bulletin, etc.) ?
+- [ ] CHK002 Le moteur PDF (TCPDF vs mPDF) est-il spécifié selon complexité ?
+- [ ] CHK003 Toutes les exigences données document (variables) sont-elles listées ?
+- [ ] CHK004 L'emplacement template PDF est-il spécifié (ressources/templates/pdf/) ?
+- [ ] CHK005 Le calcul hash SHA256 est-il spécifié pour archivage ?
+- [ ] CHK006 Le stockage table archives est-il spécifié ?
+- [ ] CHK007 Les permissions téléchargement (qui peut accéder) sont-elles définies ?
+- [ ] CHK008 La capacité régénération est-elle spécifiée (depuis snapshots) ?
+- [ ] CHK009 Les règles vérification intégrité document sont-elles définies ?
+- [ ] CHK010 La notification disponibilité document est-elle spécifiée ?
 ```
 
-### 7. Commission/Voting Checklist (commission.md)
+### 6. Checklist Opérations Financières (financial.md)
 
-Validates commission evaluation requirements:
+Valide les exigences paiement/pénalité :
 
 ```markdown
-- [ ] CHK001 Is voting mechanism specified (unanimité/majorité)?
-- [ ] CHK002 Is the 3-round maximum enforced?
-- [ ] CHK003 Is escalation to Dean specified after round 3?
-- [ ] CHK004 Are vote tracking requirements defined (sessions_commission)?
-- [ ] CHK005 Are notification requirements defined per voting round?
-- [ ] CHK006 Is PV generation specified (template, signatures)?
-- [ ] CHK007 Are member assignment rules defined?
-- [ ] CHK008 Is quorum requirement specified?
-- [ ] CHK009 Are conflict resolution procedures defined?
-- [ ] CHK010 Is vote anonymity/visibility specified?
+- [ ] CHK001 Les règles de calcul sont-elles explicitement définies (formules, montants) ?
+- [ ] CHK002 La source configuration est-elle spécifiée (paramètres finance.*) ?
+- [ ] CHK003 Les déclencheurs enregistrement paiement sont-ils définis ?
+- [ ] CHK004 La logique calcul pénalité est-elle spécifiée (délais, taux) ?
+- [ ] CHK005 La génération reçu est-elle spécifiée (TCPDF + archivage) ?
+- [ ] CHK006 Les vérifications gate financières sont-elles définies (bloqueurs workflow) ?
+- [ ] CHK007 Le suivi statut paiement est-il spécifié ?
+- [ ] CHK008 La mise à jour tableau de bord financier étudiant est-elle spécifiée ?
+- [ ] CHK009 Les règles exonération sont-elles définies (si applicable) ?
+- [ ] CHK010 La journalisation audit financière est-elle spécifiée ?
 ```
 
-### 8. Data Model Checklist (data.md)
+### 7. Checklist Commission/Vote (commission.md)
 
-Validates entity/table requirements:
+Valide les exigences évaluation commission :
 
 ```markdown
-- [ ] CHK001 Are all entity names defined in snake_case?
-- [ ] CHK002 Is primary key format specified (id_tablename)?
-- [ ] CHK003 Are all foreign keys defined with ON DELETE behavior?
-- [ ] CHK004 Are required indexes specified (FK, search columns)?
-- [ ] CHK005 Are unique constraints defined where needed?
-- [ ] CHK006 Are JSON column schemas defined (if using JSON type)?
-- [ ] CHK007 Are migration file names specified (0XX_description)?
-- [ ] CHK008 Are table relationships clearly documented?
-- [ ] CHK009 Is data validation specified (NOT NULL, ranges, formats)?
-- [ ] CHK010 Are audit columns specified (created_at, updated_at)?
+- [ ] CHK001 Le mécanisme vote est-il spécifié (unanimité/majorité) ?
+- [ ] CHK002 Le maximum 3 tours est-il appliqué ?
+- [ ] CHK003 L'escalade au Doyen est-elle spécifiée après tour 3 ?
+- [ ] CHK004 Les exigences suivi votes sont-elles définies (sessions_commission) ?
+- [ ] CHK005 Les exigences notification sont-elles définies par tour de vote ?
+- [ ] CHK006 La génération PV est-elle spécifiée (template, signatures) ?
+- [ ] CHK007 Les règles attribution membres sont-elles définies ?
+- [ ] CHK008 L'exigence quorum est-elle spécifiée ?
+- [ ] CHK009 Les procédures résolution conflits sont-elles définies ?
+- [ ] CHK010 L'anonymat/visibilité votes est-il spécifié ?
 ```
 
-### 9. Security Checklist (security.md)
+### 8. Checklist Modèle Données (data.md)
 
-Validates security requirements:
+Valide les exigences entité/table :
 
 ```markdown
-- [ ] CHK001 Is Argon2id specified for password hashing?
-- [ ] CHK002 Are prepared statements specified for all SQL?
-- [ ] CHK003 Is e() escaping specified for all view output?
-- [ ] CHK004 Are CSRF tokens specified for all forms?
-- [ ] CHK005 Is rate limiting specified for sensitive endpoints?
-- [ ] CHK006 Is input validation specified (Symfony Validator)?
-- [ ] CHK007 Is ServiceAudit specified for security-relevant actions?
-- [ ] CHK008 Are permission checks specified before data access?
-- [ ] CHK009 Is session management specified (timeout, invalidation)?
-- [ ] CHK010 Are sensitive data handling rules defined (PII, credentials)?
+- [ ] CHK001 Tous les noms entités sont-ils définis en snake_case ?
+- [ ] CHK002 Le format clé primaire est-il spécifié (id_nomtable) ?
+- [ ] CHK003 Toutes les clés étrangères sont-elles définies avec comportement ON DELETE ?
+- [ ] CHK004 Les index requis sont-ils spécifiés (FK, colonnes recherche) ?
+- [ ] CHK005 Les contraintes unicité sont-elles définies où nécessaire ?
+- [ ] CHK006 Les schémas colonnes JSON sont-ils définis (si utilisant type JSON) ?
+- [ ] CHK007 Les noms fichiers migration sont-ils spécifiés (0XX_description) ?
+- [ ] CHK008 Les relations tables sont-elles clairement documentées ?
+- [ ] CHK009 La validation données est-elle spécifiée (NOT NULL, plages, formats) ?
+- [ ] CHK010 Les colonnes audit sont-elles spécifiées (created_at, updated_at) ?
 ```
 
-### 10. Integration Checklist (integration.md)
+### 9. Checklist Sécurité (security.md)
 
-Validates Service integration requirements:
+Valide les exigences sécurité :
 
 ```markdown
-- [ ] CHK001 Are all dependent Services explicitly listed?
-- [ ] CHK002 Is ServiceWorkflow integration specified (if workflow changes)?
-- [ ] CHK003 Is ServiceNotification integration specified (if notifications)?
-- [ ] CHK004 Is ServicePermission integration specified (if access control)?
-- [ ] CHK005 Is ServiceAudit integration specified (if data writes)?
-- [ ] CHK006 Is ServiceParametres integration specified (if configuration)?
-- [ ] CHK007 Is ServicePdf integration specified (if documents)?
-- [ ] CHK008 Are error handling behaviors defined for Service failures?
-- [ ] CHK009 Are retry/fallback strategies specified?
-- [ ] CHK010 Is transaction coordination specified across Services?
+- [ ] CHK001 Argon2id est-il spécifié pour hachage mot de passe ?
+- [ ] CHK002 Les requêtes préparées sont-elles spécifiées pour tout SQL ?
+- [ ] CHK003 L'échappement e() est-il spécifié pour toute sortie vue ?
+- [ ] CHK004 Les tokens CSRF sont-ils spécifiés pour tous les formulaires ?
+- [ ] CHK005 La limitation de débit est-elle spécifiée pour endpoints sensibles ?
+- [ ] CHK006 La validation entrée est-elle spécifiée (Symfony Validator) ?
+- [ ] CHK007 ServiceAudit est-il spécifié pour actions pertinentes sécurité ?
+- [ ] CHK008 Les vérifications permissions sont-elles spécifiées avant accès données ?
+- [ ] CHK009 La gestion session est-elle spécifiée (timeout, invalidation) ?
+- [ ] CHK010 Les règles manipulation données sensibles sont-elles définies (PII, credentials) ?
 ```
 
-## User Input
+### 10. Checklist Intégration (integration.md)
+
+Valide les exigences intégration Services :
+
+```markdown
+- [ ] CHK001 Tous les Services dépendants sont-ils explicitement listés ?
+- [ ] CHK002 L'intégration ServiceWorkflow est-elle spécifiée (si changements workflow) ?
+- [ ] CHK003 L'intégration ServiceNotification est-elle spécifiée (si notifications) ?
+- [ ] CHK004 L'intégration ServicePermission est-elle spécifiée (si contrôle accès) ?
+- [ ] CHK005 L'intégration ServiceAudit est-elle spécifiée (si écritures données) ?
+- [ ] CHK006 L'intégration ServiceParametres est-elle spécifiée (si configuration) ?
+- [ ] CHK007 L'intégration ServicePdf est-elle spécifiée (si documents) ?
+- [ ] CHK008 Les comportements gestion erreurs sont-ils définis pour échecs Service ?
+- [ ] CHK009 Les stratégies retry/fallback sont-elles spécifiées ?
+- [ ] CHK010 La coordination transaction est-elle spécifiée entre Services ?
+```
+
+## Entrée Utilisateur
 
 ```text
 $ARGUMENTS
 ```
 
-You **MUST** consider the user input before proceeding (if not empty).
+Vous **DEVEZ** prendre en compte l'entrée utilisateur avant de procéder (si non vide).
 
-## Execution Steps
+## Étapes d'Exécution
 
-1. **Setup**: Run `.specify/scripts/powershell/check-prerequisites.ps1 -Json` from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS list.
-   - All file paths must be absolute.
-   - For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+1. **Setup** : Exécuter `.specify/scripts/powershell/check-prerequisites.ps1 -Json` depuis racine repo et parser JSON pour FEATURE_DIR et liste AVAILABLE_DOCS.
+   - Tous les chemins fichiers doivent être absolus.
+   - Pour apostrophes dans args comme "J'évalue", utiliser syntaxe échappement : ex 'J'\''évalue' (ou guillemets si possible : "J'évalue").
 
-2. **Clarify intent (dynamic)**: Derive up to THREE initial contextual clarifying questions (no pre-baked catalog). They MUST:
-   - Be generated from the user's phrasing + extracted signals from spec/plan/tasks
-   - Only ask about information that materially changes checklist content
-   - Be skipped individually if already unambiguous in `$ARGUMENTS`
-   - Prefer precision over breadth
+2. **Clarifier intention (dynamique)** : Dériver jusqu'à TROIS questions clarification contextuelles initiales (pas de catalogue pré-fabriqué). Elles DOIVENT :
+   - Être générées depuis la formulation utilisateur + signaux extraits de spec/plan/tasks
+   - Ne demander que les informations qui changent matériellement le contenu checklist
+   - Être sautées individuellement si déjà non ambiguës dans `$ARGUMENTS`
+   - Préférer précision sur étendue
 
-   Generation algorithm:
-   1. Extract signals: feature domain keywords (e.g., auth, latency, UX, API), risk indicators ("critical", "must", "compliance"), stakeholder hints ("QA", "review", "security team"), and explicit deliverables ("a11y", "rollback", "contracts").
-   2. Cluster signals into candidate focus areas (max 4) ranked by relevance.
-   3. Identify probable audience & timing (author, reviewer, QA, release) if not explicit.
-   4. Detect missing dimensions: scope breadth, depth/rigor, risk emphasis, exclusion boundaries, measurable acceptance criteria.
-   5. Formulate questions chosen from these archetypes:
-      - Scope refinement (e.g., "Should this include integration touchpoints with X and Y or stay limited to local module correctness?")
-      - Risk prioritization (e.g., "Which of these potential risk areas should receive mandatory gating checks?")
-      - Depth calibration (e.g., "Is this a lightweight pre-commit sanity list or a formal release gate?")
-      - Audience framing (e.g., "Will this be used by the author only or peers during PR review?")
-      - Boundary exclusion (e.g., "Should we explicitly exclude performance tuning items this round?")
-      - Scenario class gap (e.g., "No recovery flows detected—are rollback / partial failure paths in scope?")
+   Algorithme génération :
+   1. Extraire signaux : mots-clés domaine fonctionnalité (ex: auth, latence, UX, API), indicateurs risque ("critique", "doit", "conformité"), indices partie prenante ("QA", "revue", "équipe sécurité"), et livrables explicites ("a11y", "rollback", "contrats").
+   2. Regrouper signaux en domaines focus candidats (max 4) classés par pertinence.
+   3. Identifier audience probable & timing (auteur, relecteur, QA, release) si non explicite.
+   4. Détecter dimensions manquantes : étendue périmètre, profondeur/rigueur, emphase risque, limites exclusion, critères acceptation mesurables.
+   5. Formuler questions choisies parmi ces archétypes :
+      - Raffinement périmètre (ex: « Ceci doit-il inclure points contact intégration avec X et Y ou rester limité à correction module local ? »)
+      - Priorisation risque (ex: « Lesquels de ces domaines risque potentiels doivent recevoir vérifications gate obligatoires ? »)
+      - Calibration profondeur (ex: « Est-ce une liste légère sanity pré-commit ou gate release formelle ? »)
+      - Cadrage audience (ex: « Sera utilisé par l'auteur seul ou pairs pendant revue PR ? »)
+      - Exclusion limite (ex: « Devons-nous explicitement exclure éléments tuning performance ce tour ? »)
+      - Lacune classe scénario (ex: « Pas de flows recovery détectés—les chemins rollback / échec partiel sont-ils en scope ? »)
 
-   Question formatting rules:
-   - If presenting options, generate a compact table with columns: Option | Candidate | Why It Matters
-   - Limit to A–E options maximum; omit table if a free-form answer is clearer
-   - Never ask the user to restate what they already said
-   - Avoid speculative categories (no hallucination). If uncertain, ask explicitly: "Confirm whether X belongs in scope."
+   Règles formatage questions :
+   - Si présentant options, générer table compacte avec colonnes : Option | Candidat | Pourquoi Ça Compte
+   - Limiter à options A–E maximum ; omettre table si réponse libre plus claire
+   - Ne jamais demander à l'utilisateur de reformuler ce qu'il a déjà dit
+   - Éviter catégories spéculatives (pas d'hallucination). Si incertain, demander explicitement : « Confirmer si X appartient au scope. »
 
-   Defaults when interaction impossible:
-   - Depth: Standard
-   - Audience: Reviewer (PR) if code-related; Author otherwise
-   - Focus: Top 2 relevance clusters
+   Défauts quand interaction impossible :
+   - Profondeur : Standard
+   - Audience : Relecteur (PR) si lié code ; Auteur sinon
+   - Focus : Top 2 clusters pertinence
 
-   Output the questions (label Q1/Q2/Q3). After answers: if ≥2 scenario classes (Alternate / Exception / Recovery / Non-Functional domain) remain unclear, you MAY ask up to TWO more targeted follow‑ups (Q4/Q5) with a one-line justification each (e.g., "Unresolved recovery path risk"). Do not exceed five total questions. Skip escalation if user explicitly declines more.
+   Produire les questions (libeller Q1/Q2/Q3). Après réponses : si ≥2 classes scénario (Alternatif / Exception / Recovery / domaine Non-Fonctionnel) restent floues, vous POUVEZ poser jusqu'à DEUX suivis ciblés supplémentaires (Q4/Q5) avec justification une ligne chacun (ex: « Risque chemin recovery non résolu »). Ne pas dépasser cinq questions total. Sauter escalade si utilisateur décline explicitement plus.
 
-3. **Understand user request**: Combine `$ARGUMENTS` + clarifying answers:
-   - Derive checklist theme (e.g., security, review, deploy, ux)
-   - Consolidate explicit must-have items mentioned by user
-   - Map focus selections to category scaffolding
-   - Infer any missing context from spec/plan/tasks (do NOT hallucinate)
+3. **Comprendre requête utilisateur** : Combiner `$ARGUMENTS` + réponses clarification :
+   - Dériver thème checklist (ex: sécurité, revue, déploiement, ux)
+   - Consolider éléments must-have explicites mentionnés par utilisateur
+   - Mapper sélections focus au scaffolding catégorie
+   - Inférer contexte manquant depuis spec/plan/tasks (NE PAS halluciner)
 
-4. **Load feature context**: Read from FEATURE_DIR:
-   - spec.md: Feature requirements and scope
-   - plan.md (if exists): Technical details, dependencies
-   - tasks.md (if exists): Implementation tasks
+4. **Charger contexte fonctionnalité** : Lire depuis FEATURE_DIR :
+   - spec.md : Exigences et périmètre fonctionnalité
+   - plan.md (si existe) : Détails techniques, dépendances
+   - tasks.md (si existe) : Tâches implémentation
 
-   **Context Loading Strategy**:
-   - Load only necessary portions relevant to active focus areas (avoid full-file dumping)
-   - Prefer summarizing long sections into concise scenario/requirement bullets
-   - Use progressive disclosure: add follow-on retrieval only if gaps detected
-   - If source docs are large, generate interim summary items instead of embedding raw text
+   **Stratégie Chargement Contexte** :
+   - Charger uniquement portions nécessaires pertinentes aux domaines focus actifs (éviter déversement fichier complet)
+   - Préférer résumer longues sections en bullets scénario/exigence concis
+   - Utiliser divulgation progressive : ajouter récupération suivi uniquement si lacunes détectées
+   - Si docs source volumineux, générer éléments résumé intermédiaires au lieu d'incorporer texte brut
 
-5. **Generate checklist** - Create "Unit Tests for Requirements":
-   - Create `FEATURE_DIR/checklists/` directory if it doesn't exist
-   - Generate unique checklist filename:
-     - Use short, descriptive name based on domain (e.g., `ux.md`, `api.md`, `security.md`)
-     - Format: `[domain].md`
-     - If file exists, append to existing file
-   - Number items sequentially starting from CHK001
-   - Each `/speckit.checklist` run creates a NEW file (never overwrites existing checklists)
+5. **Générer checklist** - Créer « Tests Unitaires pour Exigences » :
+   - Créer répertoire `FEATURE_DIR/checklists/` s'il n'existe pas
+   - Générer nom fichier checklist unique :
+     - Utiliser nom court, descriptif basé sur domaine (ex: `ux.md`, `api.md`, `security.md`)
+     - Format : `[domaine].md`
+     - Si fichier existe, ajouter au fichier existant
+   - Numéroter éléments séquentiellement depuis CHK001
+   - Chaque exécution `/speckit.checklist` crée un NOUVEAU fichier (n'écrase jamais checklists existantes)
 
-   **CORE PRINCIPLE - Test the Requirements, Not the Implementation**:
-   Every checklist item MUST evaluate the REQUIREMENTS THEMSELVES for:
-   - **Completeness**: Are all necessary requirements present?
-   - **Clarity**: Are requirements unambiguous and specific?
-   - **Consistency**: Do requirements align with each other?
-   - **Measurability**: Can requirements be objectively verified?
-   - **Coverage**: Are all scenarios/edge cases addressed?
+   **PRINCIPE CENTRAL - Tester les Exigences, Pas l'Implémentation** :
+   Chaque élément checklist DOIT évaluer les EXIGENCES ELLES-MÊMES pour :
+   - **Complétude** : Toutes les exigences nécessaires sont-elles présentes ?
+   - **Clarté** : Les exigences sont-elles non ambiguës et spécifiques ?
+   - **Cohérence** : Les exigences s'alignent-elles entre elles ?
+   - **Mesurabilité** : Les exigences peuvent-elles être objectivement vérifiées ?
+   - **Couverture** : Tous les scénarios/cas limites sont-ils traités ?
 
-   **Category Structure** - Group items by requirement quality dimensions:
-   - **Requirement Completeness** (Are all necessary requirements documented?)
-   - **Requirement Clarity** (Are requirements specific and unambiguous?)
-   - **Requirement Consistency** (Do requirements align without conflicts?)
-   - **Acceptance Criteria Quality** (Are success criteria measurable?)
-   - **Scenario Coverage** (Are all flows/cases addressed?)
-   - **Edge Case Coverage** (Are boundary conditions defined?)
-   - **Non-Functional Requirements** (Performance, Security, Accessibility, etc. - are they specified?)
-   - **Dependencies & Assumptions** (Are they documented and validated?)
-   - **Ambiguities & Conflicts** (What needs clarification?)
+   **Structure Catégorie** - Grouper éléments par dimensions qualité exigences :
+   - **Complétude Exigences** (Toutes les exigences nécessaires sont-elles documentées ?)
+   - **Clarté Exigences** (Les exigences sont-elles spécifiques et non ambiguës ?)
+   - **Cohérence Exigences** (Les exigences s'alignent-elles sans conflits ?)
+   - **Qualité Critères Acceptation** (Les critères succès sont-ils mesurables ?)
+   - **Couverture Scénarios** (Tous les flux/cas sont-ils traités ?)
+   - **Couverture Cas Limites** (Les conditions frontière sont-elles définies ?)
+   - **Exigences Non-Fonctionnelles** (Performance, Sécurité, Accessibilité, etc. - sont-elles spécifiées ?)
+   - **Dépendances & Hypothèses** (Sont-elles documentées et validées ?)
+   - **Ambiguïtés & Conflits** (Que faut-il clarifier ?)
 
-   **HOW TO WRITE CHECKLIST ITEMS - "Unit Tests for English"**:
+   **COMMENT RÉDIGER ÉLÉMENTS CHECKLIST - « Tests Unitaires pour le Français »** :
 
-   ❌ **WRONG** (Testing implementation):
-   - "Verify landing page displays 3 episode cards"
-   - "Test hover states work on desktop"
-   - "Confirm logo click navigates home"
+   ❌ **FAUX** (Tester implémentation) :
+   - « Vérifier que la page d'accueil affiche 3 cartes épisodes »
+   - « Tester que les états hover fonctionnent sur desktop »
+   - « Confirmer que le clic logo navigue vers accueil »
 
-   ✅ **CORRECT** (Testing requirements quality):
-   - "Are the exact number and layout of featured episodes specified?" [Completeness]
-   - "Is 'prominent display' quantified with specific sizing/positioning?" [Clarity]
-   - "Are hover state requirements consistent across all interactive elements?" [Consistency]
-   - "Are keyboard navigation requirements defined for all interactive UI?" [Coverage]
-   - "Is the fallback behavior specified when logo image fails to load?" [Edge Cases]
-   - "Are loading states defined for asynchronous episode data?" [Completeness]
-   - "Does the spec define visual hierarchy for competing UI elements?" [Clarity]
+   ✅ **CORRECT** (Tester qualité exigences) :
+   - « Le nombre exact et la disposition des épisodes vedettes sont-ils spécifiés ? » [Complétude]
+   - « 'Affichage proéminent' est-il quantifié avec dimensionnement/positionnement spécifique ? » [Clarté]
+   - « Les exigences état hover sont-elles cohérentes pour tous les éléments interactifs ? » [Cohérence]
+   - « Les exigences navigation clavier sont-elles définies pour toute UI interactive ? » [Couverture]
+   - « Le comportement fallback est-il spécifié quand l'image logo échoue à charger ? » [Cas Limites]
+   - « Les états chargement sont-ils définis pour données épisode asynchrones ? » [Complétude]
+   - « La spec définit-elle la hiérarchie visuelle pour éléments UI concurrents ? » [Clarté]
 
-   **ITEM STRUCTURE**:
-   Each item should follow this pattern:
-   - Question format asking about requirement quality
-   - Focus on what's WRITTEN (or not written) in the spec/plan
-   - Include quality dimension in brackets [Completeness/Clarity/Consistency/etc.]
-   - Reference spec section `[Spec §X.Y]` when checking existing requirements
-   - Use `[Gap]` marker when checking for missing requirements
+   **STRUCTURE ÉLÉMENT** :
+   Chaque élément doit suivre ce pattern :
+   - Format question demandant sur qualité exigence
+   - Focus sur ce qui est ÉCRIT (ou non écrit) dans spec/plan
+   - Inclure dimension qualité entre crochets [Complétude/Clarté/Cohérence/etc.]
+   - Référencer section spec `[Spec §X.Y]` quand vérifiant exigences existantes
+   - Utiliser marqueur `[Lacune]` quand vérifiant exigences manquantes
 
-   **EXAMPLES BY QUALITY DIMENSION**:
+   **EXEMPLES PAR DIMENSION QUALITÉ** :
 
-   Completeness:
-   - "Are error handling requirements defined for all API failure modes? [Gap]"
-   - "Are accessibility requirements specified for all interactive elements? [Completeness]"
-   - "Are mobile breakpoint requirements defined for responsive layouts? [Gap]"
+   Complétude :
+   - « Les exigences gestion erreurs sont-elles définies pour tous les modes échec API ? [Lacune] »
+   - « Les exigences accessibilité sont-elles spécifiées pour tous les éléments interactifs ? [Complétude] »
+   - « Les exigences breakpoint mobile sont-elles définies pour layouts responsifs ? [Lacune] »
 
-   Clarity:
-   - "Is 'fast loading' quantified with specific timing thresholds? [Clarity, Spec §NFR-2]"
-   - "Are 'related episodes' selection criteria explicitly defined? [Clarity, Spec §FR-5]"
-   - "Is 'prominent' defined with measurable visual properties? [Ambiguity, Spec §FR-4]"
+   Clarté :
+   - « 'Chargement rapide' est-il quantifié avec seuils timing spécifiques ? [Clarté, Spec §ENF-2] »
+   - « Les critères sélection 'épisodes liés' sont-ils explicitement définis ? [Clarté, Spec §EF-5] »
+   - « 'Proéminent' est-il défini avec propriétés visuelles mesurables ? [Ambiguïté, Spec §EF-4] »
 
-   Consistency:
-   - "Do navigation requirements align across all pages? [Consistency, Spec §FR-10]"
-   - "Are card component requirements consistent between landing and detail pages? [Consistency]"
+   Cohérence :
+   - « Les exigences navigation s'alignent-elles sur toutes les pages ? [Cohérence, Spec §EF-10] »
+   - « Les exigences composant carte sont-elles cohérentes entre pages accueil et détail ? [Cohérence] »
 
-   Coverage:
-   - "Are requirements defined for zero-state scenarios (no episodes)? [Coverage, Edge Case]"
-   - "Are concurrent user interaction scenarios addressed? [Coverage, Gap]"
-   - "Are requirements specified for partial data loading failures? [Coverage, Exception Flow]"
+   Couverture :
+   - « Les exigences sont-elles définies pour scénarios état zéro (pas d'épisodes) ? [Couverture, Cas Limite] »
+   - « Les scénarios interaction utilisateur concurrent sont-ils traités ? [Couverture, Lacune] »
+   - « Les exigences sont-elles spécifiées pour échecs chargement données partiel ? [Couverture, Flux Exception] »
 
-   Measurability:
-   - "Are visual hierarchy requirements measurable/testable? [Acceptance Criteria, Spec §FR-1]"
-   - "Can 'balanced visual weight' be objectively verified? [Measurability, Spec §FR-2]"
+   Mesurabilité :
+   - « Les exigences hiérarchie visuelle sont-elles mesurables/testables ? [Critères Acceptation, Spec §EF-1] »
+   - « 'Poids visuel équilibré' peut-il être objectivement vérifié ? [Mesurabilité, Spec §EF-2] »
 
-   **Scenario Classification & Coverage** (Requirements Quality Focus):
-   - Check if requirements exist for: Primary, Alternate, Exception/Error, Recovery, Non-Functional scenarios
-   - For each scenario class, ask: "Are [scenario type] requirements complete, clear, and consistent?"
-   - If scenario class missing: "Are [scenario type] requirements intentionally excluded or missing? [Gap]"
-   - Include resilience/rollback when state mutation occurs: "Are rollback requirements defined for migration failures? [Gap]"
+   **Classification & Couverture Scénarios** (Focus Qualité Exigences) :
+   - Vérifier si exigences existent pour : scénarios Primaire, Alternatif, Exception/Erreur, Recovery, Non-Fonctionnel
+   - Pour chaque classe scénario, demander : « Les exigences [type scénario] sont-elles complètes, claires et cohérentes ? »
+   - Si classe scénario manquante : « Les exigences [type scénario] sont-elles intentionnellement exclues ou manquantes ? [Lacune] »
+   - Inclure résilience/rollback quand mutation état se produit : « Les exigences rollback sont-elles définies pour échecs migration ? [Lacune] »
 
-   **Traceability Requirements**:
-   - MINIMUM: ≥80% of items MUST include at least one traceability reference
-   - Each item should reference: spec section `[Spec §X.Y]`, or use markers: `[Gap]`, `[Ambiguity]`, `[Conflict]`, `[Assumption]`
-   - If no ID system exists: "Is a requirement & acceptance criteria ID scheme established? [Traceability]"
+   **Exigences Traçabilité** :
+   - MINIMUM : ≥80% des éléments DOIVENT inclure au moins une référence traçabilité
+   - Chaque élément doit référencer : section spec `[Spec §X.Y]`, ou utiliser marqueurs : `[Lacune]`, `[Ambiguïté]`, `[Conflit]`, `[Hypothèse]`
+   - Si pas de système ID existe : « Un schéma ID exigence & critères acceptation est-il établi ? [Traçabilité] »
 
-   **Surface & Resolve Issues** (Requirements Quality Problems):
-   Ask questions about the requirements themselves:
-   - Ambiguities: "Is the term 'fast' quantified with specific metrics? [Ambiguity, Spec §NFR-1]"
-   - Conflicts: "Do navigation requirements conflict between §FR-10 and §FR-10a? [Conflict]"
-   - Assumptions: "Is the assumption of 'always available podcast API' validated? [Assumption]"
-   - Dependencies: "Are external podcast API requirements documented? [Dependency, Gap]"
-   - Missing definitions: "Is 'visual hierarchy' defined with measurable criteria? [Gap]"
+   **Faire Remonter & Résoudre Problèmes** (Problèmes Qualité Exigences) :
+   Poser questions sur les exigences elles-mêmes :
+   - Ambiguïtés : « Le terme 'rapide' est-il quantifié avec métriques spécifiques ? [Ambiguïté, Spec §ENF-1] »
+   - Conflits : « Les exigences navigation conflictent-elles entre §EF-10 et §EF-10a ? [Conflit] »
+   - Hypothèses : « L'hypothèse 'API podcast toujours disponible' est-elle validée ? [Hypothèse] »
+   - Dépendances : « Les exigences API podcast externe sont-elles documentées ? [Dépendance, Lacune] »
+   - Définitions manquantes : « 'Hiérarchie visuelle' est-elle définie avec critères mesurables ? [Lacune] »
 
-   **Content Consolidation**:
-   - Soft cap: If raw candidate items > 40, prioritize by risk/impact
-   - Merge near-duplicates checking the same requirement aspect
-   - If >5 low-impact edge cases, create one item: "Are edge cases X, Y, Z addressed in requirements? [Coverage]"
+   **Consolidation Contenu** :
+   - Plafond souple : Si éléments candidats bruts > 40, prioriser par risque/impact
+   - Fusionner quasi-doublons vérifiant même aspect exigence
+   - Si >5 cas limites faible impact, créer un élément : « Les cas limites X, Y, Z sont-ils traités dans les exigences ? [Couverture] »
 
-   **🚫 ABSOLUTELY PROHIBITED** - These make it an implementation test, not a requirements test:
-   - ❌ Any item starting with "Verify", "Test", "Confirm", "Check" + implementation behavior
-   - ❌ References to code execution, user actions, system behavior
-   - ❌ "Displays correctly", "works properly", "functions as expected"
-   - ❌ "Click", "navigate", "render", "load", "execute"
-   - ❌ Test cases, test plans, QA procedures
-   - ❌ Implementation details (frameworks, APIs, algorithms)
+   **🚫 ABSOLUMENT INTERDIT** - Ceux-ci en font un test implémentation, pas un test exigences :
+   - ❌ Tout élément commençant par « Vérifier », « Tester », « Confirmer », « Contrôler » + comportement implémentation
+   - ❌ Références à exécution code, actions utilisateur, comportement système
+   - ❌ « S'affiche correctement », « fonctionne correctement », « fonctionne comme attendu »
+   - ❌ « Cliquer », « naviguer », « rendre », « charger », « exécuter »
+   - ❌ Cas de test, plans de test, procédures QA
+   - ❌ Détails implémentation (frameworks, APIs, algorithmes)
 
-   **✅ REQUIRED PATTERNS** - These test requirements quality:
-   - ✅ "Are [requirement type] defined/specified/documented for [scenario]?"
-   - ✅ "Is [vague term] quantified/clarified with specific criteria?"
-   - ✅ "Are requirements consistent between [section A] and [section B]?"
-   - ✅ "Can [requirement] be objectively measured/verified?"
-   - ✅ "Are [edge cases/scenarios] addressed in requirements?"
-   - ✅ "Does the spec define [missing aspect]?"
+   **✅ PATTERNS REQUIS** - Ceux-ci testent qualité exigences :
+   - ✅ « Les [type exigence] sont-elles définies/spécifiées/documentées pour [scénario] ? »
+   - ✅ « [Terme vague] est-il quantifié/clarifié avec critères spécifiques ? »
+   - ✅ « Les exigences sont-elles cohérentes entre [section A] et [section B] ? »
+   - ✅ « [Exigence] peut-elle être objectivement mesurée/vérifiée ? »
+   - ✅ « Les [cas limites/scénarios] sont-ils traités dans les exigences ? »
+   - ✅ « La spec définit-elle [aspect manquant] ? »
 
-6. **Structure Reference**: Generate the checklist following the canonical template in `.specify/templates/checklist-template.md` for title, meta section, category headings, and ID formatting. If template is unavailable, use: H1 title, purpose/created meta lines, `##` category sections containing `- [ ] CHK### <requirement item>` lines with globally incrementing IDs starting at CHK001.
+6. **Référence Structure** : Générer la checklist suivant le template canonique dans `.specify/templates/checklist-template.md` pour titre, section méta, en-têtes catégorie, et formatage ID. Si template indisponible, utiliser : titre H1, lignes méta objectif/créé, sections catégorie `##` contenant lignes `- [ ] CHK### <élément exigence>` avec IDs incrémentant globalement depuis CHK001.
 
-7. **Report**: Output full path to created checklist, item count, and remind user that each run creates a new file. Summarize:
-   - Focus areas selected
-   - Depth level
-   - Actor/timing
-   - Any explicit user-specified must-have items incorporated
+7. **Rapport** : Produire chemin complet vers checklist créée, nombre éléments, et rappeler utilisateur que chaque exécution crée nouveau fichier. Résumer :
+   - Domaines focus sélectionnés
+   - Niveau profondeur
+   - Acteur/timing
+   - Tous éléments must-have spécifiés par utilisateur incorporés
 
-**Important**: Each `/speckit.checklist` command invocation creates a checklist file using short, descriptive names unless file already exists. This allows:
+**Important** : Chaque invocation commande `/speckit.checklist` crée fichier checklist utilisant noms courts, descriptifs sauf si fichier existe déjà. Ceci permet :
 
-- Multiple checklists of different types (e.g., `ux.md`, `test.md`, `security.md`)
-- Simple, memorable filenames that indicate checklist purpose
-- Easy identification and navigation in the `checklists/` folder
+- Checklists multiples de types différents (ex: `ux.md`, `test.md`, `security.md`)
+- Noms fichiers simples, mémorables indiquant objectif checklist
+- Identification et navigation faciles dans dossier `checklists/`
 
-To avoid clutter, use descriptive types and clean up obsolete checklists when done.
+Pour éviter encombrement, utiliser types descriptifs et nettoyer checklists obsolètes une fois terminé.
 
-## Example Checklist Types & Sample Items
+## Types Exemples Checklist & Éléments Exemples
 
-**UX Requirements Quality:** `ux.md`
+**Qualité Exigences UX :** `ux.md`
 
-Sample items (testing the requirements, NOT the implementation):
+Éléments exemples (testant les exigences, PAS l'implémentation) :
 
-- "Are visual hierarchy requirements defined with measurable criteria? [Clarity, Spec §FR-1]"
-- "Is the number and positioning of UI elements explicitly specified? [Completeness, Spec §FR-1]"
-- "Are interaction state requirements (hover, focus, active) consistently defined? [Consistency]"
-- "Are accessibility requirements specified for all interactive elements? [Coverage, Gap]"
-- "Is fallback behavior defined when images fail to load? [Edge Case, Gap]"
-- "Can 'prominent display' be objectively measured? [Measurability, Spec §FR-4]"
+- « Les exigences hiérarchie visuelle sont-elles définies avec critères mesurables ? [Clarté, Spec §EF-1] »
+- « Le nombre et positionnement des éléments UI sont-ils explicitement spécifiés ? [Complétude, Spec §EF-1] »
+- « Les exigences état interaction (hover, focus, active) sont-elles définies de manière cohérente ? [Cohérence] »
+- « Les exigences accessibilité sont-elles spécifiées pour tous les éléments interactifs ? [Couverture, Lacune] »
+- « Le comportement fallback est-il défini quand les images échouent à charger ? [Cas Limite, Lacune] »
+- « 'Affichage proéminent' peut-il être objectivement mesuré ? [Mesurabilité, Spec §EF-4] »
 
-**API Requirements Quality:** `api.md`
+**Qualité Exigences API :** `api.md`
 
-Sample items:
+Éléments exemples :
 
-- "Are error response formats specified for all failure scenarios? [Completeness]"
-- "Are rate limiting requirements quantified with specific thresholds? [Clarity]"
-- "Are authentication requirements consistent across all endpoints? [Consistency]"
-- "Are retry/timeout requirements defined for external dependencies? [Coverage, Gap]"
-- "Is versioning strategy documented in requirements? [Gap]"
+- « Les formats réponse erreur sont-ils spécifiés pour tous les scénarios échec ? [Complétude] »
+- « Les exigences limitation débit sont-elles quantifiées avec seuils spécifiques ? [Clarté] »
+- « Les exigences authentification sont-elles cohérentes sur tous les endpoints ? [Cohérence] »
+- « Les exigences retry/timeout sont-elles définies pour dépendances externes ? [Couverture, Lacune] »
+- « La stratégie versioning est-elle documentée dans les exigences ? [Lacune] »
 
-**Performance Requirements Quality:** `performance.md`
+**Qualité Exigences Performance :** `performance.md`
 
-Sample items:
+Éléments exemples :
 
-- "Are performance requirements quantified with specific metrics? [Clarity]"
-- "Are performance targets defined for all critical user journeys? [Coverage]"
-- "Are performance requirements under different load conditions specified? [Completeness]"
-- "Can performance requirements be objectively measured? [Measurability]"
-- "Are degradation requirements defined for high-load scenarios? [Edge Case, Gap]"
+- « Les exigences performance sont-elles quantifiées avec métriques spécifiques ? [Clarté] »
+- « Les cibles performance sont-elles définies pour tous les parcours utilisateur critiques ? [Couverture] »
+- « Les exigences performance sous différentes conditions charge sont-elles spécifiées ? [Complétude] »
+- « Les exigences performance peuvent-elles être objectivement mesurées ? [Mesurabilité] »
+- « Les exigences dégradation sont-elles définies pour scénarios forte charge ? [Cas Limite, Lacune] »
 
-**Security Requirements Quality:** `security.md`
+**Qualité Exigences Sécurité :** `security.md`
 
-Sample items:
+Éléments exemples :
 
-- "Are authentication requirements specified for all protected resources? [Coverage]"
-- "Are data protection requirements defined for sensitive information? [Completeness]"
-- "Is the threat model documented and requirements aligned to it? [Traceability]"
-- "Are security requirements consistent with compliance obligations? [Consistency]"
-- "Are security failure/breach response requirements defined? [Gap, Exception Flow]"
+- « Les exigences authentification sont-elles spécifiées pour toutes les ressources protégées ? [Couverture] »
+- « Les exigences protection données sont-elles définies pour informations sensibles ? [Complétude] »
+- « Le modèle menace est-il documenté et les exigences alignées dessus ? [Traçabilité] »
+- « Les exigences sécurité sont-elles cohérentes avec obligations conformité ? [Cohérence] »
+- « Les exigences réponse échec/violation sécurité sont-elles définies ? [Lacune, Flux Exception] »
 
-## Anti-Examples: What NOT To Do
+## Anti-Exemples : Ce Qu'il Ne Faut PAS Faire
 
-**❌ WRONG - These test implementation, not requirements:**
-
-```markdown
-- [ ] CHK001 - Verify landing page displays 3 episode cards [Spec §FR-001]
-- [ ] CHK002 - Test hover states work correctly on desktop [Spec §FR-003]
-- [ ] CHK003 - Confirm logo click navigates to home page [Spec §FR-010]
-- [ ] CHK004 - Check that related episodes section shows 3-5 items [Spec §FR-005]
-```
-
-**✅ CORRECT - These test requirements quality:**
+**❌ FAUX - Ceux-ci testent implémentation, pas exigences :**
 
 ```markdown
-- [ ] CHK001 - Are the number and layout of featured episodes explicitly specified? [Completeness, Spec §FR-001]
-- [ ] CHK002 - Are hover state requirements consistently defined for all interactive elements? [Consistency, Spec §FR-003]
-- [ ] CHK003 - Are navigation requirements clear for all clickable brand elements? [Clarity, Spec §FR-010]
-- [ ] CHK004 - Is the selection criteria for related episodes documented? [Gap, Spec §FR-005]
-- [ ] CHK005 - Are loading state requirements defined for asynchronous episode data? [Gap]
-- [ ] CHK006 - Can "visual hierarchy" requirements be objectively measured? [Measurability, Spec §FR-001]
+- [ ] CHK001 - Vérifier que la page d'accueil affiche 3 cartes épisodes [Spec §EF-001]
+- [ ] CHK002 - Tester que les états hover fonctionnent correctement sur desktop [Spec §EF-003]
+- [ ] CHK003 - Confirmer que le clic logo navigue vers la page d'accueil [Spec §EF-010]
+- [ ] CHK004 - Contrôler que la section épisodes liés montre 3-5 éléments [Spec §EF-005]
 ```
 
-**Key Differences:**
+**✅ CORRECT - Ceux-ci testent qualité exigences :**
 
-- Wrong: Tests if the system works correctly
-- Correct: Tests if the requirements are written correctly
-- Wrong: Verification of behavior
-- Correct: Validation of requirement quality
-- Wrong: "Does it do X?"
-- Correct: "Is X clearly specified?"
+```markdown
+- [ ] CHK001 - Le nombre et la disposition des épisodes vedettes sont-ils explicitement spécifiés ? [Complétude, Spec §EF-001]
+- [ ] CHK002 - Les exigences état hover sont-elles définies de manière cohérente pour tous les éléments interactifs ? [Cohérence, Spec §EF-003]
+- [ ] CHK003 - Les exigences navigation sont-elles claires pour tous les éléments marque cliquables ? [Clarté, Spec §EF-010]
+- [ ] CHK004 - Les critères de sélection pour épisodes liés sont-ils documentés ? [Lacune, Spec §EF-005]
+- [ ] CHK005 - Les exigences état chargement sont-elles définies pour données épisode asynchrones ? [Lacune]
+- [ ] CHK006 - Les exigences « hiérarchie visuelle » peuvent-elles être objectivement mesurées ? [Mesurabilité, Spec §EF-001]
+```
+
+**Différences Clés :**
+
+- Faux : Teste si le système fonctionne correctement
+- Correct : Teste si les exigences sont écrites correctement
+- Faux : Vérification du comportement
+- Correct : Validation de la qualité des exigences
+- Faux : « Est-ce que ça fait X ? »
+- Correct : « X est-il clairement spécifié ? »

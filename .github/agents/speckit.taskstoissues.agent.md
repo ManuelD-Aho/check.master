@@ -1,304 +1,304 @@
 ---
-description: Convert existing CheckMaster tasks into actionable, dependency-ordered GitHub issues based on available design artifacts.
+description: Convertir les tâches CheckMaster existantes en issues GitHub actionnables et ordonnées par dépendances basées sur les artefacts de conception disponibles.
 tools: ['github/github-mcp-server/issue_write']
 ---
 
-## User Input
+## Entrée Utilisateur
 
 ```text
 $ARGUMENTS
 ```
 
-You **MUST** consider the user input before proceeding (if not empty).
+Vous **DEVEZ** prendre en compte l'entrée utilisateur avant de procéder (si non vide).
 
-## CheckMaster Issue Template Guidelines
+## Directives Templates Issues CheckMaster
 
-When creating GitHub issues from CheckMaster tasks, use these templates:
+Lors de la création d'issues GitHub depuis les tâches CheckMaster, utiliser ces templates :
 
-### Standard Task Issue Template
+### Template Issue Tâche Standard
 
 ```markdown
-## Task: [Task Description]
+## Tâche : [Description Tâche]
 
-**Task ID**: T0XX  
-**Phase**: [Setup/Core/Interface/Integration/Quality]  
-**User Story**: [USN] (if applicable)  
-**Parallel**: [Yes/No]  
-**Priority**: [P1/P2/P3]
+**ID Tâche** : T0XX  
+**Phase** : [Setup/Core/Interface/Integration/Quality]  
+**User Story** : [USN] (si applicable)  
+**Parallèle** : [Oui/Non]  
+**Priorité** : [P1/P2/P3]
 
 ### Description
-[Brief description of what needs to be implemented]
+[Brève description de ce qui doit être implémenté]
 
-### Acceptance Criteria
-- [ ] [Specific deliverable 1]
-- [ ] [Specific deliverable 2]
-- [ ] [Specific deliverable 3]
+### Critères d'Acceptation
+- [ ] [Livrable spécifique 1]
+- [ ] [Livrable spécifique 2]
+- [ ] [Livrable spécifique 3]
 
-### Technical Details
-**Files to Create/Modify**:
-- `[file path 1]`
-- `[file path 2]`
+### Détails Techniques
+**Fichiers à Créer/Modifier** :
+- `[chemin fichier 1]`
+- `[chemin fichier 2]`
 
-**Dependencies**:
-- [ ] Task T0XX must complete first
-- [ ] Depends on Service/Model/Table
+**Dépendances** :
+- [ ] Tâche T0XX doit être complétée d'abord
+- [ ] Dépend de Service/Modèle/Table
 
-**CheckMaster Standards**:
-- [ ] Strict types declared (`declare(strict_types=1);`)
-- [ ] 100% type hints (parameters, returns, properties)
-- [ ] ServiceAudit logging (if write operation)
-- [ ] ServicePermission check (if restricted)
-- [ ] Prepared statements (no raw SQL)
-- [ ] e() escaping in views
-- [ ] Hashids in URLs
-- [ ] PHPStan level 6+ passes
-- [ ] PHP-CS-Fixer (PSR-12) passes
+**Standards CheckMaster** :
+- [ ] Types stricts déclarés (`declare(strict_types=1);`)
+- [ ] 100% type hints (paramètres, retours, propriétés)
+- [ ] Journalisation ServiceAudit (si opération écriture)
+- [ ] Vérification ServicePermission (si restreint)
+- [ ] Requêtes préparées (pas de SQL brut)
+- [ ] Échappement e() dans vues
+- [ ] Hashids dans URLs
+- [ ] PHPStan niveau 6+ passe
+- [ ] PHP-CS-Fixer (PSR-12) passe
 
-### Related
-- Spec: [link to spec.md section]
-- Plan: [link to plan.md section]
-- Parent Issue: #XX (if part of epic)
+### Lié
+- Spec : [lien vers section spec.md]
+- Plan : [lien vers section plan.md]
+- Issue Parent : #XX (si partie d'un epic)
 
 ### Labels
-`task`, `phase-[phase]`, `[module]`, `[priority]`
+`tache`, `phase-[phase]`, `[module]`, `[priorite]`
 ```
 
-### Database Migration Issue Template
+### Template Issue Migration Base de Données
 
 ```markdown
-## Migration: [Table/Feature Name]
+## Migration : [Nom Table/Fonctionnalité]
 
-**Task ID**: T0XX  
-**Migration Number**: 0XX  
-**Type**: [Create Table/Alter Table/Add Seed Data]
+**ID Tâche** : T0XX  
+**Numéro Migration** : 0XX  
+**Type** : [Créer Table/Altérer Table/Ajouter Seed Data]
 
 ### Description
-[What database changes are being made]
+[Quels changements base de données sont effectués]
 
-### Migration Details
-**File**: `database/migrations/0XX_description.sql`
+### Détails Migration
+**Fichier** : `database/migrations/0XX_description.sql`
 
-**Tables Affected**:
-- [table_name]: [CREATE/ALTER/SEED]
+**Tables Affectées** :
+- [nom_table] : [CREATE/ALTER/SEED]
 
-**Changes**:
-- Add table `[name]` with columns [list]
-- Add FK to `[table]`([column])
-- Add indexes on [columns]
+**Changements** :
+- Ajouter table `[nom]` avec colonnes [liste]
+- Ajouter FK vers `[table]`([colonne])
+- Ajouter index sur [colonnes]
 
-### Acceptance Criteria
-- [ ] Migration file created with sequential number
-- [ ] Table naming follows snake_case convention
-- [ ] Primary key named `id_tablename`
-- [ ] Foreign keys include ON DELETE RESTRICT
-- [ ] Indexes added for FK and search columns
-- [ ] Migration entry added to migrations table
-- [ ] Migration runs successfully on clean DB
-- [ ] Migration is idempotent (can run multiple times)
+### Critères d'Acceptation
+- [ ] Fichier migration créé avec numéro séquentiel
+- [ ] Nommage table suit convention snake_case
+- [ ] Clé primaire nommée `id_nomtable`
+- [ ] Clés étrangères incluent ON DELETE RESTRICT
+- [ ] Index ajoutés pour colonnes FK et recherche
+- [ ] Entrée migration ajoutée dans table migrations
+- [ ] Migration s'exécute avec succès sur DB vierge
+- [ ] Migration est idempotente (peut s'exécuter plusieurs fois)
 
-### Rollback Plan
-[Describe how to revert if needed]
+### Plan Rollback
+[Décrire comment annuler si nécessaire]
 
 ### Labels
 `database`, `migration`, `phase-setup`
 ```
 
-### Service Implementation Issue Template
+### Template Issue Implémentation Service
 
 ```markdown
-## Service: Service[Name]
+## Service : Service[Nom]
 
-**Task ID**: T0XX  
-**Service**: `App\Services\[Module]\Service[Name]`  
-**User Story**: [USN]
+**ID Tâche** : T0XX  
+**Service** : `App\Services\[Module]\Service[Nom]`  
+**User Story** : [USN]
 
 ### Description
-Implement business logic for [feature description]
+Implémenter logique métier pour [description fonctionnalité]
 
-### Acceptance Criteria
-- [ ] Service class created at `app/Services/[Module]/Service[Name].php`
-- [ ] Constructor DI for dependencies
-- [ ] Public methods with full type hints
-- [ ] PHPDoc on all public methods
-- [ ] ServiceAudit logging for writes
-- [ ] Transactions for multi-table operations
-- [ ] Exception handling (typed exceptions)
-- [ ] Stateless implementation (no properties storing state)
+### Critères d'Acceptation
+- [ ] Classe service créée à `app/Services/[Module]/Service[Nom].php`
+- [ ] DI constructeur pour dépendances
+- [ ] Méthodes publiques avec type hints complets
+- [ ] PHPDoc sur toutes les méthodes publiques
+- [ ] Journalisation ServiceAudit pour écritures
+- [ ] Transactions pour opérations multi-tables
+- [ ] Gestion exceptions (exceptions typées)
+- [ ] Implémentation stateless (pas de propriétés stockant état)
 
-### Methods to Implement
+### Méthodes à Implémenter
 ```php
-public function methodName(Type $param): ReturnType;
+public function nomMethode(Type $param): TypeRetour;
 ```
 
-**Business Rules**:
-- [Rule 1]
-- [Rule 2]
+**Règles Métier** :
+- [Règle 1]
+- [Règle 2]
 
-**Integrations**:
-- ServiceWorkflow (if workflow changes)
-- ServiceNotification (if notifications)
-- ServicePermission (if access checks)
-- ServiceAudit (if data writes)
+**Intégrations** :
+- ServiceWorkflow (si changements workflow)
+- ServiceNotification (si notifications)
+- ServicePermission (si vérifications accès)
+- ServiceAudit (si écritures données)
 
-### Testing
-- [ ] Unit test created at `tests/Unit/Services/Service[Name]Test.php`
-- [ ] Mock dependencies
-- [ ] Test happy path
-- [ ] Test error scenarios
-- [ ] Test transaction rollback
+### Tests
+- [ ] Test unitaire créé à `tests/Unit/Services/Service[Nom]Test.php`
+- [ ] Mock dépendances
+- [ ] Tester chemin nominal
+- [ ] Tester scénarios erreur
+- [ ] Tester rollback transaction
 
 ### Labels
-`service`, `business-logic`, `user-story-[N]`, `[priority]`
+`service`, `logique-metier`, `user-story-[N]`, `[priorite]`
 ```
 
-### Controller Implementation Issue Template
+### Template Issue Implémentation Contrôleur
 
 ```markdown
-## Controller: [Name]Controller
+## Contrôleur : [Nom]Controller
 
-**Task ID**: T0XX  
-**Controller**: `App\Controllers\[Module]\[Name]Controller`  
-**User Story**: [USN]
+**ID Tâche** : T0XX  
+**Contrôleur** : `App\Controllers\[Module]\[Nom]Controller`  
+**User Story** : [USN]
 
 ### Description
-Handle HTTP requests for [feature description]
+Gérer requêtes HTTP pour [description fonctionnalité]
 
-### Acceptance Criteria
-- [ ] Controller created at `app/Controllers/[Module]/[Name]Controller.php`
-- [ ] Constructor DI for Service
-- [ ] Methods ≤50 lines
-- [ ] Validation + Service + Response pattern only
-- [ ] JsonResponse or View returns
-- [ ] Request wrapper (never $_POST/$_GET)
-- [ ] PermissionMiddleware applied
-- [ ] Hashids routing configured
+### Critères d'Acceptation
+- [ ] Contrôleur créé à `app/Controllers/[Module]/[Nom]Controller.php`
+- [ ] DI constructeur pour Service
+- [ ] Méthodes ≤50 lignes
+- [ ] Pattern Validation + Service + Réponse uniquement
+- [ ] Retours JsonResponse ou View
+- [ ] Wrapper Request (jamais $_POST/$_GET)
+- [ ] PermissionMiddleware appliqué
+- [ ] Routage Hashids configuré
 
-### Methods to Implement
+### Méthodes à Implémenter
 ```php
 public function action(int $id): JsonResponse;
 ```
 
-**Responsibilities**:
-1. Get data from Request
-2. Validate via Validator
-3. Call Service method
-4. Return JsonResponse
+**Responsabilités** :
+1. Obtenir données de Request
+2. Valider via Validator
+3. Appeler méthode Service
+4. Retourner JsonResponse
 
-**Routes**:
+**Routes** :
 - `POST /[module]/{hash}/[action]`
 - `GET /[module]/{hash}/[action]`
 
 ### Permissions
-- **Traitement**: [ID]
-- **Action**: [Consulter/Créer/Modifier/Supprimer]
-- **Groups**: [List of groupe_utilisateur IDs]
+- **Traitement** : [ID]
+- **Action** : [Consulter/Créer/Modifier/Supprimer]
+- **Groupes** : [Liste des IDs groupe_utilisateur]
 
 ### Labels
-`controller`, `http`, `user-story-[N]`, `[priority]`
+`controleur`, `http`, `user-story-[N]`, `[priorite]`
 ```
 
-### Workflow Integration Issue Template
+### Template Issue Intégration Workflow
 
 ```markdown
-## Workflow: [Transition Name]
+## Workflow : [Nom Transition]
 
-**Task ID**: T0XX  
-**Transition**: [état_source] → [état_cible]  
-**User Story**: [USN]
+**ID Tâche** : T0XX  
+**Transition** : [état_source] → [état_cible]  
+**User Story** : [USN]
 
 ### Description
-Implement workflow state transition for [feature]
+Implémenter transition état workflow pour [fonctionnalité]
 
-### Acceptance Criteria
-- [ ] État added to workflow_etats table
-- [ ] Transition added to workflow_transitions table
-- [ ] ServiceWorkflow::effectuerTransition called
-- [ ] Transition conditions validated
-- [ ] workflow_historique snapshot recorded
-- [ ] Notifications triggered
-- [ ] Permission check enforced
-- [ ] Gate conditions verified
+### Critères d'Acceptation
+- [ ] État ajouté dans table workflow_etats
+- [ ] Transition ajoutée dans table workflow_transitions
+- [ ] ServiceWorkflow::effectuerTransition appelé
+- [ ] Conditions transition validées
+- [ ] Snapshot workflow_historique enregistré
+- [ ] Notifications déclenchées
+- [ ] Vérification permission appliquée
+- [ ] Conditions gate vérifiées
 
-### Workflow Details
-**Source State**: `[état_source]`  
-**Target State**: `[état_cible]`  
-**Transition Code**: `[transition_code]`
+### Détails Workflow
+**État Source** : `[état_source]`  
+**État Cible** : `[état_cible]`  
+**Code Transition** : `[code_transition]`
 
-**Conditions**:
+**Conditions** :
 - [Condition 1]
 - [Condition 2]
 
-**Triggers**:
-- [What action triggers this transition]
+**Déclencheurs** :
+- [Quelle action déclenche cette transition]
 
-**Side Effects**:
-- Update [related entity]
-- Notify [user groups]
-- Generate [document]
+**Effets de Bord** :
+- Mettre à jour [entité liée]
+- Notifier [groupes utilisateurs]
+- Générer [document]
 
 ### Notifications
-- Template: `[template_code]`
-- Recipients: [user groups/roles]
-- Channels: Email, Messagerie interne
+- Template : `[code_template]`
+- Destinataires : [groupes/rôles utilisateurs]
+- Canaux : Email, Messagerie interne
 
 ### Labels
-`workflow`, `state-machine`, `user-story-[N]`, `[priority]`
+`workflow`, `machine-etat`, `user-story-[N]`, `[priorite]`
 ```
 
-### Issue Labeling Strategy
+### Stratégie Labels Issues
 
-**Standard Labels**:
-- `task` - Regular implementation task
-- `database` - Database migration/seed
-- `service` - Service layer implementation
-- `controller` - Controller implementation
-- `workflow` - Workflow/state machine
+**Labels Standard** :
+- `tache` - Tâche implémentation régulière
+- `database` - Migration/seed base de données
+- `service` - Implémentation couche service
+- `controleur` - Implémentation contrôleur
+- `workflow` - Workflow/machine état
 - `notification` - Notification/communication
-- `document` - PDF generation/archiving
-- `security` - Security-related task
-- `permission` - Permission/access control
-- `financial` - Payment/pénalité features
+- `document` - Génération PDF/archivage
+- `securite` - Tâche liée sécurité
+- `permission` - Permission/contrôle accès
+- `financier` - Fonctionnalités paiement/pénalité
 
-**Phase Labels**:
-- `phase-setup` - Infrastructure setup
-- `phase-foundational` - Blocking prerequisites
-- `phase-core` - Core business logic
-- `phase-interface` - UI/Controllers
-- `phase-integration` - Service integration
-- `phase-quality` - Testing/QA
+**Labels Phase** :
+- `phase-setup` - Setup infrastructure
+- `phase-fondamentale` - Prérequis bloquants
+- `phase-core` - Logique métier principale
+- `phase-interface` - UI/Contrôleurs
+- `phase-integration` - Intégration services
+- `phase-qualite` - Tests/QA
 
-**Priority Labels**:
-- `P1` - Must have (MVP)
-- `P2` - Should have
-- `P3` - Nice to have
+**Labels Priorité** :
+- `P1` - Doit avoir (MVP)
+- `P2` - Devrait avoir
+- `P3` - Bien d'avoir
 
-**Module Labels**:
-- `scolarite` - Scolarité module
-- `commission` - Commission module
-- `communication` - Communication module
-- `soutenance` - Soutenance/Jury module
-- `etudiant` - Student features
+**Labels Module** :
+- `scolarite` - Module Scolarité
+- `commission` - Module Commission
+- `communication` - Module Communication
+- `soutenance` - Module Soutenance/Jury
+- `etudiant` - Fonctionnalités étudiant
 - `admin` - Administration
 
-**User Story Labels**:
-- `user-story-1` - US1 tasks
-- `user-story-2` - US2 tasks
+**Labels User Story** :
+- `user-story-1` - Tâches US1
+- `user-story-2` - Tâches US2
 - etc.
 
-## Outline
+## Aperçu
 
-1. Run `.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
-1. From the executed script, extract the path to **tasks**.
-1. Get the Git remote by running:
+1. Exécuter `.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` depuis racine repo et parser FEATURE_DIR et liste AVAILABLE_DOCS. Tous les chemins doivent être absolus. Pour apostrophes dans args comme "J'exporte", utiliser syntaxe échappement : ex 'J'\''exporte' (ou guillemets si possible : "J'exporte").
+1. Depuis le script exécuté, extraire le chemin vers **tasks**.
+1. Obtenir le remote Git en exécutant :
 
 ```bash
 git config --get remote.origin.url
 ```
 
 > [!CAUTION]
-> ONLY PROCEED TO NEXT STEPS IF THE REMOTE IS A GITHUB URL
+> PROCÉDER AUX ÉTAPES SUIVANTES UNIQUEMENT SI LE REMOTE EST UNE URL GITHUB
 
-1. For each task in the list, use the GitHub MCP server to create a new issue in the repository that is representative of the Git remote.
+1. Pour chaque tâche dans la liste, utiliser le serveur MCP GitHub pour créer une nouvelle issue dans le repository représentatif du remote Git.
 
 > [!CAUTION]
-> UNDER NO CIRCUMSTANCES EVER CREATE ISSUES IN REPOSITORIES THAT DO NOT MATCH THE REMOTE URL
+> NE JAMAIS SOUS AUCUNE CIRCONSTANCE CRÉER DES ISSUES DANS DES REPOSITORIES QUI NE CORRESPONDENT PAS À L'URL REMOTE

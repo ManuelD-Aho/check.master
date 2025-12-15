@@ -1,174 +1,174 @@
 ---
-description: Create or update the CheckMaster project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync.
+description: Créer ou mettre à jour la constitution projet CheckMaster depuis des entrées de principes interactives ou fournies, en s'assurant que tous les templates dépendants restent synchronisés.
 handoffs: 
-  - label: Build Specification
+  - label: Créer Spécification
     agent: speckit.specify
-    prompt: Implement the feature specification based on the CheckMaster constitution (PHP 8.0+ MVC++, MySQL, DB-Driven). I want to build...
+    prompt: Implémenter la spécification fonctionnalité basée sur la constitution CheckMaster (PHP 8.0+ MVC++, MySQL, DB-Driven). Je veux construire...
 ---
 
-## User Input
+## Entrée Utilisateur
 
 ```text
 $ARGUMENTS
 ```
 
-You **MUST** consider the user input before proceeding (if not empty).
+Vous **DEVEZ** prendre en compte l'entrée utilisateur avant de procéder (si non vide).
 
-## CheckMaster Constitution Context
+## Contexte Constitution CheckMaster
 
-### Existing Constitution Pillars (NON-NEGOTIABLE)
+### Piliers Constitution Existants (NON-NÉGOCIABLES)
 
-The CheckMaster constitution at `.specify/memory/constitution.md` establishes these core principles that **MUST NOT** be violated:
+La constitution CheckMaster à `.specify/memory/constitution.md` établit ces principes fondamentaux qui **NE DOIVENT PAS** être violés :
 
-1. **Database-Driven Architecture**: All configuration, permissions, workflows, and menus in database (not PHP files)
-2. **Single Source of Truth**: Each system element has exactly one authoritative data source
-3. **Sécurité Par Défaut**: Deny-all permissions, Argon2id passwords, prepared statements, Hashids routing
-4. **Séparation des Responsabilités**: Strict MVC++ with Controllers (≤50 lines), Services (business logic), Models (ORM)
-5. **Convention Over Configuration**: PSR-12, strict naming (PascalCase classes, camelCase methods, snake_case DB)
-6. **Auditabilité Totale**: Double logging (Monolog + pister table) with before/after snapshots
-7. **Versioning Strict**: Sequential migrations, historique_entites for rollback
+1. **Architecture Database-Driven** : Toute configuration, permissions, workflows et menus en base de données (pas fichiers PHP)
+2. **Source Unique de Vérité** : Chaque élément système a exactement une source de données autoritaire
+3. **Sécurité Par Défaut** : Permissions deny-all, mots de passe Argon2id, requêtes préparées, routage Hashids
+4. **Séparation des Responsabilités** : MVC++ strict avec Contrôleurs (≤50 lignes), Services (logique métier), Modèles (ORM)
+5. **Convention Plutôt que Configuration** : PSR-12, nommage strict (PascalCase classes, camelCase méthodes, snake_case DB)
+6. **Auditabilité Totale** : Double logging (Monolog + table pister) avec snapshots avant/après
+7. **Versioning Strict** : Migrations séquentielles, historique_entites pour rollback
 
-### Stack Constraints (IMMUTABLE)
+### Contraintes Stack (IMMUABLES)
 
-**Allowed**:
-- PHP 8.0+ (strict types mandatory)
+**Autorisé** :
+- PHP 8.0+ (types stricts obligatoires)
 - MySQL 8.0+ / MariaDB 10.5+
-- 12 approved dependencies (~12MB total):
+- 12 dépendances approuvées (~12MB total) :
   - hashids, symfony/validator, symfony/http-foundation, symfony/cache
   - mpdf, tcpdf, phpoffice/phpspreadsheet, phpmailer, monolog
 
-**Forbidden**:
+**Interdit** :
 - Laravel/Symfony Full Stack
-- Node.js, Redis, Memcached as required dependencies
-- Any framework exceeding 50MB
-- Raw SQL queries (must use prepared statements)
-- Logic in Controllers (must be in Services)
-- Hardcoded permissions/config (must be DB-driven)
+- Node.js, Redis, Memcached comme dépendances requises
+- Tout framework dépassant 50MB
+- Requêtes SQL brutes (doit utiliser requêtes préparées)
+- Logique dans Contrôleurs (doit être dans Services)
+- Permissions/config codées en dur (doit être DB-driven)
 
-### CheckMaster-Specific Rules
+### Règles Spécifiques CheckMaster
 
-**Workflow Management**:
-- All states in workflow_etats table
-- Transitions in workflow_transitions table
-- ServiceWorkflow::effectuerTransition for all state changes
-- Workflow gates block progress until conditions met
+**Gestion Workflow** :
+- Tous les états dans table workflow_etats
+- Transitions dans table workflow_transitions
+- ServiceWorkflow::effectuerTransition pour tous les changements d'état
+- Gates workflow bloquent progression jusqu'à conditions remplies
 
-**Permission System**:
-- 13 user groups (Administrateur, Scolarité, Commission, Étudiant, etc.)
-- traitement → action → rattacher mappings
-- ServicePermission::verifier before restricted operations
-- Rôles temporaires (président jury day-of access)
+**Système Permissions** :
+- 13 groupes utilisateurs (Administrateur, Scolarité, Commission, Étudiant, etc.)
+- Mappings traitement → action → rattacher
+- ServicePermission::verifier avant opérations restreintes
+- Rôles temporaires (accès président jury jour-J)
 
-**Document Generation**:
-- 13 PDF types (reçus, PV, bulletins, attestations, etc.)
-- TCPDF for simple, mPDF for complex CSS layouts
-- SHA256 integrity hashing mandatory
-- Archive with verificat ion périodique
+**Génération Documents** :
+- 13 types PDF (reçus, PV, bulletins, attestations, etc.)
+- TCPDF pour simple, mPDF pour layouts CSS complexes
+- Hachage intégrité SHA256 obligatoire
+- Archiver avec vérification périodique
 
-**Notification System**:
-- 71 email templates for workflow transitions
-- Multi-channel: Email (primary) + Messagerie interne (backup)
-- ServiceNotification::envoyer with template code
-- Bounce tracking and retry logic
+**Système Notifications** :
+- 71 templates email pour transitions workflow
+- Multi-canal : Email (primaire) + Messagerie interne (backup)
+- ServiceNotification::envoyer avec code template
+- Suivi bounces et logique retry
 
-**Configuration**:
-- ~170 parameters in configuration_systeme table
-- Organized by prefix (workflow.*, notify.*, finance.*, etc.)
-- ServiceParametres::get/set for access
-- 27 désactivable features via config flags
+**Configuration** :
+- ~170 paramètres dans table configuration_systeme
+- Organisés par préfixe (workflow.*, notify.*, finance.*, etc.)
+- ServiceParametres::get/set pour accès
+- 27 fonctionnalités désactivables via flags config
 
-**Financial Operations**:
-- Paiements, pénalités, exonérations tables
-- Reçu generation with TCPDF
-- Financial gates in workflow (block if unpaid)
-- Configuration-driven amounts and rules
+**Opérations Financières** :
+- Tables paiements, pénalités, exonérations
+- Génération reçu avec TCPDF
+- Gates financières dans workflow (bloquer si impayé)
+- Montants et règles pilotés par configuration
 
-### Amendment Guidelines for CheckMaster
+### Directives Amendement pour CheckMaster
 
-When updating the constitution, respect these guidelines:
+Lors de la mise à jour de la constitution, respecter ces directives :
 
-**Version Bumping**:
-- **MAJOR**: Changing core architecture (DB-driven → file-based) - FORBIDDEN for CheckMaster
-- **MINOR**: Adding new mandatory service (e.g., ServiceReclamation)
-- **PATCH**: Clarifying existing principles, fixing typos
+**Incrémentation Version** :
+- **MAJEUR** : Changer architecture fondamentale (DB-driven → basé fichiers) - INTERDIT pour CheckMaster
+- **MINEUR** : Ajouter nouveau service obligatoire (ex : ServiceReclamation)
+- **PATCH** : Clarifier principes existants, corriger typos
 
-**Principle Addition Criteria**:
-- Must address recurring cross-cutting concern
-- Must be testable/verifiable in code review
-- Must not contradict existing pillars
-- Must apply broadly (not feature-specific)
+**Critères Ajout Principe** :
+- Doit adresser préoccupation transversale récurrente
+- Doit être testable/vérifiable en revue code
+- Ne doit pas contredire piliers existants
+- Doit s'appliquer largement (pas spécifique à une fonctionnalité)
 
-**Consistency Propagation Required**:
-After constitution updates, verify:
-- `.specify/templates/plan-template.md` (Constitution Check section)
-- `.specify/templates/spec-template.md` (scope requirements)
-- `.specify/templates/tasks-template.md` (task types)
-- `.github/prompts/*.md` (agent instructions)
-- `.github/agents/*.md` (agent behaviors)
+**Propagation Cohérence Requise** :
+Après mises à jour constitution, vérifier :
+- `.specify/templates/plan-template.md` (section Vérification Constitution)
+- `.specify/templates/spec-template.md` (exigences périmètre)
+- `.specify/templates/tasks-template.md` (types tâches)
+- `.github/prompts/*.md` (instructions agents)
+- `.github/agents/*.md` (comportements agents)
 
-## Outline
+## Aperçu
 
-You are updating the project constitution at `.specify/memory/constitution.md`. This file is a TEMPLATE containing placeholder tokens in square brackets (e.g. `[PROJECT_NAME]`, `[PRINCIPLE_1_NAME]`). Your job is to (a) collect/derive concrete values, (b) fill the template precisely, and (c) propagate any amendments across dependent artifacts.
+Vous mettez à jour la constitution projet à `.specify/memory/constitution.md`. Ce fichier est un TEMPLATE contenant des tokens placeholder entre crochets (ex : `[NOM_PROJET]`, `[NOM_PRINCIPE_1]`). Votre travail est de (a) collecter/dériver des valeurs concrètes, (b) remplir le template précisément, et (c) propager tout amendement à travers les artefacts dépendants.
 
-Follow this execution flow:
+Suivre ce flux d'exécution :
 
-1. Load the existing constitution template at `.specify/memory/constitution.md`.
-   - Identify every placeholder token of the form `[ALL_CAPS_IDENTIFIER]`.
-   **IMPORTANT**: The user might require less or more principles than the ones used in the template. If a number is specified, respect that - follow the general template. You will update the doc accordingly.
+1. Charger le template constitution existant à `.specify/memory/constitution.md`.
+   - Identifier chaque token placeholder de la forme `[IDENTIFIANT_MAJUSCULES]`.
+   **IMPORTANT** : L'utilisateur peut nécessiter moins ou plus de principes que ceux utilisés dans le template. Si un nombre est spécifié, le respecter - suivre le template général. Vous mettrez à jour le doc en conséquence.
 
-2. Collect/derive values for placeholders:
-   - If user input (conversation) supplies a value, use it.
-   - Otherwise infer from existing repo context (README, docs, prior constitution versions if embedded).
-   - For governance dates: `RATIFICATION_DATE` is the original adoption date (if unknown ask or mark TODO), `LAST_AMENDED_DATE` is today if changes are made, otherwise keep previous.
-   - `CONSTITUTION_VERSION` must increment according to semantic versioning rules:
-     - MAJOR: Backward incompatible governance/principle removals or redefinitions.
-     - MINOR: New principle/section added or materially expanded guidance.
-     - PATCH: Clarifications, wording, typo fixes, non-semantic refinements.
-   - If version bump type ambiguous, propose reasoning before finalizing.
+2. Collecter/dériver valeurs pour placeholders :
+   - Si entrée utilisateur (conversation) fournit une valeur, l'utiliser.
+   - Sinon inférer depuis contexte repo existant (README, docs, versions constitution antérieures si intégrées).
+   - Pour dates gouvernance : `DATE_RATIFICATION` est la date d'adoption originale (si inconnue demander ou marquer TODO), `DATE_DERNIER_AMENDEMENT` est aujourd'hui si changements effectués, sinon garder précédente.
+   - `VERSION_CONSTITUTION` doit incrémenter selon règles versioning sémantique :
+     - MAJEUR : Suppressions ou redéfinitions gouvernance/principes rétro-incompatibles.
+     - MINEUR : Nouveau principe/section ajouté ou guidance matériellement étendue.
+     - PATCH : Clarifications, formulation, corrections typos, raffinements non-sémantiques.
+   - Si type incrémentation version ambigu, proposer raisonnement avant finalisation.
 
-3. Draft the updated constitution content:
-   - Replace every placeholder with concrete text (no bracketed tokens left except intentionally retained template slots that the project has chosen not to define yet—explicitly justify any left).
-   - Preserve heading hierarchy and comments can be removed once replaced unless they still add clarifying guidance.
-   - Ensure each Principle section: succinct name line, paragraph (or bullet list) capturing non‑negotiable rules, explicit rationale if not obvious.
-   - Ensure Governance section lists amendment procedure, versioning policy, and compliance review expectations.
+3. Rédiger le contenu constitution mis à jour :
+   - Remplacer chaque placeholder par texte concret (aucun token crocheté laissé sauf slots template intentionnellement retenus que le projet a choisi de ne pas définir encore—justifier explicitement tout laissé).
+   - Préserver hiérarchie titres et les commentaires peuvent être supprimés une fois remplacés sauf s'ils ajoutent encore guidance clarifiante.
+   - S'assurer que chaque section Principe : ligne nom succincte, paragraphe (ou liste puces) capturant règles non-négociables, rationale explicite si non évident.
+   - S'assurer que section Gouvernance liste procédure amendement, politique versioning, et attentes revue conformité.
 
-4. Consistency propagation checklist (convert prior checklist into active validations):
-   - Read `.specify/templates/plan-template.md` and ensure any "Constitution Check" or rules align with updated principles.
-   - Read `.specify/templates/spec-template.md` for scope/requirements alignment—update if constitution adds/removes mandatory sections or constraints.
-   - Read `.specify/templates/tasks-template.md` and ensure task categorization reflects new or removed principle-driven task types (e.g., observability, versioning, testing discipline).
-   - Read each command file in `.specify/templates/commands/*.md` (including this one) to verify no outdated references (agent-specific names like CLAUDE only) remain when generic guidance is required.
-   - Read any runtime guidance docs (e.g., `README.md`, `docs/quickstart.md`, or agent-specific guidance files if present). Update references to principles changed.
+4. Checklist propagation cohérence (convertir checklist antérieure en validations actives) :
+   - Lire `.specify/templates/plan-template.md` et s'assurer que toute « Vérification Constitution » ou règles s'alignent avec principes mis à jour.
+   - Lire `.specify/templates/spec-template.md` pour alignement périmètre/exigences—mettre à jour si constitution ajoute/supprime sections ou contraintes obligatoires.
+   - Lire `.specify/templates/tasks-template.md` et s'assurer que la catégorisation tâches reflète les types tâches pilotés par nouveaux ou supprimés principes (ex : observabilité, versioning, discipline test).
+   - Lire chaque fichier commande dans `.specify/templates/commands/*.md` (incluant celui-ci) pour vérifier qu'aucune référence obsolète (noms spécifiques agents comme CLAUDE uniquement) ne reste quand guidance générique est requise.
+   - Lire tout doc guidance runtime (ex : `README.md`, `docs/quickstart.md`, ou fichiers guidance spécifiques agents si présents). Mettre à jour références aux principes changés.
 
-5. Produce a Sync Impact Report (prepend as an HTML comment at top of the constitution file after update):
-   - Version change: old → new
-   - List of modified principles (old title → new title if renamed)
-   - Added sections
-   - Removed sections
-   - Templates requiring updates (✅ updated / ⚠ pending) with file paths
-   - Follow-up TODOs if any placeholders intentionally deferred.
+5. Produire un Rapport Impact Sync (préfixer comme commentaire HTML en haut du fichier constitution après mise à jour) :
+   - Changement version : ancienne → nouvelle
+   - Liste principes modifiés (ancien titre → nouveau titre si renommé)
+   - Sections ajoutées
+   - Sections supprimées
+   - Templates nécessitant mises à jour (✅ mis à jour / ⚠ en attente) avec chemins fichiers
+   - TODOs suivi si placeholders intentionnellement différés.
 
-6. Validation before final output:
-   - No remaining unexplained bracket tokens.
-   - Version line matches report.
-   - Dates ISO format YYYY-MM-DD.
-   - Principles are declarative, testable, and free of vague language ("should" → replace with MUST/SHOULD rationale where appropriate).
+6. Validation avant sortie finale :
+   - Aucun token crochet inexpliqué restant.
+   - Ligne version correspond au rapport.
+   - Dates format ISO AAAA-MM-JJ.
+   - Principes sont déclaratifs, testables, et exempts de langage vague ("devrait" → remplacer par rationale DOIT/DEVRAIT où approprié).
 
-7. Write the completed constitution back to `.specify/memory/constitution.md` (overwrite).
+7. Écrire la constitution complétée dans `.specify/memory/constitution.md` (écraser).
 
-8. Output a final summary to the user with:
-   - New version and bump rationale.
-   - Any files flagged for manual follow-up.
-   - Suggested commit message (e.g., `docs: amend constitution to vX.Y.Z (principle additions + governance update)`).
+8. Produire résumé final à l'utilisateur avec :
+   - Nouvelle version et rationale incrémentation.
+   - Tout fichier signalé pour suivi manuel.
+   - Message commit suggéré (ex : `docs: amender constitution vers vX.Y.Z (ajouts principes + mise à jour gouvernance)`).
 
-Formatting & Style Requirements:
+Exigences Formatage & Style :
 
-- Use Markdown headings exactly as in the template (do not demote/promote levels).
-- Wrap long rationale lines to keep readability (<100 chars ideally) but do not hard enforce with awkward breaks.
-- Keep a single blank line between sections.
-- Avoid trailing whitespace.
+- Utiliser titres Markdown exactement comme dans le template (ne pas rétrograder/promouvoir niveaux).
+- Wrapper longues lignes rationale pour garder lisibilité (<100 caractères idéalement) mais ne pas forcer avec coupures maladroites.
+- Garder une seule ligne vide entre sections.
+- Éviter espaces blancs trailing.
 
-If the user supplies partial updates (e.g., only one principle revision), still perform validation and version decision steps.
+Si l'utilisateur fournit mises à jour partielles (ex : révision un seul principe), effectuer quand même validation et étapes décision version.
 
-If critical info missing (e.g., ratification date truly unknown), insert `TODO(<FIELD_NAME>): explanation` and include in the Sync Impact Report under deferred items.
+Si info critique manquante (ex : date ratification vraiment inconnue), insérer `TODO(<NOM_CHAMP>) : explication` et inclure dans Rapport Impact Sync sous éléments différés.
 
-Do not create a new template; always operate on the existing `.specify/memory/constitution.md` file.
+Ne pas créer nouveau template ; toujours opérer sur le fichier `.specify/memory/constitution.md` existant.

@@ -1,323 +1,319 @@
 ---
-description: Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation for CheckMaster features.
+description: Effectuer une analyse non-destructive de cohérence et qualité inter-artefacts pour CheckMaster (spec.md, plan.md, tasks.md) après génération des tâches.
 ---
 
-## User Input
+## Entrée Utilisateur
 
 ```text
 $ARGUMENTS
 ```
 
-You **MUST** consider the user input before proceeding (if not empty).
+Vous **DEVEZ** prendre en compte l'entrée utilisateur avant de procéder (si non vide).
 
-## CheckMaster-Specific Analysis Rules
+## Règles d'Analyse Spécifiques CheckMaster
 
-### Constitution Compliance (CRITICAL Checks)
+### Conformité Constitution (Vérifications CRITIQUES)
 
-**Every analysis MUST verify these CheckMaster mandates**:
+**Chaque analyse DOIT vérifier ces mandats CheckMaster** :
 
-1. **DB-Driven Architecture**:
-   - [ ] Configuration NOT in PHP files (must use configuration_systeme table)
-   - [ ] Permissions NOT hardcoded (must use rattacher + permissions tables)
-   - [ ] Menus constructed from traitement + rattacher tables
-   - [ ] Workflow states in workflow_etats/transitions tables
+1. **Architecture DB-Driven** :
+   - [ ] Configuration NON dans fichiers PHP (doit utiliser table configuration_systeme)
+   - [ ] Permissions NON codées en dur (doit utiliser tables rattacher + permissions)
+   - [ ] Menus construits depuis tables traitement + rattacher
+   - [ ] États workflow dans tables workflow_etats/transitions
 
-2. **Security Standards**:
-   - [ ] All entity IDs use Hashids in URLs (no raw integers)
-   - [ ] Passwords use Argon2id (no md5, sha1, bcrypt)
-   - [ ] SQL uses prepared statements (no string concatenation)
-   - [ ] Views use `e()` escaping (no raw echo)
-   - [ ] All forms have CSRF tokens
-   - [ ] ServiceAudit called for write operations
+2. **Standards de Sécurité** :
+   - [ ] Tous les IDs entités utilisent Hashids dans URLs (pas d'entiers bruts)
+   - [ ] Mots de passe utilisent Argon2id (pas md5, sha1, bcrypt)
+   - [ ] SQL utilise requêtes préparées (pas de concaténation)
+   - [ ] Vues utilisent échappement `e()` (pas d'echo brut)
+   - [ ] Tous les formulaires ont tokens CSRF
+   - [ ] ServiceAudit appelé pour opérations d'écriture
 
-3. **Architecture Layers**:
-   - [ ] Controllers max 50 lines (validation + service + response only)
-   - [ ] Business logic in Services (not Controllers or Views)
-   - [ ] Models extend App\Orm\Model
-   - [ ] Dependency injection via constructor
-   - [ ] Transactions for multi-table operations
+3. **Couches Architecture** :
+   - [ ] Contrôleurs max 50 lignes (validation + service + réponse uniquement)
+   - [ ] Logique métier dans Services (pas Contrôleurs ou Vues)
+   - [ ] Modèles étendent App\Orm\Model
+   - [ ] Injection de dépendances via constructeur
+   - [ ] Transactions pour opérations multi-tables
 
-4. **CheckMaster Integration**:
-   - [ ] Workflow changes use ServiceWorkflow::effectuerTransition()
-   - [ ] Permissions checked via ServicePermission::verifier()
+4. **Intégration CheckMaster** :
+   - [ ] Changements workflow utilisent ServiceWorkflow::effectuerTransition()
+   - [ ] Permissions vérifiées via ServicePermission::verifier()
    - [ ] Notifications via ServiceNotification::envoyer()
    - [ ] Configuration via ServiceParametres::get()
-   - [ ] PDF generation with SHA256 archiving
-   - [ ] Document types match 13 defined types
+   - [ ] Génération PDF avec archivage SHA256
+   - [ ] Types documents correspondent aux 13 types définis
 
-5. **Database Standards**:
-   - [ ] Table names `snake_case` 
-   - [ ] Primary key always `id_tablename`
-   - [ ] Foreign keys with ON DELETE RESTRICT
-   - [ ] Migrations sequential (0XX_description.sql)
-   - [ ] Never modify existing migrations
-   - [ ] Indexes on FK + search columns
+5. **Standards Base de Données** :
+   - [ ] Noms tables `snake_case`
+   - [ ] Clé primaire toujours `id_nomtable`
+   - [ ] Clés étrangères avec ON DELETE RESTRICT
+   - [ ] Migrations séquentielles (0XX_description.sql)
+   - [ ] Ne jamais modifier migrations existantes
+   - [ ] Index sur colonnes FK + recherche
 
-### CheckMaster Domain Validation
+### Validation Domaine CheckMaster
 
-**Cross-check these domain patterns**:
+**Vérifier ces patterns de domaine** :
 
-**Workflow Consistency**:
+**Cohérence Workflow** :
 ```markdown
-- [ ] Feature touches candidature/rapport/soutenance?
-  - [ ] Spec defines which workflow states involved
-  - [ ] Plan maps states to transitions
-  - [ ] Tasks include workflow_etats/transitions updates
-  - [ ] Tasks call ServiceWorkflow for state changes
-  - [ ] Notifications defined for each transition
+- [ ] Fonctionnalité touche candidature/rapport/soutenance ?
+  - [ ] Spec définit quels états workflow impliqués
+  - [ ] Plan mappe états aux transitions
+  - [ ] Tâches incluent MAJ workflow_etats/transitions
+  - [ ] Tâches appellent ServiceWorkflow pour changements état
+  - [ ] Notifications définies pour chaque transition
 ```
 
-**Permission Mapping**:
+**Mapping Permissions** :
 ```markdown
-- [ ] Feature requires user access control?
-  - [ ] Spec defines which user groups need access
-  - [ ] Plan identifies traitement + action entries
-  - [ ] Tasks include seed data for rattacher table
-  - [ ] Controllers check ServicePermission
-  - [ ] Middleware applies PermissionMiddleware
+- [ ] Fonctionnalité requiert contrôle d'accès ?
+  - [ ] Spec définit quels groupes utilisateurs ont accès
+  - [ ] Plan identifie entrées traitement + action
+  - [ ] Tâches incluent données seed pour table rattacher
+  - [ ] Contrôleurs vérifient ServicePermission
+  - [ ] Middleware applique PermissionMiddleware
 ```
 
-**Document Generation**:
+**Génération Documents** :
 ```markdown
-- [ ] Feature generates PDF documents?
-  - [ ] Spec defines document type (simple/complex)
-  - [ ] Plan chooses TCPDF or mPDF appropriately
-  - [ ] Tasks create template in ressources/templates/pdf/
-  - [ ] Tasks calculate SHA256 hash
-  - [ ] Tasks archive with integrity check
-  - [ ] Tasks trigger download notification
+- [ ] Fonctionnalité génère documents PDF ?
+  - [ ] Spec définit type document (simple/complexe)
+  - [ ] Plan choisit TCPDF ou mPDF approprié
+  - [ ] Tâches créent template dans ressources/templates/pdf/
+  - [ ] Tâches calculent hash SHA256
+  - [ ] Tâches archivent avec vérification intégrité
+  - [ ] Tâches déclenchent notification téléchargement
 ```
 
-**Financial Operations**:
+**Opérations Financières** :
 ```markdown
-- [ ] Feature involves payments/pénalités?
-  - [ ] Spec defines amounts, calculation rules
-  - [ ] Plan maps to paiements/penalites tables
-  - [ ] Tasks generate reçu PDFs
-  - [ ] Tasks archive financial documents
-  - [ ] Tasks update student financial status
-  - [ ] Gate checks payment status before workflow advance
+- [ ] Fonctionnalité implique paiements/pénalités ?
+  - [ ] Spec définit montants, règles de calcul
+  - [ ] Plan mappe aux tables paiements/penalites
+  - [ ] Tâches génèrent PDFs reçus
+  - [ ] Tâches archivent documents financiers
+  - [ ] Tâches mettent à jour statut financier étudiant
+  - [ ] Gate vérifie statut paiement avant avancement workflow
 ```
 
-**Commission/Voting**:
+**Commission/Vote** :
 ```markdown
-- [ ] Feature involves commission decisions?
-  - [ ] Spec defines vote logic (unanimity/majority)
-  - [ ] Plan handles 3-round maximum with escalation
-  - [ ] Tasks track votes in sessions_commission
-  - [ ] Tasks trigger Dean escalation after round 3
-  - [ ] Tasks generate PV documents
-  - [ ] Tasks send round notifications
+- [ ] Fonctionnalité implique décisions commission ?
+  - [ ] Spec définit logique vote (unanimité/majorité)
+  - [ ] Plan gère 3 tours max avec escalade
+  - [ ] Tâches tracent votes dans sessions_commission
+  - [ ] Tâches déclenchent escalade Doyen après tour 3
+  - [ ] Tâches génèrent documents PV
+  - [ ] Tâches envoient notifications par tour
 ```
 
-### CheckMaster-Specific Findings
+### Constatations Spécifiques CheckMaster
 
-**Look for these common issues**:
+**Rechercher ces problèmes courants** :
 
-**CRITICAL Issues**:
-- Using Laravel/Symfony Full Stack (CheckMaster is native MVC++)
-- Node.js dependencies (CheckMaster is PHP-only)
-- Redis/Memcached as required dependencies (only Symfony Cache)
-- Raw SQL queries (must use prepared statements)
-- Controllers with business logic (>50 lines, complex logic)
-- Hardcoded permissions (must be DB-driven)
-- Raw integer IDs in URLs (must use Hashids)
-- Missing ServiceAudit calls for data writes
+**Problèmes CRITIQUES** :
+- Utilisation Laravel/Symfony Full Stack (CheckMaster est MVC++ natif)
+- Dépendances Node.js (CheckMaster est PHP uniquement)
+- Redis/Memcached comme dépendances requises (uniquement Symfony Cache)
+- Requêtes SQL brutes (doit utiliser requêtes préparées)
+- Contrôleurs avec logique métier (>50 lignes, logique complexe)
+- Permissions codées en dur (doit être DB-driven)
+- IDs entiers bruts dans URLs (doit utiliser Hashids)
+- Appels ServiceAudit manquants pour écritures données
 
-**HIGH Issues**:
-- Workflow state changes without ServiceWorkflow
-- Permission checks missing ServicePermission
-- Notifications not using ServiceNotification
-- Configuration in PHP files (must use DB)
-- PDF without SHA256 archiving
-- Modifications to existing migrations
-- Missing transaction wrappers for multi-table ops
-- Non-typed properties/parameters/returns
+**Problèmes ÉLEVÉS** :
+- Changements état workflow sans ServiceWorkflow
+- Vérifications permissions manquant ServicePermission
+- Notifications n'utilisant pas ServiceNotification
+- Configuration dans fichiers PHP (doit utiliser DB)
+- PDF sans archivage SHA256
+- Modifications migrations existantes
+- Wrappers transaction manquants pour ops multi-tables
+- Propriétés/paramètres/retours non typés
 
-**MEDIUM Issues**:
-- Inconsistent table naming (not snake_case)
-- Missing indexes on search/FK columns
-- Direct $_POST/$_GET usage (must use Request wrapper)
-- Views with raw echo (must use e() helper)
-- Services not stateless (storing state)
-- Missing PHPDoc on public methods
-- Validator not using Symfony constraints
+**Problèmes MOYENS** :
+- Nommage tables incohérent (pas snake_case)
+- Index manquants sur colonnes recherche/FK
+- Usage direct $_POST/$_GET (doit utiliser wrapper Request)
+- Vues avec echo brut (doit utiliser helper e())
+- Services non stateless (stockant état)
+- PHPDoc manquant sur méthodes publiques
+- Validateur n'utilisant pas contraintes Symfony
 
-**LOW Issues**:
-- Inconsistent variable naming
-- Missing comments on complex logic
-- Non-PSR-12 compliant formatting
-- Suboptimal query patterns
+**Problèmes FAIBLES** :
+- Nommage variables incohérent
+- Commentaires manquants sur logique complexe
+- Formatage non conforme PSR-12
+- Patterns requête sous-optimaux
 
-## Goal
+## Objectif
 
-Identify inconsistencies, duplications, ambiguities, and underspecified items across the three core artifacts (`spec.md`, `plan.md`, `tasks.md`) before implementation. This command MUST run only after `/speckit.tasks` has successfully produced a complete `tasks.md`.
+Identifier incohérences, duplications, ambiguïtés et éléments sous-spécifiés à travers les trois artefacts principaux (`spec.md`, `plan.md`, `tasks.md`) avant implémentation. Cette commande DOIT s'exécuter uniquement après que `/speckit.tasks` a produit un `tasks.md` complet.
 
-## Operating Constraints
+## Contraintes Opératoires
 
-**STRICTLY READ-ONLY**: Do **not** modify any files. Output a structured analysis report. Offer an optional remediation plan (user must explicitly approve before any follow-up editing commands would be invoked manually).
+**STRICTEMENT LECTURE SEULE** : Ne **pas** modifier de fichiers. Produire un rapport d'analyse structuré. Proposer un plan de remédiation optionnel (l'utilisateur doit approuver explicitement avant toute commande d'édition de suivi).
 
-**Constitution Authority**: The project constitution (`.specify/memory/constitution.md`) is **non-negotiable** within this analysis scope. Constitution conflicts are automatically CRITICAL and require adjustment of the spec, plan, or tasks—not dilution, reinterpretation, or silent ignoring of the principle. If a principle itself needs to change, that must occur in a separate, explicit constitution update outside `/speckit.analyze`.
+**Autorité Constitution** : La constitution projet (`.specify/memory/constitution.md`) est **non-négociable** dans ce périmètre d'analyse. Les conflits constitution sont automatiquement CRITIQUES et nécessitent ajustement de spec, plan ou tâches—pas dilution, réinterprétation ou ignorance silencieuse du principe. Si un principe lui-même doit changer, cela doit se faire dans une mise à jour constitution séparée, explicite, hors `/speckit.analyze`.
 
-## Execution Steps
+## Étapes d'Exécution
 
-### 1. Initialize Analysis Context
+### 1. Initialiser Contexte Analyse
 
-Run `.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS. Derive absolute paths:
+Exécuter `.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` une fois depuis racine repo et parser JSON pour FEATURE_DIR et AVAILABLE_DOCS. Dériver chemins absolus :
 
 - SPEC = FEATURE_DIR/spec.md
 - PLAN = FEATURE_DIR/plan.md
 - TASKS = FEATURE_DIR/tasks.md
 
-Abort with an error message if any required file is missing (instruct the user to run missing prerequisite command).
-For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+Abandonner avec message erreur si fichier requis manquant (instruire utilisateur à exécuter commande prérequis manquante).
+Pour apostrophes dans args comme "J'analyse", utiliser syntaxe échappement : ex 'J'\''analyse' (ou guillemets si possible : "J'analyse").
 
-### 2. Load Artifacts (Progressive Disclosure)
+### 2. Charger Artefacts (Divulgation Progressive)
 
-Load only the minimal necessary context from each artifact:
+Charger uniquement contexte minimal nécessaire de chaque artefact :
 
-**From spec.md:**
-
-- Overview/Context
-- Functional Requirements
-- Non-Functional Requirements
+**Depuis spec.md :**
+- Vue d'ensemble/Contexte
+- Exigences Fonctionnelles
+- Exigences Non-Fonctionnelles
 - User Stories
-- Edge Cases (if present)
+- Cas Limites (si présent)
 
-**From plan.md:**
-
-- Architecture/stack choices
-- Data Model references
+**Depuis plan.md :**
+- Choix Architecture/stack
+- Références Modèle Données
 - Phases
-- Technical constraints
+- Contraintes techniques
 
-**From tasks.md:**
-
-- Task IDs
+**Depuis tasks.md :**
+- IDs Tâches
 - Descriptions
-- Phase grouping
-- Parallel markers [P]
-- Referenced file paths
+- Groupement par phase
+- Marqueurs parallèles [P]
+- Chemins fichiers référencés
 
-**From constitution:**
+**Depuis constitution :**
+- Charger `.specify/memory/constitution.md` pour validation principes
 
-- Load `.specify/memory/constitution.md` for principle validation
+### 3. Construire Modèles Sémantiques
 
-### 3. Build Semantic Models
+Créer représentations internes (ne pas inclure artefacts bruts en sortie) :
 
-Create internal representations (do not include raw artifacts in output):
+- **Inventaire exigences** : Chaque exigence fonctionnelle + non-fonctionnelle avec clé stable (dériver slug basé sur phrase impérative)
+- **Inventaire user story/action** : Actions utilisateur discrètes avec critères acceptation
+- **Mapping couverture tâches** : Mapper chaque tâche à une ou plusieurs exigences ou stories (inférence par mot-clé / patterns référence explicite)
+- **Ensemble règles constitution** : Extraire noms principes et déclarations normatives DOIT/DEVRAIT
 
-- **Requirements inventory**: Each functional + non-functional requirement with a stable key (derive slug based on imperative phrase; e.g., "User can upload file" → `user-can-upload-file`)
-- **User story/action inventory**: Discrete user actions with acceptance criteria
-- **Task coverage mapping**: Map each task to one or more requirements or stories (inference by keyword / explicit reference patterns like IDs or key phrases)
-- **Constitution rule set**: Extract principle names and MUST/SHOULD normative statements
+### 4. Passes Détection (Analyse Token-Efficiente)
 
-### 4. Detection Passes (Token-Efficient Analysis)
+Se concentrer sur constatations à signal élevé. Limiter à 50 constatations total ; agréger reste en résumé débordement.
 
-Focus on high-signal findings. Limit to 50 findings total; aggregate remainder in overflow summary.
+#### A. Détection Duplication
 
-#### A. Duplication Detection
+- Identifier exigences quasi-dupliquées
+- Marquer formulation qualité inférieure pour consolidation
 
-- Identify near-duplicate requirements
-- Mark lower-quality phrasing for consolidation
+#### B. Détection Ambiguïté
 
-#### B. Ambiguity Detection
+- Signaler adjectifs vagues (rapide, scalable, sécurisé, intuitif, robuste) manquant critères mesurables
+- Signaler placeholders non résolus (TODO, TKTK, ???, `<placeholder>`, etc.)
 
-- Flag vague adjectives (fast, scalable, secure, intuitive, robust) lacking measurable criteria
-- Flag unresolved placeholders (TODO, TKTK, ???, `<placeholder>`, etc.)
+#### C. Sous-spécification
 
-#### C. Underspecification
+- Exigences avec verbes mais objet ou résultat mesurable manquant
+- User stories manquant alignement critères acceptation
+- Tâches référençant fichiers ou composants non définis dans spec/plan
 
-- Requirements with verbs but missing object or measurable outcome
-- User stories missing acceptance criteria alignment
-- Tasks referencing files or components not defined in spec/plan
+#### D. Alignement Constitution
 
-#### D. Constitution Alignment
+- Toute exigence ou élément plan en conflit avec principe DOIT
+- Sections mandatées ou gates qualité manquants de constitution
 
-- Any requirement or plan element conflicting with a MUST principle
-- Missing mandated sections or quality gates from constitution
+#### E. Lacunes Couverture
 
-#### E. Coverage Gaps
+- Exigences avec zéro tâche associée
+- Tâches sans exigence/story mappée
+- Exigences non-fonctionnelles non reflétées dans tâches (ex : performance, sécurité)
 
-- Requirements with zero associated tasks
-- Tasks with no mapped requirement/story
-- Non-functional requirements not reflected in tasks (e.g., performance, security)
+#### F. Incohérence
 
-#### F. Inconsistency
+- Dérive terminologique (même concept nommé différemment entre fichiers)
+- Entités données référencées dans plan mais absentes de spec (ou vice versa)
+- Contradictions ordre tâches (ex : tâches intégration avant tâches setup fondamentales sans note dépendance)
+- Exigences conflictuelles (ex : une requiert Next.js tandis qu'autre spécifie Vue)
 
-- Terminology drift (same concept named differently across files)
-- Data entities referenced in plan but absent in spec (or vice versa)
-- Task ordering contradictions (e.g., integration tasks before foundational setup tasks without dependency note)
-- Conflicting requirements (e.g., one requires Next.js while other specifies Vue)
+### 5. Attribution Sévérité
 
-### 5. Severity Assignment
+Utiliser cette heuristique pour prioriser constatations :
 
-Use this heuristic to prioritize findings:
+- **CRITIQUE** : Viole constitution DOIT, artefact spec principal manquant, ou exigence avec zéro couverture bloquant fonctionnalité de base
+- **ÉLEVÉ** : Exigence dupliquée ou conflictuelle, attribut sécurité/performance ambigu, critère acceptation non testable
+- **MOYEN** : Dérive terminologique, couverture tâche non-fonctionnelle manquante, cas limite sous-spécifié
+- **FAIBLE** : Améliorations style/formulation, redondance mineure n'affectant pas ordre exécution
 
-- **CRITICAL**: Violates constitution MUST, missing core spec artifact, or requirement with zero coverage that blocks baseline functionality
-- **HIGH**: Duplicate or conflicting requirement, ambiguous security/performance attribute, untestable acceptance criterion
-- **MEDIUM**: Terminology drift, missing non-functional task coverage, underspecified edge case
-- **LOW**: Style/wording improvements, minor redundancy not affecting execution order
+### 6. Produire Rapport Analyse Compact
 
-### 6. Produce Compact Analysis Report
+Produire rapport Markdown (pas d'écriture fichier) avec structure suivante :
 
-Output a Markdown report (no file writes) with the following structure:
+## Rapport Analyse Spécification
 
-## Specification Analysis Report
+| ID | Catégorie | Sévérité | Emplacement(s) | Résumé | Recommandation |
+|----|-----------|----------|----------------|--------|----------------|
+| A1 | Duplication | ÉLEVÉ | spec.md:L120-134 | Deux exigences similaires ... | Fusionner formulation ; garder version plus claire |
 
-| ID | Category | Severity | Location(s) | Summary | Recommendation |
-|----|----------|----------|-------------|---------|----------------|
-| A1 | Duplication | HIGH | spec.md:L120-134 | Two similar requirements ... | Merge phrasing; keep clearer version |
+(Ajouter une ligne par constatation ; générer IDs stables préfixés par initiale catégorie.)
 
-(Add one row per finding; generate stable IDs prefixed by category initial.)
+**Table Résumé Couverture :**
 
-**Coverage Summary Table:**
+| Clé Exigence | A Tâche ? | IDs Tâches | Notes |
+|--------------|-----------|------------|-------|
 
-| Requirement Key | Has Task? | Task IDs | Notes |
-|-----------------|-----------|----------|-------|
+**Problèmes Alignement Constitution :** (si présent)
 
-**Constitution Alignment Issues:** (if any)
+**Tâches Non Mappées :** (si présent)
 
-**Unmapped Tasks:** (if any)
+**Métriques :**
 
-**Metrics:**
+- Total Exigences
+- Total Tâches
+- % Couverture (exigences avec >=1 tâche)
+- Nombre Ambiguïtés
+- Nombre Duplications
+- Nombre Problèmes Critiques
 
-- Total Requirements
-- Total Tasks
-- Coverage % (requirements with >=1 task)
-- Ambiguity Count
-- Duplication Count
-- Critical Issues Count
+### 7. Fournir Actions Suivantes
 
-### 7. Provide Next Actions
+En fin de rapport, produire bloc Actions Suivantes concis :
 
-At end of report, output a concise Next Actions block:
+- Si problèmes CRITIQUES existent : Recommander résolution avant `/speckit.implement`
+- Si seulement FAIBLE/MOYEN : Utilisateur peut procéder, mais fournir suggestions amélioration
+- Fournir suggestions commandes explicites : ex « Exécuter /speckit.specify avec raffinement », « Exécuter /speckit.plan pour ajuster architecture », « Éditer manuellement tasks.md pour ajouter couverture 'performance-metrics' »
 
-- If CRITICAL issues exist: Recommend resolving before `/speckit.implement`
-- If only LOW/MEDIUM: User may proceed, but provide improvement suggestions
-- Provide explicit command suggestions: e.g., "Run /speckit.specify with refinement", "Run /speckit.plan to adjust architecture", "Manually edit tasks.md to add coverage for 'performance-metrics'"
+### 8. Proposer Remédiation
 
-### 8. Offer Remediation
+Demander utilisateur : « Souhaitez-vous que je suggère des éditions de remédiation concrètes pour les N principaux problèmes ? » (NE PAS les appliquer automatiquement.)
 
-Ask the user: "Would you like me to suggest concrete remediation edits for the top N issues?" (Do NOT apply them automatically.)
+## Principes Opératoires
 
-## Operating Principles
+### Efficience Contexte
 
-### Context Efficiency
+- **Tokens minimum signal élevé** : Se concentrer sur constatations actionnables, pas documentation exhaustive
+- **Divulgation progressive** : Charger artefacts incrémentalement ; ne pas déverser tout contenu en analyse
+- **Sortie token-efficiente** : Limiter table constatations à 50 lignes ; résumer débordement
+- **Résultats déterministes** : Ré-exécution sans changements doit produire IDs et comptages cohérents
 
-- **Minimal high-signal tokens**: Focus on actionable findings, not exhaustive documentation
-- **Progressive disclosure**: Load artifacts incrementally; don't dump all content into analysis
-- **Token-efficient output**: Limit findings table to 50 rows; summarize overflow
-- **Deterministic results**: Rerunning without changes should produce consistent IDs and counts
+### Directives Analyse
 
-### Analysis Guidelines
+- **NE JAMAIS modifier fichiers** (analyse lecture seule)
+- **NE JAMAIS halluciner sections manquantes** (si absent, rapporter avec précision)
+- **Prioriser violations constitution** (toujours CRITIQUES)
+- **Utiliser exemples plutôt que règles exhaustives** (citer instances spécifiques, pas patterns génériques)
+- **Rapporter zéro problème gracieusement** (émettre rapport succès avec statistiques couverture)
 
-- **NEVER modify files** (this is read-only analysis)
-- **NEVER hallucinate missing sections** (if absent, report them accurately)
-- **Prioritize constitution violations** (these are always CRITICAL)
-- **Use examples over exhaustive rules** (cite specific instances, not generic patterns)
-- **Report zero issues gracefully** (emit success report with coverage statistics)
-
-## Context
+## Contexte
 
 $ARGUMENTS
