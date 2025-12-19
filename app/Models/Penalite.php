@@ -106,4 +106,56 @@ class Penalite extends Model
     {
         return self::totalImpaye($etudiantId) > 0;
     }
+
+    /**
+     * Retourne toutes les pénalités d'un étudiant
+     * @return self[]
+     */
+    public static function pourEtudiant(int $etudiantId): array
+    {
+        $sql = "SELECT * FROM penalites WHERE etudiant_id = :id ORDER BY date_application DESC";
+        $stmt = self::raw($sql, ['id' => $etudiantId]);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(function (array $row) {
+            $model = new self($row);
+            $model->exists = true;
+            return $model;
+        }, $rows);
+    }
+
+    /**
+     * Vérifie si la pénalité est payée
+     */
+    public function estPayee(): bool
+    {
+        return (bool) $this->payee;
+    }
+
+    /**
+     * Génère le reçu de paiement
+     */
+    public function genererRecu(string $cheminRecu): void
+    {
+        $this->recu_chemin = $cheminRecu;
+        $this->save();
+    }
+
+    /**
+     * Retourne les statistiques des pénalités
+     */
+    public static function statistiques(): array
+    {
+        $sql = "SELECT 
+                    COUNT(*) as total,
+                    SUM(CASE WHEN payee = 1 THEN 1 ELSE 0 END) as payees,
+                    SUM(CASE WHEN payee = 0 THEN 1 ELSE 0 END) as impayees,
+                    COALESCE(SUM(montant), 0) as montant_total,
+                    COALESCE(SUM(CASE WHEN payee = 1 THEN montant ELSE 0 END), 0) as montant_paye,
+                    COALESCE(SUM(CASE WHEN payee = 0 THEN montant ELSE 0 END), 0) as montant_impaye
+                FROM penalites";
+        
+        $stmt = self::raw($sql);
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
 }
