@@ -9,7 +9,7 @@ use App\Orm\Model;
 /**
  * Modèle NiveauEtude
  * 
- * Représente un niveau d'étude (L1, L2, L3, M1, M2).
+ * Représente un niveau d'étude (Licence 1, Master 2, etc.).
  * Table: niveau_etude
  */
 class NiveauEtude extends Model
@@ -22,8 +22,21 @@ class NiveauEtude extends Model
         'ordre_niveau',
     ];
 
+    // ===== RELATIONS =====
+
     /**
-     * Trouve un niveau par son libellé
+     * Retourne les UE de ce niveau
+     * @return Ue[]
+     */
+    public function ues(): array
+    {
+        return $this->hasMany(Ue::class, 'niveau_id', 'id_niveau');
+    }
+
+    // ===== MÉTHODES DE RECHERCHE =====
+
+    /**
+     * Trouve par libellé
      */
     public static function findByLibelle(string $libelle): ?self
     {
@@ -31,13 +44,12 @@ class NiveauEtude extends Model
     }
 
     /**
-     * Retourne tous les niveaux triés
-     *
+     * Retourne tous les niveaux ordonnés
      * @return self[]
      */
-    public static function tousTriees(): array
+    public static function ordonnes(): array
     {
-        $sql = "SELECT * FROM niveau_etude ORDER BY ordre_niveau ASC";
+        $sql = "SELECT * FROM niveau_etude ORDER BY ordre_niveau";
         $stmt = self::raw($sql, []);
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -48,13 +60,23 @@ class NiveauEtude extends Model
         }, $rows);
     }
 
+    // ===== MÉTHODES MÉTIER =====
+
     /**
-     * Retourne les UE de ce niveau
+     * Compte les UE de ce niveau
      */
-    public function getUes(): array
+    public function nombreUes(): int
     {
-        $sql = "SELECT * FROM ue WHERE niveau_id = :id ORDER BY code_ue";
+        return Ue::count(['niveau_id' => $this->getId()]);
+    }
+
+    /**
+     * Total des crédits des UE du niveau
+     */
+    public function totalCredits(): int
+    {
+        $sql = "SELECT COALESCE(SUM(credits), 0) FROM ue WHERE niveau_id = :id";
         $stmt = self::raw($sql, ['id' => $this->getId()]);
-        return $stmt->fetchAll(\PDO::FETCH_OBJ);
+        return (int) $stmt->fetchColumn();
     }
 }

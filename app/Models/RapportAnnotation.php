@@ -32,27 +32,65 @@ class RapportAnnotation extends Model
     public const TYPE_CORRECTION = 'Correction';
     public const TYPE_SUGGESTION = 'Suggestion';
 
+    // ===== RELATIONS =====
+
     /**
      * Retourne le rapport
      */
-    public function getRapport(): ?RapportEtudiant
+    public function rapport(): ?RapportEtudiant
     {
-        if ($this->rapport_id === null) {
-            return null;
-        }
-        return RapportEtudiant::find((int) $this->rapport_id);
+        return $this->belongsTo(RapportEtudiant::class, 'rapport_id', 'id_rapport');
     }
 
     /**
      * Retourne l'auteur (enseignant)
      */
-    public function getAuteur(): ?Enseignant
+    public function auteur(): ?Enseignant
     {
-        if ($this->auteur_id === null) {
-            return null;
-        }
-        return Enseignant::find((int) $this->auteur_id);
+        return $this->belongsTo(Enseignant::class, 'auteur_id', 'id_enseignant');
     }
+
+    // ===== MÉTHODES DE RECHERCHE =====
+
+    /**
+     * Retourne les annotations d'un rapport
+     * @return self[]
+     */
+    public static function pourRapport(int $rapportId): array
+    {
+        $sql = "SELECT * FROM annotations_rapport 
+                WHERE rapport_id = :id 
+                ORDER BY page_numero, created_at";
+
+        $stmt = self::raw($sql, ['id' => $rapportId]);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(function (array $row) {
+            $model = new self($row);
+            $model->exists = true;
+            return $model;
+        }, $rows);
+    }
+
+    /**
+     * Retourne les annotations par auteur
+     * @return self[]
+     */
+    public static function parAuteur(int $auteurId): array
+    {
+        return self::where(['auteur_id' => $auteurId]);
+    }
+
+    /**
+     * Retourne les annotations par type
+     * @return self[]
+     */
+    public static function parType(string $type): array
+    {
+        return self::where(['type_annotation' => $type]);
+    }
+
+    // ===== MÉTHODES MÉTIER =====
 
     /**
      * Retourne la position décodée
@@ -66,45 +104,24 @@ class RapportAnnotation extends Model
     }
 
     /**
-     * Crée une annotation
+     * Définit la position
      */
-    public static function ajouter(
-        int $rapportId,
-        int $auteurId,
-        string $contenu,
-        string $type = self::TYPE_COMMENTAIRE,
-        ?int $pageNumero = null,
-        ?array $position = null
-    ): self {
-        $annotation = new self([
-            'rapport_id' => $rapportId,
-            'auteur_id' => $auteurId,
-            'contenu' => $contenu,
-            'type_annotation' => $type,
-            'page_numero' => $pageNumero,
-            'position_json' => $position ? json_encode($position) : null,
-        ]);
-        $annotation->save();
-        return $annotation;
+    public function setPosition(array $position): void
+    {
+        $this->position_json = json_encode($position);
     }
 
     /**
-     * Retourne les annotations d'un rapport
-     *
-     * @return self[]
+     * Compte les annotations par type pour un rapport
      */
-    public static function pourRapport(int $rapportId): array
+    public static function statistiquesParType(int $rapportId): array
     {
-        return self::where(['rapport_id' => $rapportId]);
-    }
+        $sql = "SELECT type_annotation, COUNT(*) as total
+                FROM annotations_rapport
+                WHERE rapport_id = :id
+                GROUP BY type_annotation";
 
-    /**
-     * Retourne les annotations d'un auteur
-     *
-     * @return self[]
-     */
-    public static function parAuteur(int $auteurId): array
-    {
-        return self::where(['auteur_id' => $auteurId]);
+        $stmt = self::raw($sql, ['id' => $rapportId]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

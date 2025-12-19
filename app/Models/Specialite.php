@@ -22,8 +22,21 @@ class Specialite extends Model
         'actif',
     ];
 
+    // ===== RELATIONS =====
+
     /**
-     * Trouve une spécialité par son libellé
+     * Retourne les enseignants de cette spécialité
+     * @return Enseignant[]
+     */
+    public function enseignants(): array
+    {
+        return $this->hasMany(Enseignant::class, 'specialite_id', 'id_specialite');
+    }
+
+    // ===== MÉTHODES DE RECHERCHE =====
+
+    /**
+     * Trouve par libellé
      */
     public static function findByLibelle(string $libelle): ?self
     {
@@ -32,7 +45,6 @@ class Specialite extends Model
 
     /**
      * Retourne toutes les spécialités actives
-     *
      * @return self[]
      */
     public static function actives(): array
@@ -40,11 +52,41 @@ class Specialite extends Model
         return self::where(['actif' => true]);
     }
 
+    // ===== MÉTHODES D'ÉTAT =====
+
     /**
-     * Retourne les enseignants de cette spécialité
+     * Vérifie si la spécialité est active
      */
-    public function getEnseignants(): array
+    public function estActive(): bool
     {
-        return Enseignant::where(['specialite_id' => $this->getId(), 'actif' => true]);
+        return (bool) $this->actif;
+    }
+
+    // ===== MÉTHODES MÉTIER =====
+
+    /**
+     * Compte les enseignants de cette spécialité
+     */
+    public function nombreEnseignants(): int
+    {
+        return Enseignant::count(['specialite_id' => $this->getId(), 'actif' => true]);
+    }
+
+    /**
+     * Active la spécialité
+     */
+    public function activer(): void
+    {
+        $this->actif = true;
+        $this->save();
+    }
+
+    /**
+     * Désactive la spécialité
+     */
+    public function desactiver(): void
+    {
+        $this->actif = false;
+        $this->save();
     }
 }

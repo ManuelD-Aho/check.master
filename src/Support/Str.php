@@ -56,11 +56,14 @@ class Str
      */
     public static function slug(string $value, string $separator = '-'): string
     {
+        // Conversion en minuscules d'abord
+        $value = mb_strtolower($value, 'UTF-8');
+        
         // Translittérer les caractères accentués
         $value = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $value);
 
         // Remplacer les caractères non alphanumériques par des séparateurs
-        $value = preg_replace('/[^a-zA-Z0-9\s-]/', '', $value);
+        $value = preg_replace('/[^a-z0-9\s-]/', '', $value);
 
         // Remplacer les espaces par des séparateurs
         $value = preg_replace('/[\s-]+/', $separator, $value);
@@ -78,7 +81,7 @@ class Str
             return $value;
         }
 
-        return mb_substr($value, 0, $limit, 'UTF-8') . $end;
+        return rtrim(mb_substr($value, 0, $limit, 'UTF-8')) . $end;
     }
 
     /**

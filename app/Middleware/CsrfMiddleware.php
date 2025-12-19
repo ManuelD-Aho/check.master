@@ -17,7 +17,7 @@ use Src\Support\CSRF;
  * 
  * @see Constitution III - Sécurité Par Défaut
  */
-class CSRFMiddleware
+class CsrfMiddleware
 {
     /**
      * Méthodes HTTP qui nécessitent une vérification CSRF

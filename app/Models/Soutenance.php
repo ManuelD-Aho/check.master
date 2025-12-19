@@ -19,13 +19,11 @@ class Soutenance extends Model
     protected array $fillable = [
         'dossier_id',
         'date_soutenance',
-        'heure_debut',
-        'heure_fin',
+        'lieu',
         'salle_id',
+        'duree_minutes',
         'statut',
-        'note_finale',
-        'mention',
-        'pv_signe',
+        'pv_genere',
         'pv_chemin',
     ];
 
@@ -97,13 +95,11 @@ class Soutenance extends Model
     }
 
     /**
-     * Termine la soutenance avec note et mention
+     * Termine la soutenance
      */
-    public function terminer(float $note, string $mention): void
+    public function terminer(): void
     {
         $this->statut = self::STATUT_TERMINEE;
-        $this->note_finale = $note;
-        $this->mention = $mention;
         $this->save();
     }
 
@@ -119,11 +115,13 @@ class Soutenance extends Model
     /**
      * Reporte la soutenance
      */
-    public function reporter(\DateTime $nouvelleDate, string $nouvelleHeure): void
+    public function reporter(\DateTime $nouvelleDateHeure, ?string $nouveauLieu = null): void
     {
         $this->statut = self::STATUT_REPORTEE;
-        $this->date_soutenance = $nouvelleDate->format('Y-m-d');
-        $this->heure_debut = $nouvelleHeure;
+        $this->date_soutenance = $nouvelleDateHeure->format('Y-m-d H:i:s');
+        if ($nouveauLieu) {
+            $this->lieu = $nouveauLieu;
+        }
         $this->save();
     }
 
@@ -170,11 +168,11 @@ class Soutenance extends Model
     }
 
     /**
-     * Marque le PV comme signé
+     * Marque le PV comme généré
      */
-    public function marquerPvSigne(string $chemin): void
+    public function marquerPvGenere(string $chemin): void
     {
-        $this->pv_signe = true;
+        $this->pv_genere = true;
         $this->pv_chemin = $chemin;
         $this->save();
     }

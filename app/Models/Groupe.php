@@ -9,7 +9,7 @@ use App\Orm\Model;
 /**
  * Modèle Groupe
  * 
- * Représente un groupe de permissions (rôle).
+ * Représente un groupe d'utilisateurs (pour permissions alternatives).
  * Table: groupes
  */
 class Groupe extends Model
@@ -23,85 +23,27 @@ class Groupe extends Model
         'actif',
     ];
 
+    // ===== RELATIONS =====
+
+    /**
+     * Retourne les associations utilisateurs-groupes
+     * @return UtilisateurGroupe[]
+     */
+    public function utilisateursGroupes(): array
+    {
+        return $this->hasMany(UtilisateurGroupe::class, 'groupe_id', 'id_groupe');
+    }
+
     /**
      * Retourne les permissions du groupe
-     *
      * @return Permission[]
      */
-    public function getPermissions(): array
+    public function permissions(): array
     {
-        return Permission::where(['groupe_id' => $this->getId()]);
+        return $this->hasMany(Permission::class, 'groupe_id', 'id_groupe');
     }
 
-    /**
-     * Retourne les utilisateurs de ce groupe
-     *
-     * @return Utilisateur[]
-     */
-    public function getUtilisateurs(): array
-    {
-        $sql = "SELECT u.* FROM utilisateurs u
-                INNER JOIN utilisateurs_groupes ug ON ug.utilisateur_id = u.id_utilisateur
-                WHERE ug.groupe_id = :groupe_id";
-
-        $stmt = self::raw($sql, ['groupe_id' => $this->getId()]);
-        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        return array_map(function (array $row) {
-            $model = new Utilisateur($row);
-            $model->exists = true;
-            return $model;
-        }, $rows);
-    }
-
-    /**
-     * Vérifie si le groupe a une permission sur une ressource
-     */
-    public function aPermission(string $codeRessource, string $action): bool
-    {
-        $sql = "SELECT p.* FROM permissions p
-                INNER JOIN ressources r ON r.id_ressource = p.ressource_id
-                WHERE p.groupe_id = :groupe_id AND r.code_ressource = :code";
-
-        $stmt = self::raw($sql, [
-            'groupe_id' => $this->getId(),
-            'code' => $codeRessource,
-        ]);
-
-        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        if (!$row) {
-            return false;
-        }
-
-        return match ($action) {
-            'lire' => (bool) ($row['peut_lire'] ?? false),
-            'creer' => (bool) ($row['peut_creer'] ?? false),
-            'modifier' => (bool) ($row['peut_modifier'] ?? false),
-            'supprimer' => (bool) ($row['peut_supprimer'] ?? false),
-            'exporter' => (bool) ($row['peut_exporter'] ?? false),
-            'valider' => (bool) ($row['peut_valider'] ?? false),
-            default => false,
-        };
-    }
-
-    /**
-     * Vérifie si le groupe est actif
-     */
-    public function estActif(): bool
-    {
-        return (bool) $this->actif;
-    }
-
-    /**
-     * Retourne tous les groupes actifs
-     *
-     * @return self[]
-     */
-    public static function actifs(): array
-    {
-        return self::where(['actif' => true]);
-    }
+    // ===== MÉTHODES DE RECHERCHE =====
 
     /**
      * Trouve un groupe par son nom
@@ -112,13 +54,21 @@ class Groupe extends Model
     }
 
     /**
-     * Retourne les groupes triés par niveau hiérarchique
-     *
+     * Retourne tous les groupes actifs
      * @return self[]
      */
-    public static function parHierarchie(): array
+    public static function actifs(): array
     {
-        $sql = "SELECT * FROM groupes WHERE actif = 1 ORDER BY niveau_hierarchique ASC";
+        return self::where(['actif' => true]);
+    }
+
+    /**
+     * Retourne les groupes ordonnés par niveau hiérarchique
+     * @return self[]
+     */
+    public static function parNiveauHierarchique(): array
+    {
+        $sql = "SELECT * FROM groupes WHERE actif = 1 ORDER BY niveau_hierarchique DESC, nom_groupe";
         $stmt = self::raw($sql, []);
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -129,13 +79,108 @@ class Groupe extends Model
         }, $rows);
     }
 
+    // ===== MÉTHODES D'ÉTAT =====
+
     /**
-     * Compte le nombre d'utilisateurs dans ce groupe
+     * Vérifie si le groupe est actif
+     */
+    public function estActif(): bool
+    {
+        return (bool) $this->actif;
+    }
+
+    // ===== MÉTHODES MÉTIER =====
+
+    /**
+     * Retourne les utilisateurs du groupe
+     * @return Utilisateur[]
+     */
+    public function getUtilisateurs(): array
+    {
+        $sql = "SELECT u.* FROM utilisateurs u
+                INNER JOIN utilisateurs_groupes ug ON u.id_utilisateur = ug.utilisateur_id
+                WHERE ug.groupe_id = :id AND u.statut_utilisateur = 'Actif'";
+
+        $stmt = self::raw($sql, ['id' => $this->getId()]);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(function (array $row) {
+            $model = new Utilisateur($row);
+            $model->exists = true;
+            return $model;
+        }, $rows);
+    }
+
+    /**
+     * Compte les utilisateurs du groupe
      */
     public function compterUtilisateurs(): int
     {
         $sql = "SELECT COUNT(*) FROM utilisateurs_groupes WHERE groupe_id = :id";
         $stmt = self::raw($sql, ['id' => $this->getId()]);
         return (int) $stmt->fetchColumn();
+    }
+
+    /**
+     * Ajoute un utilisateur au groupe
+     */
+    public function ajouterUtilisateur(int $utilisateurId, ?int $attribueParId = null): bool
+    {
+        // Vérifier si déjà membre
+        $sql = "SELECT COUNT(*) FROM utilisateurs_groupes 
+                WHERE utilisateur_id = :uid AND groupe_id = :gid";
+        $stmt = self::raw($sql, ['uid' => $utilisateurId, 'gid' => $this->getId()]);
+
+        if ((int) $stmt->fetchColumn() > 0) {
+            return false; // Déjà membre
+        }
+
+        $ug = new UtilisateurGroupe([
+            'utilisateur_id' => $utilisateurId,
+            'groupe_id' => $this->getId(),
+            'attribue_par' => $attribueParId,
+            'attribue_le' => date('Y-m-d H:i:s'),
+        ]);
+        return $ug->save();
+    }
+
+    /**
+     * Retire un utilisateur du groupe
+     */
+    public function retirerUtilisateur(int $utilisateurId): bool
+    {
+        $sql = "DELETE FROM utilisateurs_groupes 
+                WHERE utilisateur_id = :uid AND groupe_id = :gid";
+        $stmt = self::raw($sql, ['uid' => $utilisateurId, 'gid' => $this->getId()]);
+        return $stmt->rowCount() > 0;
+    }
+
+    /**
+     * Vérifie si un utilisateur est membre du groupe
+     */
+    public function contientUtilisateur(int $utilisateurId): bool
+    {
+        $sql = "SELECT COUNT(*) FROM utilisateurs_groupes 
+                WHERE utilisateur_id = :uid AND groupe_id = :gid";
+        $stmt = self::raw($sql, ['uid' => $utilisateurId, 'gid' => $this->getId()]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
+    /**
+     * Active le groupe
+     */
+    public function activer(): void
+    {
+        $this->actif = true;
+        $this->save();
+    }
+
+    /**
+     * Désactive le groupe
+     */
+    public function desactiver(): void
+    {
+        $this->actif = false;
+        $this->save();
     }
 }

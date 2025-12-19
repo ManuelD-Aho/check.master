@@ -9,7 +9,7 @@ use App\Orm\Model;
 /**
  * Modèle Permission
  * 
- * Représente les permissions d'un groupe sur une ressource.
+ * Représente les permissions granulaires par groupe et ressource.
  * Table: permissions
  */
 class Permission extends Model
@@ -29,7 +29,7 @@ class Permission extends Model
     ];
 
     /**
-     * Actions disponibles
+     * Actions possibles
      */
     public const ACTION_LIRE = 'lire';
     public const ACTION_CREER = 'creer';
@@ -38,24 +38,140 @@ class Permission extends Model
     public const ACTION_EXPORTER = 'exporter';
     public const ACTION_VALIDER = 'valider';
 
+    // ===== RELATIONS =====
+
     /**
-     * Vérifie si une action est autorisée
+     * Retourne le groupe
      */
-    public function peutEffectuer(string $action): bool
+    public function groupe(): ?Groupe
     {
-        return match ($action) {
-            self::ACTION_LIRE => (bool) $this->peut_lire,
-            self::ACTION_CREER => (bool) $this->peut_creer,
-            self::ACTION_MODIFIER => (bool) $this->peut_modifier,
-            self::ACTION_SUPPRIMER => (bool) $this->peut_supprimer,
-            self::ACTION_EXPORTER => (bool) $this->peut_exporter,
-            self::ACTION_VALIDER => (bool) $this->peut_valider,
-            default => false,
-        };
+        return $this->belongsTo(Groupe::class, 'groupe_id', 'id_groupe');
     }
 
     /**
-     * Retourne les conditions sous forme de tableau
+     * Retourne la ressource
+     */
+    public function ressource(): ?Ressource
+    {
+        return $this->belongsTo(Ressource::class, 'ressource_id', 'id_ressource');
+    }
+
+    // ===== MÉTHODES DE RECHERCHE =====
+
+    /**
+     * Trouve les permissions d'un groupe
+     * @return self[]
+     */
+    public static function pourGroupe(int $groupeId): array
+    {
+        return self::where(['groupe_id' => $groupeId]);
+    }
+
+    /**
+     * Trouve les permissions pour une ressource
+     * @return self[]
+     */
+    public static function pourRessource(int $ressourceId): array
+    {
+        return self::where(['ressource_id' => $ressourceId]);
+    }
+
+    /**
+     * Trouve la permission spécifique groupe/ressource
+     */
+    public static function trouver(int $groupeId, int $ressourceId): ?self
+    {
+        return self::firstWhere([
+            'groupe_id' => $groupeId,
+            'ressource_id' => $ressourceId,
+        ]);
+    }
+
+    /**
+     * Trouve la permission par groupe et code ressource
+     */
+    public static function trouverParCode(int $groupeId, string $codeRessource): ?self
+    {
+        $sql = "SELECT p.* FROM permissions p
+                INNER JOIN ressources r ON r.id_ressource = p.ressource_id
+                WHERE p.groupe_id = :gid AND r.code_ressource = :code
+                LIMIT 1";
+
+        $stmt = self::raw($sql, ['gid' => $groupeId, 'code' => $codeRessource]);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if (!$row) {
+            return null;
+        }
+
+        $model = new self($row);
+        $model->exists = true;
+        return $model;
+    }
+
+    // ===== MÉTHODES D'ÉTAT =====
+
+    /**
+     * Vérifie une action spécifique
+     */
+    public function peutAction(string $action): bool
+    {
+        $colonne = 'peut_' . $action;
+        return (bool) ($this->$colonne ?? false);
+    }
+
+    /**
+     * Vérifie si peut lire
+     */
+    public function peutLire(): bool
+    {
+        return (bool) $this->peut_lire;
+    }
+
+    /**
+     * Vérifie si peut créer
+     */
+    public function peutCreer(): bool
+    {
+        return (bool) $this->peut_creer;
+    }
+
+    /**
+     * Vérifie si peut modifier
+     */
+    public function peutModifier(): bool
+    {
+        return (bool) $this->peut_modifier;
+    }
+
+    /**
+     * Vérifie si peut supprimer
+     */
+    public function peutSupprimer(): bool
+    {
+        return (bool) $this->peut_supprimer;
+    }
+
+    /**
+     * Vérifie si peut exporter
+     */
+    public function peutExporter(): bool
+    {
+        return (bool) $this->peut_exporter;
+    }
+
+    /**
+     * Vérifie si peut valider
+     */
+    public function peutValider(): bool
+    {
+        return (bool) $this->peut_valider;
+    }
+
+    // ===== MÉTHODES MÉTIER =====
+
+    /**
+     * Retourne les conditions JSON décodées
      */
     public function getConditions(): array
     {
@@ -66,124 +182,85 @@ class Permission extends Model
     }
 
     /**
-     * Retourne le groupe associé
+     * Définit les conditions JSON
      */
-    public function getGroupe(): ?Groupe
+    public function setConditions(array $conditions): void
     {
-        if ($this->groupe_id === null) {
-            return null;
-        }
-        return Groupe::find((int) $this->groupe_id);
+        $this->conditions_json = json_encode($conditions);
     }
 
     /**
-     * Retourne la ressource associée
+     * Retourne toutes les permissions sous forme de tableau
      */
-    public function getRessource(): ?Ressource
+    public function toPermissionsArray(): array
     {
-        if ($this->ressource_id === null) {
-            return null;
-        }
-        return Ressource::find((int) $this->ressource_id);
+        return [
+            'lire' => $this->peutLire(),
+            'creer' => $this->peutCreer(),
+            'modifier' => $this->peutModifier(),
+            'supprimer' => $this->peutSupprimer(),
+            'exporter' => $this->peutExporter(),
+            'valider' => $this->peutValider(),
+        ];
     }
 
     /**
-     * Vérifie si un groupe a la permission sur une ressource
+     * Crée ou met à jour une permission
      */
-    public static function verifier(int $groupeId, string $codeRessource, string $action): bool
-    {
-        $sql = "SELECT p.* FROM permissions p
-                INNER JOIN ressources r ON r.id_ressource = p.ressource_id
-                WHERE p.groupe_id = :groupe_id AND r.code_ressource = :code";
-
-        $stmt = self::raw($sql, [
-            'groupe_id' => $groupeId,
-            'code' => $codeRessource,
-        ]);
-
-        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        if (!$row) {
-            return false; // DENY by default
-        }
-
-        $permission = new self($row);
-        $permission->exists = true;
-
-        return $permission->peutEffectuer($action);
-    }
-
-    /**
-     * Accorde une permission
-     */
-    public static function accorder(
+    public static function definir(
         int $groupeId,
         int $ressourceId,
-        array $actions
+        array $permissions,
+        ?array $conditions = null
     ): self {
-        // Chercher une permission existante
-        $existing = self::firstWhere([
-            'groupe_id' => $groupeId,
-            'ressource_id' => $ressourceId,
-        ]);
+        $perm = self::trouver($groupeId, $ressourceId);
 
-        if ($existing === null) {
-            $existing = new self([
-                'groupe_id' => $groupeId,
-                'ressource_id' => $ressourceId,
-            ]);
+        if ($perm === null) {
+            $perm = new self();
+            $perm->groupe_id = $groupeId;
+            $perm->ressource_id = $ressourceId;
         }
 
-        // Mettre à jour les actions
-        foreach ($actions as $action => $autorise) {
-            $colonne = 'peut_' . $action;
-            if (property_exists($existing, $colonne) || in_array($colonne, $existing->fillable)) {
-                $existing->$colonne = $autorise ? 1 : 0;
-            }
+        $perm->peut_lire = $permissions['lire'] ?? false;
+        $perm->peut_creer = $permissions['creer'] ?? false;
+        $perm->peut_modifier = $permissions['modifier'] ?? false;
+        $perm->peut_supprimer = $permissions['supprimer'] ?? false;
+        $perm->peut_exporter = $permissions['exporter'] ?? false;
+        $perm->peut_valider = $permissions['valider'] ?? false;
+
+        if ($conditions !== null) {
+            $perm->setConditions($conditions);
         }
 
-        $existing->save();
-        return $existing;
+        $perm->save();
+        return $perm;
     }
 
     /**
-     * Révoque toutes les permissions d'un groupe sur une ressource
+     * Accorde toutes les permissions
      */
-    public static function revoquer(int $groupeId, int $ressourceId): bool
+    public function accorderTout(): void
     {
-        $permission = self::firstWhere([
-            'groupe_id' => $groupeId,
-            'ressource_id' => $ressourceId,
-        ]);
-
-        if ($permission === null) {
-            return true;
-        }
-
-        return $permission->delete();
+        $this->peut_lire = true;
+        $this->peut_creer = true;
+        $this->peut_modifier = true;
+        $this->peut_supprimer = true;
+        $this->peut_exporter = true;
+        $this->peut_valider = true;
+        $this->save();
     }
 
     /**
-     * Retourne toutes les permissions d'un groupe
-     *
-     * @return self[]
+     * Révoque toutes les permissions
      */
-    public static function pourGroupe(int $groupeId): array
+    public function revoquerTout(): void
     {
-        return self::where(['groupe_id' => $groupeId]);
-    }
-
-    /**
-     * Retourne les permissions détaillées d'un groupe (avec ressources)
-     */
-    public static function detailleesGroupe(int $groupeId): array
-    {
-        $sql = "SELECT p.*, r.code_ressource, r.nom_ressource, r.module
-                FROM permissions p
-                INNER JOIN ressources r ON r.id_ressource = p.ressource_id
-                WHERE p.groupe_id = :groupe_id";
-
-        $stmt = self::raw($sql, ['groupe_id' => $groupeId]);
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $this->peut_lire = false;
+        $this->peut_creer = false;
+        $this->peut_modifier = false;
+        $this->peut_supprimer = false;
+        $this->peut_exporter = false;
+        $this->peut_valider = false;
+        $this->save();
     }
 }

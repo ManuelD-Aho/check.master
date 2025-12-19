@@ -163,4 +163,64 @@ class PasswordValidator
     {
         return reset($this->errors) ?: null;
     }
+
+    /**
+     * Alias pour validate() - pour compatibilité avec les tests
+     */
+    public function valider(string $password): bool
+    {
+        return $this->validate($password);
+    }
+
+    /**
+     * Retourne les erreurs - alias pour compatibilité
+     */
+    public function getErreurs(): array
+    {
+        return $this->getErrors();
+    }
+
+    /**
+     * Valide que deux mots de passe correspondent
+     */
+    public function validerConfirmation(string $password, string $confirmation): bool
+    {
+        if ($password !== $confirmation) {
+            $this->errors[] = 'Les mots de passe ne correspondent pas';
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Vérifie si un mot de passe est dans la liste des mots de passe communs
+     */
+    public function estMotDePasseCommun(string $password): bool
+    {
+        $commonPasswords = [
+            'password', 'password123', '12345678', 'qwerty', 'abc123',
+            'monkey', '1234567', 'letmein', 'trustno1', 'dragon',
+            'baseball', 'iloveyou', 'master', 'sunshine', 'ashley',
+            'bailey', 'passw0rd', 'shadow', '123123', '654321',
+            'p@ssw0rd'
+        ];
+
+        return in_array(strtolower($password), $commonPasswords, true);
+    }
+
+    /**
+     * Calcule la force du mot de passe - alias pour compatibilité
+     */
+    public function calculerForce(string $password): int
+    {
+        return $this->getStrengthScore($password);
+    }
+
+    /**
+     * Formate les erreurs en une chaîne
+     */
+    public function getErreursFormatees(): string
+    {
+        return implode(', ', $this->errors);
+    }
 }

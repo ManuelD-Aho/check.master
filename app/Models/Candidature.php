@@ -9,7 +9,7 @@ use App\Orm\Model;
 /**
  * Modèle Candidature
  * 
- * Représente une candidature de stage/mémoire.
+ * Représente une candidature de soutenance.
  * Table: candidatures
  */
 class Candidature extends Model
@@ -32,72 +32,51 @@ class Candidature extends Model
         'date_valid_communication',
     ];
 
+    // ===== RELATIONS =====
+
     /**
-     * Retourne le dossier associé
+     * Retourne le dossier étudiant
      */
-    public function getDossier(): ?DossierEtudiant
+    public function dossier(): ?DossierEtudiant
     {
-        if ($this->dossier_id === null) {
-            return null;
-        }
-        return DossierEtudiant::find((int) $this->dossier_id);
+        return $this->belongsTo(DossierEtudiant::class, 'dossier_id', 'id_dossier');
     }
 
     /**
-     * Retourne l'entreprise associée
+     * Retourne l'entreprise de stage
      */
-    public function getEntreprise(): ?Entreprise
+    public function entreprise(): ?Entreprise
     {
         if ($this->entreprise_id === null) {
             return null;
         }
-        return Entreprise::find((int) $this->entreprise_id);
+        return $this->belongsTo(Entreprise::class, 'entreprise_id', 'id_entreprise');
     }
 
+    // ===== MÉTHODES DE RECHERCHE =====
+
     /**
-     * Valide la candidature par la scolarité
+     * Trouve la candidature d'un dossier
      */
-    public function validerScolarite(): void
+    public static function pourDossier(int $dossierId): ?self
     {
-        $this->validee_scolarite = true;
-        $this->date_valid_scolarite = date('Y-m-d H:i:s');
-        $this->save();
+        return self::firstWhere(['dossier_id' => $dossierId]);
     }
 
     /**
-     * Valide la candidature par la communication
-     */
-    public function validerCommunication(): void
-    {
-        $this->validee_communication = true;
-        $this->date_valid_communication = date('Y-m-d H:i:s');
-        $this->save();
-    }
-
-    /**
-     * Vérifie si la candidature est complètement validée
-     */
-    public function estValidee(): bool
-    {
-        return (bool) $this->validee_scolarite && (bool) $this->validee_communication;
-    }
-
-    /**
-     * Retourne les candidatures en attente de validation scolarité
-     *
+     * Retourne les candidatures non validées par scolarité
      * @return self[]
      */
-    public static function enAttenteScolarite(): array
+    public static function attenteValidationScolarite(): array
     {
         return self::where(['validee_scolarite' => false]);
     }
 
     /**
      * Retourne les candidatures en attente de validation communication
-     *
      * @return self[]
      */
-    public static function enAttenteCommunication(): array
+    public static function attenteValidationCommunication(): array
     {
         return self::where([
             'validee_scolarite' => true,
@@ -110,7 +89,7 @@ class Candidature extends Model
      */
     public static function rechercherParTheme(string $terme, int $limit = 50): array
     {
-        $sql = "SELECT c.*, de.etudiant_id, e.nom_etu, e.prenom_etu
+        $sql = "SELECT c.*, e.nom_etu, e.prenom_etu 
                 FROM candidatures c
                 INNER JOIN dossiers_etudiants de ON de.id_dossier = c.dossier_id
                 INNER JOIN etudiants e ON e.id_etudiant = de.etudiant_id
@@ -123,6 +102,114 @@ class Candidature extends Model
         $stmt->bindValue('limit', $limit, \PDO::PARAM_INT);
         $stmt->execute();
 
-        return $stmt->fetchAll(\PDO::FETCH_OBJ);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    // ===== MÉTHODES D'ÉTAT =====
+
+    /**
+     * Vérifie si validée par la scolarité
+     */
+    public function estValideeScolarite(): bool
+    {
+        return (bool) $this->validee_scolarite;
+    }
+
+    /**
+     * Vérifie si validée par la communication
+     */
+    public function estValideeCommunication(): bool
+    {
+        return (bool) $this->validee_communication;
+    }
+
+    /**
+     * Vérifie si la candidature est complètement validée
+     */
+    public function estCompleteValidee(): bool
+    {
+        return $this->estValideeScolarite() && $this->estValideeCommunication();
+    }
+
+    // ===== MÉTHODES MÉTIER =====
+
+    /**
+     * Valide par la scolarité
+     */
+    public function validerScolarite(): void
+    {
+        $this->validee_scolarite = true;
+        $this->date_valid_scolarite = date('Y-m-d H:i:s');
+        $this->save();
+    }
+
+    /**
+     * Rejette par la scolarité
+     */
+    public function rejeterScolarite(): void
+    {
+        $this->validee_scolarite = false;
+        $this->date_valid_scolarite = null;
+        $this->save();
+    }
+
+    /**
+     * Valide par la communication
+     */
+    public function validerCommunication(): void
+    {
+        $this->validee_communication = true;
+        $this->date_valid_communication = date('Y-m-d H:i:s');
+        $this->save();
+    }
+
+    /**
+     * Rejette par la communication
+     */
+    public function rejeterCommunication(): void
+    {
+        $this->validee_communication = false;
+        $this->date_valid_communication = null;
+        $this->save();
+    }
+
+    /**
+     * Calcule la durée du stage en jours
+     */
+    public function getDureeStageJours(): ?int
+    {
+        if (empty($this->date_debut_stage) || empty($this->date_fin_stage)) {
+            return null;
+        }
+        $debut = new \DateTime($this->date_debut_stage);
+        $fin = new \DateTime($this->date_fin_stage);
+        return $debut->diff($fin)->days;
+    }
+
+    /**
+     * Retourne les informations du maître de stage
+     */
+    public function getInfosMaitreStage(): array
+    {
+        return [
+            'nom' => $this->maitre_stage_nom,
+            'email' => $this->maitre_stage_email,
+            'telephone' => $this->maitre_stage_tel,
+        ];
+    }
+
+    /**
+     * Statistiques par entreprise
+     */
+    public static function statistiquesParEntreprise(): array
+    {
+        $sql = "SELECT e.nom_entreprise, COUNT(c.id_candidature) as total
+                FROM entreprises e
+                INNER JOIN candidatures c ON c.entreprise_id = e.id_entreprise
+                GROUP BY e.id_entreprise, e.nom_entreprise
+                ORDER BY total DESC
+                LIMIT 20";
+        $stmt = self::raw($sql, []);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

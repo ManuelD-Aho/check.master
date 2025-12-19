@@ -9,7 +9,7 @@ use App\Orm\Model;
 /**
  * Modèle Fonction
  * 
- * Représente une fonction (Directeur, Chef de département, etc.).
+ * Représente une fonction administrative ou académique.
  * Table: fonctions
  */
 class Fonction extends Model
@@ -22,8 +22,30 @@ class Fonction extends Model
         'actif',
     ];
 
+    // ===== RELATIONS =====
+
     /**
-     * Trouve une fonction par son libellé
+     * Retourne les enseignants avec cette fonction
+     * @return Enseignant[]
+     */
+    public function enseignants(): array
+    {
+        return $this->hasMany(Enseignant::class, 'fonction_id', 'id_fonction');
+    }
+
+    /**
+     * Retourne le personnel admin avec cette fonction
+     * @return PersonnelAdmin[]
+     */
+    public function personnelAdmin(): array
+    {
+        return $this->hasMany(PersonnelAdmin::class, 'fonction_id', 'id_fonction');
+    }
+
+    // ===== MÉTHODES DE RECHERCHE =====
+
+    /**
+     * Trouve par libellé
      */
     public static function findByLibelle(string $libelle): ?self
     {
@@ -32,11 +54,40 @@ class Fonction extends Model
 
     /**
      * Retourne toutes les fonctions actives
-     *
      * @return self[]
      */
     public static function actives(): array
     {
         return self::where(['actif' => true]);
+    }
+
+    // ===== MÉTHODES D'ÉTAT =====
+
+    /**
+     * Vérifie si la fonction est active
+     */
+    public function estActive(): bool
+    {
+        return (bool) $this->actif;
+    }
+
+    // ===== MÉTHODES MÉTIER =====
+
+    /**
+     * Active la fonction
+     */
+    public function activer(): void
+    {
+        $this->actif = true;
+        $this->save();
+    }
+
+    /**
+     * Désactive la fonction
+     */
+    public function desactiver(): void
+    {
+        $this->actif = false;
+        $this->save();
     }
 }

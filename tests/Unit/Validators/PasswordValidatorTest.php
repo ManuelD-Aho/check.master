@@ -16,7 +16,7 @@ class PasswordValidatorTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->validator = new PasswordValidator();
+        $this->validator = new PasswordValidator(8, true, true, true, true);
     }
 
     /**

@@ -20,6 +20,8 @@ require_once BASE_PATH . '/vendor/autoload.php';
 
 // Configurer le rapport d'erreurs selon l'environnement
 $environment = getenv('APP_ENV') ?: 'production';
+define('APP_ENV', $environment);
+define('APP_DEBUG', $environment === 'development' || $environment === 'testing');
 
 if ($environment === 'development' || $environment === 'testing') {
     error_reporting(E_ALL);
@@ -58,7 +60,7 @@ if (class_exists(\Monolog\Logger::class)) {
     $handler = new \Monolog\Handler\RotatingFileHandler(
         STORAGE_PATH . '/logs/app.log',
         7, // Garder 7 jours de logs
-        \Monolog\Level::Debug
+        \Monolog\Logger::DEBUG
     );
     $handler->setFormatter(new \Monolog\Formatter\LineFormatter(
         "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n",

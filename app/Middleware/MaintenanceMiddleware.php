@@ -111,8 +111,11 @@ class MaintenanceMiddleware
      */
     private function renderMaintenancePage(array $data): string
     {
-        $message = htmlspecialchars($data['message'] ?? 'Maintenance en cours');
+        $message = htmlspecialchars($data['message'] ?? 'Maintenance en cours', ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $retour = $data['expected_return'] ?? null;
+        $retourHtml = $retour
+            ? '<p>Retour prévu : ' . htmlspecialchars($retour, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '</p>'
+            : '';
 
         return <<<HTML
 <!DOCTYPE html>
@@ -136,7 +139,7 @@ class MaintenanceMiddleware
         <div class="icon">🔧</div>
         <h1>Maintenance en cours</h1>
         <p>{$message}</p>
-        {$retour ? "<p>Retour prévu : {$retour}</p>" : ""}
+        {$retourHtml}
     </div>
 </body>
 </html>

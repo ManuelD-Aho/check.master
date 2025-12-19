@@ -15,7 +15,7 @@ use App\Orm\Model;
 class JuryMembre extends Model
 {
     protected string $table = 'jury_membres';
-    protected string $primaryKey = 'id_jury_membre';
+    protected string $primaryKey = 'id_membre_jury';
     protected array $fillable = [
         'dossier_id',
         'enseignant_id',

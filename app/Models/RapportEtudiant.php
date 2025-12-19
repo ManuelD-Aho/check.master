@@ -9,7 +9,7 @@ use App\Orm\Model;
 /**
  * Modèle RapportEtudiant
  * 
- * Représente un rapport de stage/mémoire.
+ * Représente un rapport de mémoire étudiant.
  * Table: rapports_etudiants
  */
 class RapportEtudiant extends Model
@@ -28,7 +28,7 @@ class RapportEtudiant extends Model
     ];
 
     /**
-     * Statuts du rapport
+     * Statuts possibles
      */
     public const STATUT_BROUILLON = 'Brouillon';
     public const STATUT_SOUMIS = 'Soumis';
@@ -36,87 +36,45 @@ class RapportEtudiant extends Model
     public const STATUT_VALIDE = 'Valide';
     public const STATUT_REJETE = 'Rejete';
 
-    /**
-     * Retourne le dossier associé
-     */
-    public function getDossier(): ?DossierEtudiant
-    {
-        if ($this->dossier_id === null) {
-            return null;
-        }
-        return DossierEtudiant::find((int) $this->dossier_id);
-    }
+    // ===== RELATIONS =====
 
     /**
-     * Soumet le rapport
+     * Retourne le dossier étudiant
      */
-    public function soumettre(): void
+    public function dossier(): ?DossierEtudiant
     {
-        $this->statut = self::STATUT_SOUMIS;
-        $this->date_depot = date('Y-m-d H:i:s');
-        $this->save();
+        return $this->belongsTo(DossierEtudiant::class, 'dossier_id', 'id_dossier');
     }
 
     /**
      * Retourne les annotations du rapport
+     * @return RapportAnnotation[]
      */
-    public function getAnnotations(): array
+    public function annotations(): array
     {
-        $sql = "SELECT a.*, e.nom_ens, e.prenom_ens
-                FROM annotations_rapport a
-                INNER JOIN enseignants e ON e.id_enseignant = a.auteur_id
-                WHERE a.rapport_id = :id
-                ORDER BY a.created_at DESC";
-
-        $stmt = self::raw($sql, ['id' => $this->getId()]);
-        return $stmt->fetchAll(\PDO::FETCH_OBJ);
+        return $this->hasMany(RapportAnnotation::class, 'rapport_id', 'id_rapport');
     }
 
     /**
-     * Incrémente la version et crée une nouvelle entrée
+     * Retourne les votes de commission
+     * @return CommissionVote[]
      */
-    public function nouvelleVersion(): self
+    public function votesCommission(): array
     {
-        $nouveau = new self([
-            'dossier_id' => $this->dossier_id,
-            'titre' => $this->titre,
-            'contenu_html' => $this->contenu_html,
-            'version' => ($this->version ?? 1) + 1,
-            'statut' => self::STATUT_BROUILLON,
-        ]);
-        $nouveau->save();
-        return $nouveau;
+        return $this->hasMany(CommissionVote::class, 'rapport_id', 'id_rapport');
     }
 
-    /**
-     * Calcule le hash SHA256 du fichier
-     */
-    public function calculerHash(): ?string
-    {
-        if (empty($this->chemin_fichier) || !file_exists($this->chemin_fichier)) {
-            return null;
-        }
-
-        return hash_file('sha256', $this->chemin_fichier);
-    }
+    // ===== MÉTHODES DE RECHERCHE =====
 
     /**
-     * Vérifie l'intégrité du fichier
+     * Trouve le rapport actuel d'un dossier (dernière version)
      */
-    public function verifierIntegrite(): bool
-    {
-        $hash = $this->calculerHash();
-        return $hash !== null && $hash === $this->hash_fichier;
-    }
-
-    /**
-     * Retourne le dernier rapport d'un dossier
-     */
-    public static function dernierPourDossier(int $dossierId): ?self
+    public static function actuelPourDossier(int $dossierId): ?self
     {
         $sql = "SELECT * FROM rapports_etudiants 
                 WHERE dossier_id = :id 
-                ORDER BY version DESC LIMIT 1";
+                ORDER BY version DESC 
+                LIMIT 1";
 
         $stmt = self::raw($sql, ['id' => $dossierId]);
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -131,12 +89,182 @@ class RapportEtudiant extends Model
     }
 
     /**
-     * Retourne les rapports soumis (en attente d'évaluation)
-     *
+     * Retourne toutes les versions d'un dossier
      * @return self[]
      */
-    public static function soumis(): array
+    public static function versionsParDossier(int $dossierId): array
+    {
+        $sql = "SELECT * FROM rapports_etudiants 
+                WHERE dossier_id = :id 
+                ORDER BY version DESC";
+
+        $stmt = self::raw($sql, ['id' => $dossierId]);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(function (array $row) {
+            $model = new self($row);
+            $model->exists = true;
+            return $model;
+        }, $rows);
+    }
+
+    /**
+     * Retourne les rapports par statut
+     * @return self[]
+     */
+    public static function parStatut(string $statut): array
+    {
+        return self::where(['statut' => $statut]);
+    }
+
+    /**
+     * Retourne les rapports en attente d'évaluation
+     * @return self[]
+     */
+    public static function enAttenteEvaluation(): array
     {
         return self::where(['statut' => self::STATUT_SOUMIS]);
+    }
+
+    // ===== MÉTHODES D'ÉTAT =====
+
+    /**
+     * Vérifie si le rapport est en brouillon
+     */
+    public function estBrouillon(): bool
+    {
+        return $this->statut === self::STATUT_BROUILLON;
+    }
+
+    /**
+     * Vérifie si le rapport est soumis
+     */
+    public function estSoumis(): bool
+    {
+        return $this->statut === self::STATUT_SOUMIS;
+    }
+
+    /**
+     * Vérifie si le rapport est en évaluation
+     */
+    public function estEnEvaluation(): bool
+    {
+        return $this->statut === self::STATUT_EN_EVALUATION;
+    }
+
+    /**
+     * Vérifie si le rapport est validé
+     */
+    public function estValide(): bool
+    {
+        return $this->statut === self::STATUT_VALIDE;
+    }
+
+    /**
+     * Vérifie si le rapport est rejeté
+     */
+    public function estRejete(): bool
+    {
+        return $this->statut === self::STATUT_REJETE;
+    }
+
+    // ===== MÉTHODES MÉTIER =====
+
+    /**
+     * Soumet le rapport
+     */
+    public function soumettre(): void
+    {
+        $this->statut = self::STATUT_SOUMIS;
+        $this->date_depot = date('Y-m-d H:i:s');
+        $this->save();
+    }
+
+    /**
+     * Passe en évaluation
+     */
+    public function passerEnEvaluation(): void
+    {
+        $this->statut = self::STATUT_EN_EVALUATION;
+        $this->save();
+    }
+
+    /**
+     * Valide le rapport
+     */
+    public function valider(): void
+    {
+        $this->statut = self::STATUT_VALIDE;
+        $this->save();
+    }
+
+    /**
+     * Rejette le rapport
+     */
+    public function rejeter(): void
+    {
+        $this->statut = self::STATUT_REJETE;
+        $this->save();
+    }
+
+    /**
+     * Crée une nouvelle version du rapport
+     */
+    public function creerNouvelleVersion(): self
+    {
+        $nouvelleVersion = new self([
+            'dossier_id' => $this->dossier_id,
+            'titre' => $this->titre,
+            'contenu_html' => $this->contenu_html,
+            'version' => ($this->version ?? 0) + 1,
+            'statut' => self::STATUT_BROUILLON,
+        ]);
+        $nouvelleVersion->save();
+        return $nouvelleVersion;
+    }
+
+    /**
+     * Calcule le hash SHA256 du fichier
+     */
+    public function calculerHash(): ?string
+    {
+        if (empty($this->chemin_fichier) || !file_exists($this->chemin_fichier)) {
+            return null;
+        }
+        return hash_file('sha256', $this->chemin_fichier);
+    }
+
+    /**
+     * Vérifie l'intégrité du fichier
+     */
+    public function verifierIntegrite(): bool
+    {
+        $hashActuel = $this->calculerHash();
+        if ($hashActuel === null) {
+            return false;
+        }
+        return $hashActuel === $this->hash_fichier;
+    }
+
+    /**
+     * Compte les annotations du rapport
+     */
+    public function nombreAnnotations(): int
+    {
+        return RapportAnnotation::count(['rapport_id' => $this->getId()]);
+    }
+
+    /**
+     * Retourne le résultat des votes (si évalué)
+     */
+    public function getResultatVotes(): array
+    {
+        $sql = "SELECT decision, COUNT(*) as total
+                FROM votes_commission
+                WHERE rapport_id = :id
+                GROUP BY decision";
+
+        $stmt = self::raw($sql, ['id' => $this->getId()]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

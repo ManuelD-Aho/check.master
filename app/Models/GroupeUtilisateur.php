@@ -9,109 +9,132 @@ use App\Orm\Model;
 /**
  * Modèle GroupeUtilisateur
  * 
- * Table pivot entre utilisateurs et groupes.
- * Table: utilisateurs_groupes
+ * Représente un groupe d'utilisateurs pour la gestion des droits.
+ * Table: groupe_utilisateur
  */
 class GroupeUtilisateur extends Model
 {
-    protected string $table = 'utilisateurs_groupes';
-    protected string $primaryKey = 'utilisateur_id'; // Composite key
+    protected string $table = 'groupe_utilisateur';
+    protected string $primaryKey = 'id_GU';
     protected array $fillable = [
-        'utilisateur_id',
-        'groupe_id',
-        'attribue_par',
-        'attribue_le',
+        'lib_GU',
+        'description',
+        'niveau_hierarchique',
     ];
 
     /**
-     * Assigne un utilisateur à un groupe
+     * Groupes prédéfinis
      */
-    public static function assigner(int $utilisateurId, int $groupeId, ?int $attribuePar = null): bool
+    public const GROUPE_ADMIN = 'Administrateur';
+    public const GROUPE_SCOLARITE = 'Scolarité';
+    public const GROUPE_COMMUNICATION = 'Communication';
+    public const GROUPE_COMMISSION = 'Commission';
+    public const GROUPE_ENSEIGNANT = 'Enseignant';
+    public const GROUPE_ETUDIANT = 'Etudiant';
+
+    // ===== MÉTHODES DE RECHERCHE =====
+
+    /**
+     * Trouve un groupe par son libellé
+     */
+    public static function findByLibelle(string $libelle): ?self
     {
-        // Vérifier si l'assignation existe déjà
-        if (self::existe($utilisateurId, $groupeId)) {
-            return true;
-        }
-
-        $pivot = new self([
-            'utilisateur_id' => $utilisateurId,
-            'groupe_id' => $groupeId,
-            'attribue_par' => $attribuePar,
-            'attribue_le' => date('Y-m-d H:i:s'),
-        ]);
-
-        return $pivot->save();
+        return self::firstWhere(['lib_GU' => $libelle]);
     }
 
     /**
-     * Retire un utilisateur d'un groupe
+     * Retourne tous les groupes triés par niveau hiérarchique
+     * @return self[]
      */
-    public static function retirer(int $utilisateurId, int $groupeId): bool
+    public static function triesParNiveau(): array
     {
-        $sql = "DELETE FROM utilisateurs_groupes 
-                WHERE utilisateur_id = :user_id AND groupe_id = :groupe_id";
-
-        $stmt = self::raw($sql, [
-            'user_id' => $utilisateurId,
-            'groupe_id' => $groupeId,
-        ]);
-
-        return $stmt->rowCount() > 0;
-    }
-
-    /**
-     * Vérifie si une assignation existe
-     */
-    public static function existe(int $utilisateurId, int $groupeId): bool
-    {
-        $sql = "SELECT COUNT(*) FROM utilisateurs_groupes 
-                WHERE utilisateur_id = :user_id AND groupe_id = :groupe_id";
-
-        $stmt = self::raw($sql, [
-            'user_id' => $utilisateurId,
-            'groupe_id' => $groupeId,
-        ]);
-
-        return (int) $stmt->fetchColumn() > 0;
-    }
-
-    /**
-     * Retourne tous les groupes d'un utilisateur
-     *
-     * @return Groupe[]
-     */
-    public static function groupesUtilisateur(int $utilisateurId): array
-    {
-        $sql = "SELECT g.* FROM groupes g
-                INNER JOIN utilisateurs_groupes ug ON ug.groupe_id = g.id_groupe
-                WHERE ug.utilisateur_id = :user_id AND g.actif = 1";
-
-        $stmt = self::raw($sql, ['user_id' => $utilisateurId]);
+        $sql = "SELECT * FROM groupe_utilisateur ORDER BY niveau_hierarchique ASC, lib_GU ASC";
+        $stmt = self::raw($sql);
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         return array_map(function (array $row) {
-            $model = new Groupe($row);
+            $model = new self($row);
             $model->exists = true;
             return $model;
         }, $rows);
     }
 
-    /**
-     * Synchronise les groupes d'un utilisateur
-     *
-     * @param int $utilisateurId
-     * @param int[] $groupeIds
-     * @param int|null $attribuePar
-     */
-    public static function synchroniser(int $utilisateurId, array $groupeIds, ?int $attribuePar = null): void
-    {
-        // Supprimer toutes les assignations actuelles
-        $sql = "DELETE FROM utilisateurs_groupes WHERE utilisateur_id = :user_id";
-        self::raw($sql, ['user_id' => $utilisateurId]);
+    // ===== RELATIONS =====
 
-        // Ajouter les nouvelles assignations
-        foreach ($groupeIds as $groupeId) {
-            self::assigner($utilisateurId, $groupeId, $attribuePar);
-        }
+    /**
+     * Retourne tous les utilisateurs de ce groupe (rôle principal)
+     * @return Utilisateur[]
+     */
+    public function utilisateurs(): array
+    {
+        return Utilisateur::where(['id_GU' => $this->getId()]);
+    }
+
+    /**
+     * Retourne les permissions de ce groupe
+     * @return Rattacher[]
+     */
+    public function permissions(): array
+    {
+        return Rattacher::pourGroupe($this->getId());
+    }
+
+    // ===== MÉTHODES MÉTIER =====
+
+    /**
+     * Crée un nouveau groupe
+     */
+    public static function creer(
+        string $libelle,
+        ?string $description = null,
+        int $niveau = 0
+    ): self {
+        $groupe = new self([
+            'lib_GU' => $libelle,
+            'description' => $description,
+            'niveau_hierarchique' => $niveau,
+        ]);
+        $groupe->save();
+        return $groupe;
+    }
+
+    /**
+     * Vérifie si le groupe a une permission sur un traitement
+     */
+    public function aPermission(int $traitementId, int $actionId): bool
+    {
+        return Rattacher::aPermission($this->getId(), $traitementId, $actionId);
+    }
+
+    /**
+     * Vérifie si ce groupe a un niveau supérieur à un autre
+     */
+    public function estSuperieurA(self $autre): bool
+    {
+        return (int) $this->niveau_hierarchique < (int) $autre->niveau_hierarchique;
+    }
+
+    /**
+     * Compte les utilisateurs dans ce groupe
+     */
+    public function nombreUtilisateurs(): int
+    {
+        return Utilisateur::count(['id_GU' => $this->getId()]);
+    }
+
+    /**
+     * Retourne le groupe administrateur
+     */
+    public static function administrateur(): ?self
+    {
+        return self::findByLibelle(self::GROUPE_ADMIN);
+    }
+
+    /**
+     * Retourne le groupe scolarité
+     */
+    public static function scolarite(): ?self
+    {
+        return self::findByLibelle(self::GROUPE_SCOLARITE);
     }
 }

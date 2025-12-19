@@ -18,11 +18,12 @@ class Note extends Model
     protected string $primaryKey = 'id_note';
     protected array $fillable = [
         'soutenance_id',
-        'jury_membre_id',
-        'note_contenu',
-        'note_presentation',
-        'note_travail',
-        'note_globale',
+        'membre_jury_id',
+        'note_fond',
+        'note_forme',
+        'note_soutenance',
+        'note_finale',
+        'mention',
         'commentaire',
     ];
 
@@ -49,31 +50,35 @@ class Note extends Model
      */
     public function getJuryMembre(): ?JuryMembre
     {
-        if ($this->jury_membre_id === null) {
+        if ($this->membre_jury_id === null) {
             return null;
         }
-        return JuryMembre::find((int) $this->jury_membre_id);
+        return JuryMembre::find((int) $this->membre_jury_id);
     }
 
     /**
-     * Calcule la note globale
+     * Calcule la note finale (moyenne pondérée ou simple)
      */
-    public function calculerNoteGlobale(): float
+    public function calculerNoteFinale(): float
     {
-        return round(
-            ($this->note_contenu * self::COEF_CONTENU) +
-                ($this->note_presentation * self::COEF_PRESENTATION) +
-                ($this->note_travail * self::COEF_TRAVAIL),
-            2
-        );
+        // Selon le PRD, la note finale est souvent la moyenne ou calculée via pondération
+        // Ici on fait une moyenne simple des composantes si disponibles
+        $composantes = [];
+        if ($this->note_fond !== null) $composantes[] = $this->note_fond;
+        if ($this->note_forme !== null) $composantes[] = $this->note_forme;
+        if ($this->note_soutenance !== null) $composantes[] = $this->note_soutenance;
+
+        if (empty($composantes)) return 0.0;
+
+        return round(array_sum($composantes) / count($composantes), 2);
     }
 
     /**
-     * Sauvegarde avec calcul automatique de la note globale
+     * Sauvegarde avec calcul automatique de la note finale
      */
     public function save(): bool
     {
-        $this->note_globale = $this->calculerNoteGlobale();
+        $this->note_finale = $this->calculerNoteFinale();
         return parent::save();
     }
 
@@ -100,7 +105,7 @@ class Note extends Model
 
         $total = 0;
         foreach ($notes as $note) {
-            $total += (float) $note->note_globale;
+            $total += (float) $note->note_finale;
         }
 
         return round($total / count($notes), 2);

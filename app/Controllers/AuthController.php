@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Services\Security\ServiceAuthentification;
 use App\Services\Security\ServicePermissions;
+use App\Services\Security\ServiceAudit;
 use App\Models\SessionActive;
 use Src\Http\Request;
 use Src\Http\Response;
@@ -200,5 +201,93 @@ class AuthController
         unset($_SESSION['redirect_after_login']);
 
         return $url;
+    }
+
+    /**
+     * GET|POST /change-password - Changement de mot de passe
+     */
+    public function changePassword(): Response
+    {
+        // Vérifier que l'utilisateur est connecté
+        if (!Auth::check()) {
+            return Response::redirect('/');
+        }
+
+        $user = Auth::user();
+        if ($user === null) {
+            return Response::redirect('/');
+        }
+
+        // Si POST, traiter le formulaire
+        if (Request::method() === 'POST') {
+            return $this->processChangePassword($user);
+        }
+
+        // GET: Afficher le formulaire
+        $isForced = $user->doitChangerMotDePasse();
+
+        ob_start();
+        include dirname(__DIR__, 2) . '/ressources/views/change_password.php';
+        $content = ob_get_clean();
+
+        return Response::html($content);
+    }
+
+    /**
+     * Traite le changement de mot de passe
+     */
+    private function processChangePassword(\App\Models\Utilisateur $user): Response
+    {
+        $currentPassword = Request::post('current_password', '');
+        $newPassword = Request::post('new_password', '');
+        $confirmPassword = Request::post('confirm_password', '');
+
+        // Validation
+        $errors = [];
+
+        if ($currentPassword === '') {
+            $errors[] = 'Le mot de passe actuel est requis.';
+        } elseif (!$this->authService->verifierMotDePasse($currentPassword, $user->mdp_utilisateur)) {
+            $errors[] = 'Le mot de passe actuel est incorrect.';
+        }
+
+        if ($newPassword === '') {
+            $errors[] = 'Le nouveau mot de passe est requis.';
+        } elseif (strlen($newPassword) < 8) {
+            $errors[] = 'Le nouveau mot de passe doit contenir au moins 8 caractères.';
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            $errors[] = 'Les mots de passe ne correspondent pas.';
+        }
+
+        if ($currentPassword === $newPassword) {
+            $errors[] = 'Le nouveau mot de passe doit être différent de l\'ancien.';
+        }
+
+        if (!empty($errors)) {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $_SESSION['flash_errors'] = $errors;
+            return Response::redirect('/change-password');
+        }
+
+        // Mettre à jour le mot de passe
+        $user->mdp_utilisateur = $this->authService->hasherMotDePasse($newPassword);
+        $user->doit_changer_mdp = false;
+        $user->save();
+
+        // Log audit
+        ServiceAudit::log('password_changed', 'utilisateur', $user->getId(), [
+            'changed_by' => 'self',
+        ]);
+
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $_SESSION['flash_success'] = 'Mot de passe modifié avec succès.';
+
+        return Response::redirect('/dashboard');
     }
 }

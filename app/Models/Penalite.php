@@ -18,12 +18,12 @@ class Penalite extends Model
     protected string $primaryKey = 'id_penalite';
     protected array $fillable = [
         'etudiant_id',
-        'type_penalite',
         'montant',
         'motif',
         'date_application',
         'payee',
         'date_paiement',
+        'recu_chemin',
     ];
 
     /**
@@ -60,16 +60,14 @@ class Penalite extends Model
      */
     public static function appliquer(
         int $etudiantId,
-        string $type,
         float $montant,
         string $motif
     ): self {
         $penalite = new self([
             'etudiant_id' => $etudiantId,
-            'type_penalite' => $type,
             'montant' => $montant,
             'motif' => $motif,
-            'date_application' => date('Y-m-d H:i:s'),
+            'date_application' => date('Y-m-d'),
             'payee' => false,
         ]);
         $penalite->save();

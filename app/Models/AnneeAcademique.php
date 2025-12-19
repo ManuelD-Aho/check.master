@@ -9,7 +9,7 @@ use App\Orm\Model;
 /**
  * Modèle AnneeAcademique
  * 
- * Représente une année académique (ex: 2024-2025).
+ * Représente une année académique.
  * Table: annee_academique
  */
 class AnneeAcademique extends Model
@@ -23,21 +23,71 @@ class AnneeAcademique extends Model
         'est_active',
     ];
 
+    // ===== RELATIONS =====
+
     /**
-     * Retourne l'année académique active
+     * Retourne les semestres de cette année
+     * @return Semestre[]
      */
-    public static function getActive(): ?self
+    public function semestres(): array
     {
-        return self::firstWhere(['est_active' => true]);
+        return $this->hasMany(Semestre::class, 'annee_acad_id', 'id_annee_acad');
     }
 
     /**
-     * Trouve une année par son libellé
+     * Retourne les dossiers étudiants de cette année
+     * @return DossierEtudiant[]
+     */
+    public function dossiersEtudiants(): array
+    {
+        return $this->hasMany(DossierEtudiant::class, 'annee_acad_id', 'id_annee_acad');
+    }
+
+    /**
+     * Retourne les paiements de cette année
+     * @return Paiement[]
+     */
+    public function paiements(): array
+    {
+        return $this->hasMany(Paiement::class, 'annee_acad_id', 'id_annee_acad');
+    }
+
+    // ===== MÉTHODES DE RECHERCHE =====
+
+    /**
+     * Trouve par libellé
      */
     public static function findByLibelle(string $libelle): ?self
     {
         return self::firstWhere(['lib_annee_acad' => $libelle]);
     }
+
+    /**
+     * Retourne l'année académique active
+     */
+    public static function active(): ?self
+    {
+        return self::firstWhere(['est_active' => true]);
+    }
+
+    /**
+     * Retourne toutes les années ordonnées
+     * @return self[]
+     */
+    public static function ordonnees(): array
+    {
+        $sql = "SELECT * FROM annee_academique ORDER BY date_debut DESC";
+        $stmt = self::raw($sql, []);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(function (array $row) {
+            $model = new self($row);
+            $model->exists = true;
+            return $model;
+        }, $rows);
+    }
+
+    // ===== MÉTHODES D'ÉTAT =====
 
     /**
      * Vérifie si l'année est active
@@ -48,7 +98,36 @@ class AnneeAcademique extends Model
     }
 
     /**
-     * Active cette année (désactive les autres)
+     * Vérifie si on est actuellement dans cette année
+     */
+    public function estEnCours(): bool
+    {
+        $now = time();
+        $debut = strtotime($this->date_debut);
+        $fin = strtotime($this->date_fin);
+        return $now >= $debut && $now <= $fin;
+    }
+
+    /**
+     * Vérifie si l'année est passée
+     */
+    public function estPassee(): bool
+    {
+        return strtotime($this->date_fin) < time();
+    }
+
+    /**
+     * Vérifie si l'année est future
+     */
+    public function estFuture(): bool
+    {
+        return strtotime($this->date_debut) > time();
+    }
+
+    // ===== MÉTHODES MÉTIER =====
+
+    /**
+     * Active cette année (et désactive les autres)
      */
     public function activer(): void
     {
@@ -62,49 +141,69 @@ class AnneeAcademique extends Model
     }
 
     /**
-     * Retourne les semestres de cette année
+     * Désactive cette année
      */
-    public function getSemestres(): array
+    public function desactiver(): void
     {
-        $sql = "SELECT * FROM semestre WHERE annee_acad_id = :id ORDER BY lib_semestre";
+        $this->est_active = false;
+        $this->save();
+    }
+
+    /**
+     * Retourne la durée en jours
+     */
+    public function getDureeJours(): int
+    {
+        $debut = new \DateTime($this->date_debut);
+        $fin = new \DateTime($this->date_fin);
+        return $debut->diff($fin)->days;
+    }
+
+    /**
+     * Compte les dossiers étudiants
+     */
+    public function nombreDossiers(): int
+    {
+        return DossierEtudiant::count(['annee_acad_id' => $this->getId()]);
+    }
+
+    /**
+     * Compte les dossiers par état
+     */
+    public function statistiquesDossiersParEtat(): array
+    {
+        $sql = "SELECT we.code_etat, we.nom_etat, COUNT(de.id_dossier) as total
+                FROM workflow_etats we
+                LEFT JOIN dossiers_etudiants de ON de.etat_actuel_id = we.id_etat 
+                    AND de.annee_acad_id = :id
+                GROUP BY we.id_etat, we.code_etat, we.nom_etat
+                ORDER BY we.ordre_affichage";
+
         $stmt = self::raw($sql, ['id' => $this->getId()]);
-        return $stmt->fetchAll(\PDO::FETCH_OBJ);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     /**
-     * Vérifie si une date est dans cette année académique
+     * Total des paiements de l'année
      */
-    public function contientDate(\DateTime $date): bool
+    public function totalPaiements(): float
     {
-        $dateStr = $date->format('Y-m-d');
-        return $dateStr >= $this->date_debut && $dateStr <= $this->date_fin;
-    }
-
-    /**
-     * Retourne toutes les années triées par date décroissante
-     *
-     * @return self[]
-     */
-    public static function toutesTriees(): array
-    {
-        $sql = "SELECT * FROM annee_academique ORDER BY date_debut DESC";
-        $stmt = self::raw($sql, []);
-        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        return array_map(function (array $row) {
-            $model = new self($row);
-            $model->exists = true;
-            return $model;
-        }, $rows);
-    }
-
-    /**
-     * Compte les étudiants inscrits cette année
-     */
-    public function nombreEtudiants(): int
-    {
-        $sql = "SELECT COUNT(DISTINCT etudiant_id) FROM dossiers_etudiants WHERE annee_acad_id = :id";
+        $sql = "SELECT COALESCE(SUM(montant), 0) FROM paiements WHERE annee_acad_id = :id";
         $stmt = self::raw($sql, ['id' => $this->getId()]);
-        return (int) $stmt->fetchColumn();
+        return (float) $stmt->fetchColumn();
+    }
+
+    /**
+     * Génère le libellé pour l'année suivante
+     */
+    public function genererLibelleSuivante(): string
+    {
+        // Parse le libellé actuel (format: 2024-2025)
+        if (preg_match('/(\d{4})-(\d{4})/', $this->lib_annee_acad, $matches)) {
+            $debut = (int) $matches[1] + 1;
+            $fin = (int) $matches[2] + 1;
+            return "{$debut}-{$fin}";
+        }
+        return '';
     }
 }

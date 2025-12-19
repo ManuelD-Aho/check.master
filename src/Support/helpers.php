@@ -150,10 +150,41 @@ if (!function_exists('dd')) {
 
 if (!function_exists('now')) {
     /**
-     * Retourne la date/heure actuelle formatée
+     * Retourne une instance DateTimeImmutable pour maintenant
      */
-    function now(string $format = 'Y-m-d H:i:s'): string
+    function now(string|DateTimeZone|null $tz = null): \DateTimeImmutable
     {
-        return date($format);
+        return new \DateTimeImmutable('now', $tz instanceof DateTimeZone ? $tz : null);
+    }
+}
+
+if (!function_exists('env')) {
+    /**
+     * Récupère une variable d'environnement
+     */
+    function env(string $key, mixed $default = null): mixed
+    {
+        $value = getenv($key);
+
+        if ($value === false) {
+            return $default;
+        }
+
+        switch (strtolower($value)) {
+            case 'true':
+            case '(true)':
+                return true;
+            case 'false':
+            case '(false)':
+                return false;
+            case 'empty':
+            case '(empty)':
+                return '';
+            case 'null':
+            case '(null)':
+                return null;
+        }
+
+        return $value;
     }
 }

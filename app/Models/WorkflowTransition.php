@@ -9,7 +9,7 @@ use App\Orm\Model;
 /**
  * Modèle WorkflowTransition
  * 
- * Représente une transition possible entre deux états du workflow.
+ * Représente une transition autorisée entre deux états du workflow.
  * Table: workflow_transitions
  */
 class WorkflowTransition extends Model
@@ -26,8 +26,28 @@ class WorkflowTransition extends Model
         'notifier',
     ];
 
+    // ===== RELATIONS =====
+
     /**
-     * Trouve une transition par son code
+     * Retourne l'état source
+     */
+    public function etatSource(): ?WorkflowEtat
+    {
+        return $this->belongsTo(WorkflowEtat::class, 'etat_source_id', 'id_etat');
+    }
+
+    /**
+     * Retourne l'état cible
+     */
+    public function etatCible(): ?WorkflowEtat
+    {
+        return $this->belongsTo(WorkflowEtat::class, 'etat_cible_id', 'id_etat');
+    }
+
+    // ===== MÉTHODES DE RECHERCHE =====
+
+    /**
+     * Trouve par code
      */
     public static function findByCode(string $code): ?self
     {
@@ -35,29 +55,48 @@ class WorkflowTransition extends Model
     }
 
     /**
-     * Retourne l'état source
+     * Trouve une transition entre deux états
      */
-    public function getEtatSource(): ?WorkflowEtat
+    public static function trouverTransition(int $etatSourceId, int $etatCibleId): ?self
     {
-        if ($this->etat_source_id === null) {
-            return null;
-        }
-        return WorkflowEtat::find((int) $this->etat_source_id);
+        return self::firstWhere([
+            'etat_source_id' => $etatSourceId,
+            'etat_cible_id' => $etatCibleId,
+        ]);
     }
 
     /**
-     * Retourne l'état cible
+     * Retourne les transitions depuis un état
+     * @return self[]
      */
-    public function getEtatCible(): ?WorkflowEtat
+    public static function depuisEtat(int $etatId): array
     {
-        if ($this->etat_cible_id === null) {
-            return null;
-        }
-        return WorkflowEtat::find((int) $this->etat_cible_id);
+        return self::where(['etat_source_id' => $etatId]);
     }
 
     /**
-     * Retourne les rôles autorisés
+     * Retourne les transitions vers un état
+     * @return self[]
+     */
+    public static function versEtat(int $etatId): array
+    {
+        return self::where(['etat_cible_id' => $etatId]);
+    }
+
+    // ===== MÉTHODES D'ÉTAT =====
+
+    /**
+     * Vérifie si la transition doit déclencher des notifications
+     */
+    public function doitNotifier(): bool
+    {
+        return (bool) $this->notifier;
+    }
+
+    // ===== MÉTHODES MÉTIER =====
+
+    /**
+     * Retourne les rôles autorisés décodés
      */
     public function getRolesAutorises(): array
     {
@@ -68,16 +107,15 @@ class WorkflowTransition extends Model
     }
 
     /**
-     * Vérifie si un rôle est autorisé pour cette transition
+     * Définit les rôles autorisés
      */
-    public function estAutoriseePourRole(string $role): bool
+    public function setRolesAutorises(array $roles): void
     {
-        $roles = $this->getRolesAutorises();
-        return in_array($role, $roles, true) || in_array('*', $roles, true);
+        $this->roles_autorises = json_encode($roles);
     }
 
     /**
-     * Retourne les conditions de la transition
+     * Retourne les conditions décodées
      */
     public function getConditions(): array
     {
@@ -88,41 +126,36 @@ class WorkflowTransition extends Model
     }
 
     /**
-     * Vérifie si les notifications sont activées
+     * Définit les conditions
      */
-    public function doitNotifier(): bool
+    public function setConditions(array $conditions): void
     {
-        return (bool) $this->notifier;
+        $this->conditions_json = json_encode($conditions);
     }
 
     /**
-     * Trouve la transition entre deux états
+     * Vérifie si un rôle est autorisé pour cette transition
      */
-    public static function trouverTransition(int $sourceId, int $cibleId): ?self
+    public function roleAutorise(string $role): bool
     {
-        return self::firstWhere([
-            'etat_source_id' => $sourceId,
-            'etat_cible_id' => $cibleId,
-        ]);
+        $roles = $this->getRolesAutorises();
+        if (empty($roles)) {
+            return true; // Pas de restriction
+        }
+        return in_array($role, $roles, true);
     }
 
     /**
-     * Retourne toutes les transitions depuis un état
-     *
-     * @return self[]
+     * Retourne le libellé complet de la transition
      */
-    public static function depuisEtat(int $etatId): array
+    public function getLibelleComplet(): string
     {
-        return self::where(['etat_source_id' => $etatId]);
-    }
+        $source = $this->etatSource();
+        $cible = $this->etatCible();
 
-    /**
-     * Retourne toutes les transitions vers un état
-     *
-     * @return self[]
-     */
-    public static function versEtat(int $etatId): array
-    {
-        return self::where(['etat_cible_id' => $etatId]);
+        $sourceNom = $source ? $source->nom_etat : '?';
+        $cibleNom = $cible ? $cible->nom_etat : '?';
+
+        return "{$sourceNom} → {$cibleNom}";
     }
 }

@@ -27,6 +27,70 @@ class Enseignant extends Model
         'actif',
     ];
 
+    // ===== RELATIONS =====
+
+    /**
+     * Retourne le grade
+     */
+    public function grade(): ?Grade
+    {
+        if ($this->grade_id === null) {
+            return null;
+        }
+        return $this->belongsTo(Grade::class, 'grade_id', 'id_grade');
+    }
+
+    /**
+     * Retourne la fonction
+     */
+    public function fonction(): ?Fonction
+    {
+        if ($this->fonction_id === null) {
+            return null;
+        }
+        return $this->belongsTo(Fonction::class, 'fonction_id', 'id_fonction');
+    }
+
+    /**
+     * Retourne la spécialité
+     */
+    public function specialite(): ?Specialite
+    {
+        if ($this->specialite_id === null) {
+            return null;
+        }
+        return $this->belongsTo(Specialite::class, 'specialite_id', 'id_specialite');
+    }
+
+    /**
+     * Retourne les votes de commission
+     * @return CommissionVote[]
+     */
+    public function votesCommission(): array
+    {
+        return $this->hasMany(CommissionVote::class, 'membre_id', 'id_enseignant');
+    }
+
+    /**
+     * Retourne les annotations de rapport
+     * @return RapportAnnotation[]
+     */
+    public function annotationsRapport(): array
+    {
+        return $this->hasMany(RapportAnnotation::class, 'auteur_id', 'id_enseignant');
+    }
+
+    /**
+     * Retourne les participations au jury
+     * @return JuryMembre[]
+     */
+    public function participationsJury(): array
+    {
+        return $this->hasMany(JuryMembre::class, 'enseignant_id', 'id_enseignant');
+    }
+
+    // ===== MÉTHODES DE RECHERCHE =====
+
     /**
      * Trouve un enseignant par son email
      */
@@ -36,117 +100,30 @@ class Enseignant extends Model
     }
 
     /**
-     * Retourne le nom complet
-     */
-    public function getNomComplet(): string
-    {
-        return trim($this->prenom_ens . ' ' . $this->nom_ens);
-    }
-
-    /**
-     * Retourne le nom complet avec titre (grade)
-     */
-    public function getNomCompletAvecTitre(): string
-    {
-        $grade = $this->getGrade();
-        $titre = $grade ? $grade->lib_grade . ' ' : '';
-        return $titre . $this->getNomComplet();
-    }
-
-    /**
-     * Vérifie si l'enseignant est actif
-     */
-    public function estActif(): bool
-    {
-        return (bool) $this->actif;
-    }
-
-    /**
-     * Retourne le grade de l'enseignant
-     */
-    public function getGrade(): ?object
-    {
-        if ($this->grade_id === null) {
-            return null;
-        }
-
-        $sql = "SELECT * FROM grades WHERE id_grade = :id";
-        $stmt = self::raw($sql, ['id' => $this->grade_id]);
-        return $stmt->fetch(\PDO::FETCH_OBJ) ?: null;
-    }
-
-    /**
-     * Retourne la spécialité de l'enseignant
-     */
-    public function getSpecialite(): ?object
-    {
-        if ($this->specialite_id === null) {
-            return null;
-        }
-
-        $sql = "SELECT * FROM specialites WHERE id_specialite = :id";
-        $stmt = self::raw($sql, ['id' => $this->specialite_id]);
-        return $stmt->fetch(\PDO::FETCH_OBJ) ?: null;
-    }
-
-    /**
-     * Retourne la fonction de l'enseignant
-     */
-    public function getFonction(): ?object
-    {
-        if ($this->fonction_id === null) {
-            return null;
-        }
-
-        $sql = "SELECT * FROM fonctions WHERE id_fonction = :id";
-        $stmt = self::raw($sql, ['id' => $this->fonction_id]);
-        return $stmt->fetch(\PDO::FETCH_OBJ) ?: null;
-    }
-
-    /**
-     * Retourne les jurys où l'enseignant est membre
-     */
-    public function getJurys(?string $statut = null): array
-    {
-        $sql = "SELECT jm.*, de.*, s.date_soutenance
-                FROM jury_membres jm
-                INNER JOIN dossiers_etudiants de ON de.id_dossier = jm.dossier_id
-                LEFT JOIN soutenances s ON s.dossier_id = de.id_dossier
-                WHERE jm.enseignant_id = :id";
-
-        $params = ['id' => $this->getId()];
-
-        if ($statut !== null) {
-            $sql .= " AND jm.statut_acceptation = :statut";
-            $params['statut'] = $statut;
-        }
-
-        $sql .= " ORDER BY s.date_soutenance DESC";
-
-        $stmt = self::raw($sql, $params);
-        return $stmt->fetchAll(\PDO::FETCH_OBJ);
-    }
-
-    /**
-     * Compte les invitations en attente
-     */
-    public function invitationsEnAttente(): int
-    {
-        $sql = "SELECT COUNT(*) FROM jury_membres 
-                WHERE enseignant_id = :id AND statut_acceptation = 'Invite'";
-
-        $stmt = self::raw($sql, ['id' => $this->getId()]);
-        return (int) $stmt->fetchColumn();
-    }
-
-    /**
      * Retourne tous les enseignants actifs
-     *
      * @return self[]
      */
     public static function actifs(): array
     {
         return self::where(['actif' => true]);
+    }
+
+    /**
+     * Retourne les enseignants par grade
+     * @return self[]
+     */
+    public static function parGrade(int $gradeId): array
+    {
+        return self::where(['grade_id' => $gradeId, 'actif' => true]);
+    }
+
+    /**
+     * Retourne les enseignants par spécialité
+     * @return self[]
+     */
+    public static function parSpecialite(int $specialiteId): array
+    {
+        return self::where(['specialite_id' => $specialiteId, 'actif' => true]);
     }
 
     /**
@@ -177,28 +154,107 @@ class Enseignant extends Model
         }, $rows);
     }
 
+    // ===== MÉTHODES D'ÉTAT =====
+
     /**
-     * Retourne les enseignants par spécialité
-     *
-     * @return self[]
+     * Vérifie si l'enseignant est actif
      */
-    public static function parSpecialite(int $specialiteId): array
+    public function estActif(): bool
     {
-        return self::where(['specialite_id' => $specialiteId, 'actif' => true]);
+        return (bool) $this->actif;
+    }
+
+    // ===== MÉTHODES HELPER =====
+
+    /**
+     * Retourne le nom complet
+     */
+    public function getNomComplet(): string
+    {
+        return trim($this->prenom_ens . ' ' . $this->nom_ens);
     }
 
     /**
-     * Retourne les enseignants par grade
-     *
-     * @return self[]
+     * Retourne le nom formel avec grade
      */
-    public static function parGrade(int $gradeId): array
+    public function getNomFormelAvecGrade(): string
     {
-        return self::where(['grade_id' => $gradeId, 'actif' => true]);
+        $grade = $this->grade();
+        $prefix = $grade ? $grade->lib_grade . ' ' : '';
+        return $prefix . strtoupper($this->nom_ens ?? '') . ' ' . $this->prenom_ens;
     }
 
     /**
-     * Vérifie si l'enseignant est disponible à une date
+     * Retourne le titre complet
+     */
+    public function getTitreComplet(): string
+    {
+        $grade = $this->grade();
+        $fonction = $this->fonction();
+
+        $parts = [];
+        if ($grade) {
+            $parts[] = $grade->lib_grade;
+        }
+        $parts[] = $this->getNomComplet();
+        if ($fonction) {
+            $parts[] = '(' . $fonction->lib_fonction . ')';
+        }
+
+        return implode(' ', $parts);
+    }
+
+    // ===== MÉTHODES COMMISSION =====
+
+    /**
+     * Vérifie si l'enseignant est membre de commission
+     */
+    public function estMembreCommission(): bool
+    {
+        // Vérifier via le groupe utilisateur
+        $sql = "SELECT COUNT(*) FROM utilisateurs u
+                INNER JOIN utilisateurs_groupes ug ON u.id_utilisateur = ug.utilisateur_id
+                INNER JOIN groupes g ON g.id_groupe = ug.groupe_id
+                WHERE u.login_utilisateur = :email 
+                AND g.nom_groupe LIKE '%Commission%'";
+
+        $stmt = self::raw($sql, ['email' => $this->email_ens]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
+    /**
+     * Retourne les sessions de commission où l'enseignant a voté
+     */
+    public function getSessionsCommissionParticipees(): array
+    {
+        $sql = "SELECT DISTINCT sc.* FROM sessions_commission sc
+                INNER JOIN votes_commission vc ON vc.session_id = sc.id_session
+                WHERE vc.membre_id = :id
+                ORDER BY sc.date_session DESC";
+
+        $stmt = self::raw($sql, ['id' => $this->getId()]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    // ===== MÉTHODES JURY =====
+
+    /**
+     * Retourne les soutenances où l'enseignant est juré
+     */
+    public function getSoutenancesJury(): array
+    {
+        $sql = "SELECT s.*, jm.role_jury, jm.statut_acceptation
+                FROM soutenances s
+                INNER JOIN jury_membres jm ON jm.dossier_id = s.dossier_id
+                WHERE jm.enseignant_id = :id
+                ORDER BY s.date_soutenance DESC";
+
+        $stmt = self::raw($sql, ['id' => $this->getId()]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Vérifie la disponibilité pour une date
      */
     public function estDisponible(\DateTime $date): bool
     {
@@ -214,6 +270,76 @@ class Enseignant extends Model
             'date' => $date->format('Y-m-d'),
         ]);
 
-        return (int) $stmt->fetchColumn() === 0;
+        // Si l'enseignant a moins de 3 soutenances ce jour, il est disponible
+        return (int) $stmt->fetchColumn() < 3;
+    }
+
+    /**
+     * Compte les soutenances sur une période
+     */
+    public function nombreSoutenances(\DateTime $debut, \DateTime $fin): int
+    {
+        $sql = "SELECT COUNT(*) FROM soutenances s
+                INNER JOIN jury_membres jm ON jm.dossier_id = s.dossier_id
+                WHERE jm.enseignant_id = :id 
+                AND jm.statut_acceptation = 'Accepte'
+                AND s.date_soutenance BETWEEN :debut AND :fin
+                AND s.statut NOT IN ('Annulee', 'Reportee')";
+
+        $stmt = self::raw($sql, [
+            'id' => $this->getId(),
+            'debut' => $debut->format('Y-m-d H:i:s'),
+            'fin' => $fin->format('Y-m-d H:i:s'),
+        ]);
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    // ===== MÉTHODES MÉTIER =====
+
+    /**
+     * Active l'enseignant
+     */
+    public function activer(): void
+    {
+        $this->actif = true;
+        $this->save();
+    }
+
+    /**
+     * Désactive l'enseignant
+     */
+    public function desactiver(): void
+    {
+        $this->actif = false;
+        $this->save();
+    }
+
+    /**
+     * Statistiques par grade
+     */
+    public static function statistiquesParGrade(): array
+    {
+        $sql = "SELECT g.lib_grade, COUNT(e.id_enseignant) as total
+                FROM grades g
+                LEFT JOIN enseignants e ON e.grade_id = g.id_grade AND e.actif = 1
+                GROUP BY g.id_grade, g.lib_grade
+                ORDER BY g.niveau_hierarchique DESC";
+        $stmt = self::raw($sql, []);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Statistiques par spécialité
+     */
+    public static function statistiquesParSpecialite(): array
+    {
+        $sql = "SELECT s.lib_specialite, COUNT(e.id_enseignant) as total
+                FROM specialites s
+                LEFT JOIN enseignants e ON e.specialite_id = s.id_specialite AND e.actif = 1
+                GROUP BY s.id_specialite, s.lib_specialite
+                ORDER BY total DESC";
+        $stmt = self::raw($sql, []);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

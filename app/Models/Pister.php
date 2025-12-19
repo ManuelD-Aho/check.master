@@ -7,12 +7,10 @@ namespace App\Models;
 use App\Orm\Model;
 
 /**
- * Modèle Pister (Audit Trail)
+ * Modèle Pister
  * 
- * Enregistre toutes les actions critiques dans le système.
+ * Journal d'audit inaltérable pour traçabilité complète.
  * Table: pister
- * 
- * Note: Aucune suppression autorisée (auditabilité totale).
  */
 class Pister extends Model
 {
@@ -29,10 +27,11 @@ class Pister extends Model
     ];
 
     /**
-     * Actions prédéfinies
+     * Actions courantes
      */
     public const ACTION_CONNEXION = 'connexion';
     public const ACTION_DECONNEXION = 'deconnexion';
+    public const ACTION_ECHEC_CONNEXION = 'echec_connexion';
     public const ACTION_CREATION = 'creation';
     public const ACTION_MODIFICATION = 'modification';
     public const ACTION_SUPPRESSION = 'suppression';
@@ -40,152 +39,34 @@ class Pister extends Model
     public const ACTION_EXPORT = 'export';
     public const ACTION_VALIDATION = 'validation';
     public const ACTION_TRANSITION = 'transition_workflow';
-    public const ACTION_TENTATIVE_ECHEC = 'tentative_echec';
+    public const ACTION_UPLOAD = 'upload';
+    public const ACTION_TELECHARGEMENT = 'telechargement';
+
+    // ===== RELATIONS =====
 
     /**
-     * Enregistre une action dans l'audit trail
+     * Retourne l'utilisateur qui a effectué l'action
      */
-    public static function enregistrer(
-        string $action,
-        ?int $utilisateurId = null,
-        ?string $entiteType = null,
-        ?int $entiteId = null,
-        ?array $donnees = null,
-        ?string $ipAdresse = null,
-        ?string $userAgent = null
-    ): self {
-        $entry = new self([
-            'utilisateur_id' => $utilisateurId,
-            'action' => $action,
-            'entite_type' => $entiteType,
-            'entite_id' => $entiteId,
-            'donnees_snapshot' => $donnees !== null ? json_encode($donnees) : null,
-            'ip_adresse' => $ipAdresse ?? self::getClientIp(),
-            'user_agent' => $userAgent ?? self::getUserAgent(),
-        ]);
-        $entry->save();
-        return $entry;
-    }
-
-    /**
-     * Enregistre une connexion réussie
-     */
-    public static function connexion(int $utilisateurId): self
+    public function utilisateur(): ?Utilisateur
     {
-        return self::enregistrer(
-            self::ACTION_CONNEXION,
-            $utilisateurId,
-            'utilisateur',
-            $utilisateurId
-        );
+        if ($this->utilisateur_id === null) {
+            return null;
+        }
+        return $this->belongsTo(Utilisateur::class, 'utilisateur_id', 'id_utilisateur');
     }
 
-    /**
-     * Enregistre une déconnexion
-     */
-    public static function deconnexion(int $utilisateurId): self
-    {
-        return self::enregistrer(
-            self::ACTION_DECONNEXION,
-            $utilisateurId,
-            'utilisateur',
-            $utilisateurId
-        );
-    }
+    // ===== MÉTHODES DE RECHERCHE =====
 
     /**
-     * Enregistre une tentative de connexion échouée
-     */
-    public static function tentativeEchouee(string $login, string $raison): self
-    {
-        return self::enregistrer(
-            self::ACTION_TENTATIVE_ECHEC,
-            null,
-            null,
-            null,
-            ['login' => $login, 'raison' => $raison]
-        );
-    }
-
-    /**
-     * Enregistre la création d'une entité
-     */
-    public static function creation(int $utilisateurId, string $entiteType, int $entiteId, array $donnees = []): self
-    {
-        return self::enregistrer(
-            self::ACTION_CREATION,
-            $utilisateurId,
-            $entiteType,
-            $entiteId,
-            $donnees
-        );
-    }
-
-    /**
-     * Enregistre une modification avec snapshot avant/après
-     */
-    public static function modification(
-        int $utilisateurId,
-        string $entiteType,
-        int $entiteId,
-        array $avant,
-        array $apres
-    ): self {
-        return self::enregistrer(
-            self::ACTION_MODIFICATION,
-            $utilisateurId,
-            $entiteType,
-            $entiteId,
-            ['avant' => $avant, 'apres' => $apres]
-        );
-    }
-
-    /**
-     * Enregistre une suppression avec snapshot
-     */
-    public static function suppression(int $utilisateurId, string $entiteType, int $entiteId, array $donnees): self
-    {
-        return self::enregistrer(
-            self::ACTION_SUPPRESSION,
-            $utilisateurId,
-            $entiteType,
-            $entiteId,
-            $donnees
-        );
-    }
-
-    /**
-     * Enregistre une transition de workflow
-     */
-    public static function transitionWorkflow(
-        int $utilisateurId,
-        int $dossierId,
-        string $etatSource,
-        string $etatCible,
-        ?string $commentaire = null
-    ): self {
-        return self::enregistrer(
-            self::ACTION_TRANSITION,
-            $utilisateurId,
-            'dossier',
-            $dossierId,
-            [
-                'etat_source' => $etatSource,
-                'etat_cible' => $etatCible,
-                'commentaire' => $commentaire,
-            ]
-        );
-    }
-
-    /**
-     * Retourne les logs d'un utilisateur
-     *
+     * Retourne les entrées pour un utilisateur
      * @return self[]
      */
     public static function pourUtilisateur(int $utilisateurId, int $limit = 100): array
     {
-        $sql = "SELECT * FROM pister WHERE utilisateur_id = :id 
-                ORDER BY created_at DESC LIMIT :limit";
+        $sql = "SELECT * FROM pister 
+                WHERE utilisateur_id = :id 
+                ORDER BY created_at DESC 
+                LIMIT :limit";
 
         $stmt = self::getConnection()->prepare($sql);
         $stmt->bindValue('id', $utilisateurId, \PDO::PARAM_INT);
@@ -202,19 +83,64 @@ class Pister extends Model
     }
 
     /**
-     * Retourne les logs d'une entité
-     *
+     * Retourne les entrées pour une entité
      * @return self[]
      */
-    public static function pourEntite(string $type, int $id, int $limit = 50): array
+    public static function pourEntite(string $entiteType, int $entiteId): array
     {
         $sql = "SELECT * FROM pister 
                 WHERE entite_type = :type AND entite_id = :id 
-                ORDER BY created_at DESC LIMIT :limit";
+                ORDER BY created_at DESC";
+
+        $stmt = self::raw($sql, ['type' => $entiteType, 'id' => $entiteId]);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(function (array $row) {
+            $model = new self($row);
+            $model->exists = true;
+            return $model;
+        }, $rows);
+    }
+
+    /**
+     * Retourne les entrées par action
+     * @return self[]
+     */
+    public static function parAction(string $action, int $limit = 100): array
+    {
+        $sql = "SELECT * FROM pister 
+                WHERE action = :action 
+                ORDER BY created_at DESC 
+                LIMIT :limit";
 
         $stmt = self::getConnection()->prepare($sql);
-        $stmt->bindValue('type', $type, \PDO::PARAM_STR);
-        $stmt->bindValue('id', $id, \PDO::PARAM_INT);
+        $stmt->bindValue('action', $action, \PDO::PARAM_STR);
+        $stmt->bindValue('limit', $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(function (array $row) {
+            $model = new self($row);
+            $model->exists = true;
+            return $model;
+        }, $rows);
+    }
+
+    /**
+     * Retourne les entrées dans une plage de dates
+     * @return self[]
+     */
+    public static function entreDates(\DateTime $debut, \DateTime $fin, int $limit = 1000): array
+    {
+        $sql = "SELECT * FROM pister 
+                WHERE created_at BETWEEN :debut AND :fin 
+                ORDER BY created_at DESC 
+                LIMIT :limit";
+
+        $stmt = self::getConnection()->prepare($sql);
+        $stmt->bindValue('debut', $debut->format('Y-m-d H:i:s'), \PDO::PARAM_STR);
+        $stmt->bindValue('fin', $fin->format('Y-m-d H:i:s'), \PDO::PARAM_STR);
         $stmt->bindValue('limit', $limit, \PDO::PARAM_INT);
         $stmt->execute();
 
@@ -230,52 +156,61 @@ class Pister extends Model
     /**
      * Recherche dans les logs
      */
-    public static function rechercher(array $criteres, int $limit = 100): array
+    public static function rechercher(array $filtres, int $page = 1, int $parPage = 50): array
     {
-        $where = [];
+        $sql = "SELECT * FROM pister WHERE 1=1";
         $params = [];
 
-        if (!empty($criteres['action'])) {
-            $where[] = 'action = :action';
-            $params['action'] = $criteres['action'];
+        if (!empty($filtres['utilisateur_id'])) {
+            $sql .= " AND utilisateur_id = :uid";
+            $params['uid'] = $filtres['utilisateur_id'];
         }
 
-        if (!empty($criteres['utilisateur_id'])) {
-            $where[] = 'utilisateur_id = :user_id';
-            $params['user_id'] = $criteres['utilisateur_id'];
+        if (!empty($filtres['action'])) {
+            $sql .= " AND action = :action";
+            $params['action'] = $filtres['action'];
         }
 
-        if (!empty($criteres['entite_type'])) {
-            $where[] = 'entite_type = :type';
-            $params['type'] = $criteres['entite_type'];
+        if (!empty($filtres['entite_type'])) {
+            $sql .= " AND entite_type = :etype";
+            $params['etype'] = $filtres['entite_type'];
         }
 
-        if (!empty($criteres['date_debut'])) {
-            $where[] = 'created_at >= :debut';
-            $params['debut'] = $criteres['date_debut'];
+        if (!empty($filtres['date_debut'])) {
+            $sql .= " AND created_at >= :debut";
+            $params['debut'] = $filtres['date_debut'];
         }
 
-        if (!empty($criteres['date_fin'])) {
-            $where[] = 'created_at <= :fin';
-            $params['fin'] = $criteres['date_fin'];
+        if (!empty($filtres['date_fin'])) {
+            $sql .= " AND created_at <= :fin";
+            $params['fin'] = $filtres['date_fin'];
         }
 
-        $sql = "SELECT * FROM pister";
-        if (!empty($where)) {
-            $sql .= " WHERE " . implode(' AND ', $where);
+        if (!empty($filtres['ip_adresse'])) {
+            $sql .= " AND ip_adresse = :ip";
+            $params['ip'] = $filtres['ip_adresse'];
         }
-        $sql .= " ORDER BY created_at DESC LIMIT {$limit}";
 
-        $stmt = self::getConnection()->prepare($sql);
-        $stmt->execute($params);
+        $sql .= " ORDER BY created_at DESC";
+        $offset = ($page - 1) * $parPage;
+        $sql .= " LIMIT {$parPage} OFFSET {$offset}";
 
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $stmt = self::raw($sql, $params);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(function (array $row) {
+            $model = new self($row);
+            $model->exists = true;
+            return $model;
+        }, $rows);
     }
 
+    // ===== MÉTHODES MÉTIER =====
+
     /**
-     * Retourne les données snapshot décodées
+     * Retourne le snapshot JSON décodé
      */
-    public function getDonnees(): array
+    public function getSnapshot(): array
     {
         if (empty($this->donnees_snapshot)) {
             return [];
@@ -284,33 +219,177 @@ class Pister extends Model
     }
 
     /**
-     * Récupère l'IP du client
+     * Enregistre une action
      */
-    private static function getClientIp(): string
+    public static function log(
+        string $action,
+        ?int $utilisateurId = null,
+        ?string $entiteType = null,
+        ?int $entiteId = null,
+        ?array $snapshot = null,
+        ?string $ipAdresse = null,
+        ?string $userAgent = null
+    ): self {
+        $model = new self([
+            'utilisateur_id' => $utilisateurId,
+            'action' => $action,
+            'entite_type' => $entiteType,
+            'entite_id' => $entiteId,
+            'donnees_snapshot' => $snapshot !== null ? json_encode($snapshot) : null,
+            'ip_adresse' => $ipAdresse,
+            'user_agent' => $userAgent,
+        ]);
+        $model->save();
+        return $model;
+    }
+
+    /**
+     * Log une connexion réussie
+     */
+    public static function logConnexion(int $utilisateurId, string $ip, string $userAgent): self
     {
-        $headers = ['HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR'];
-        foreach ($headers as $header) {
-            if (!empty($_SERVER[$header])) {
-                return explode(',', $_SERVER[$header])[0];
-            }
+        return self::log(self::ACTION_CONNEXION, $utilisateurId, 'utilisateur', $utilisateurId, null, $ip, $userAgent);
+    }
+
+    /**
+     * Log une déconnexion
+     */
+    public static function logDeconnexion(int $utilisateurId, string $ip): self
+    {
+        return self::log(self::ACTION_DECONNEXION, $utilisateurId, 'utilisateur', $utilisateurId, null, $ip);
+    }
+
+    /**
+     * Log un échec de connexion
+     */
+    public static function logEchecConnexion(string $login, string $ip, string $userAgent): self
+    {
+        return self::log(
+            self::ACTION_ECHEC_CONNEXION,
+            null,
+            'tentative_connexion',
+            null,
+            ['login' => $login],
+            $ip,
+            $userAgent
+        );
+    }
+
+    /**
+     * Log une création d'entité
+     */
+    public static function logCreation(
+        int $utilisateurId,
+        string $entiteType,
+        int $entiteId,
+        array $donnees,
+        ?string $ip = null
+    ): self {
+        return self::log(self::ACTION_CREATION, $utilisateurId, $entiteType, $entiteId, $donnees, $ip);
+    }
+
+    /**
+     * Log une modification d'entité
+     */
+    public static function logModification(
+        int $utilisateurId,
+        string $entiteType,
+        int $entiteId,
+        array $avant,
+        array $apres,
+        ?string $ip = null
+    ): self {
+        return self::log(
+            self::ACTION_MODIFICATION,
+            $utilisateurId,
+            $entiteType,
+            $entiteId,
+            ['avant' => $avant, 'apres' => $apres],
+            $ip
+        );
+    }
+
+    /**
+     * Log une suppression d'entité
+     */
+    public static function logSuppression(
+        int $utilisateurId,
+        string $entiteType,
+        int $entiteId,
+        array $donnees,
+        ?string $ip = null
+    ): self {
+        return self::log(self::ACTION_SUPPRESSION, $utilisateurId, $entiteType, $entiteId, $donnees, $ip);
+    }
+
+    /**
+     * Log une transition de workflow
+     */
+    public static function logTransition(
+        int $utilisateurId,
+        int $dossierId,
+        string $etatSource,
+        string $etatCible,
+        ?string $commentaire = null,
+        ?string $ip = null
+    ): self {
+        return self::log(
+            self::ACTION_TRANSITION,
+            $utilisateurId,
+            'dossier_etudiant',
+            $dossierId,
+            [
+                'etat_source' => $etatSource,
+                'etat_cible' => $etatCible,
+                'commentaire' => $commentaire,
+            ],
+            $ip
+        );
+    }
+
+    /**
+     * Compte les entrées par action (statistiques)
+     */
+    public static function statistiquesParAction(\DateTime $debut, \DateTime $fin): array
+    {
+        $sql = "SELECT action, COUNT(*) as total 
+                FROM pister 
+                WHERE created_at BETWEEN :debut AND :fin 
+                GROUP BY action 
+                ORDER BY total DESC";
+
+        $stmt = self::raw($sql, [
+            'debut' => $debut->format('Y-m-d H:i:s'),
+            'fin' => $fin->format('Y-m-d H:i:s'),
+        ]);
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Retourne les IPs les plus fréquentes
+     */
+    public static function topIPs(int $limit = 10, ?\DateTime $depuis = null): array
+    {
+        $sql = "SELECT ip_adresse, COUNT(*) as total 
+                FROM pister 
+                WHERE ip_adresse IS NOT NULL";
+        $params = [];
+
+        if ($depuis !== null) {
+            $sql .= " AND created_at >= :depuis";
+            $params['depuis'] = $depuis->format('Y-m-d H:i:s');
         }
-        return 'unknown';
-    }
 
-    /**
-     * Récupère le User-Agent
-     */
-    private static function getUserAgent(): string
-    {
-        return substr($_SERVER['HTTP_USER_AGENT'] ?? 'unknown', 0, 500);
-    }
+        $sql .= " GROUP BY ip_adresse ORDER BY total DESC LIMIT :limit";
 
-    /**
-     * Interdire la suppression des logs d'audit
-     */
-    public function delete(): bool
-    {
-        // Audit logs are immutable
-        return false;
+        $stmt = self::getConnection()->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value, \PDO::PARAM_STR);
+        }
+        $stmt->bindValue('limit', $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

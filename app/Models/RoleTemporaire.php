@@ -9,7 +9,7 @@ use App\Orm\Model;
 /**
  * Modèle RoleTemporaire
  * 
- * Représente un rôle temporaire attribué à un utilisateur (ex: Président Jury).
+ * Gère les rôles temporaires (ex: Président Jury le jour J).
  * Table: roles_temporaires
  */
 class RoleTemporaire extends Model
@@ -33,11 +33,118 @@ class RoleTemporaire extends Model
      */
     public const ROLE_PRESIDENT_JURY = 'president_jury';
     public const ROLE_MEMBRE_JURY = 'membre_jury';
-    public const ROLE_RAPPORTEUR = 'rapporteur';
-    public const ROLE_SUPERVISEUR = 'superviseur';
+    public const ROLE_SUPPLEANT = 'suppleant';
 
     /**
-     * Vérifie si le rôle est actuellement actif
+     * Types de contexte
+     */
+    public const CONTEXTE_SOUTENANCE = 'soutenance';
+    public const CONTEXTE_SESSION = 'session';
+
+    // ===== RELATIONS =====
+
+    /**
+     * Retourne l'utilisateur associé
+     */
+    public function utilisateur(): ?Utilisateur
+    {
+        return $this->belongsTo(Utilisateur::class, 'utilisateur_id', 'id_utilisateur');
+    }
+
+    /**
+     * Retourne l'utilisateur créateur
+     */
+    public function creePar(): ?Utilisateur
+    {
+        if ($this->cree_par === null) {
+            return null;
+        }
+        return Utilisateur::find((int) $this->cree_par);
+    }
+
+    // ===== MÉTHODES DE RECHERCHE =====
+
+    /**
+     * Trouve les rôles temporaires actifs d'un utilisateur
+     * @return self[]
+     */
+    public static function actifsPourUtilisateur(int $utilisateurId): array
+    {
+        $sql = "SELECT * FROM roles_temporaires 
+                WHERE utilisateur_id = :id 
+                AND actif = 1 
+                AND valide_de <= NOW() 
+                AND valide_jusqu_a >= NOW()";
+
+        $stmt = self::raw($sql, ['id' => $utilisateurId]);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(function (array $row) {
+            $model = new self($row);
+            $model->exists = true;
+            return $model;
+        }, $rows);
+    }
+
+    /**
+     * Trouve les rôles pour un contexte donné
+     * @return self[]
+     */
+    public static function pourContexte(string $contexteType, int $contexteId): array
+    {
+        return self::where([
+            'contexte_type' => $contexteType,
+            'contexte_id' => $contexteId,
+            'actif' => true,
+        ]);
+    }
+
+    /**
+     * Trouve un rôle spécifique pour un utilisateur et un contexte
+     */
+    public static function trouver(
+        int $utilisateurId,
+        string $roleCode,
+        ?string $contexteType = null,
+        ?int $contexteId = null
+    ): ?self {
+        $sql = "SELECT * FROM roles_temporaires 
+                WHERE utilisateur_id = :uid 
+                AND role_code = :role 
+                AND actif = 1 
+                AND valide_de <= NOW() 
+                AND valide_jusqu_a >= NOW()";
+
+        $params = ['uid' => $utilisateurId, 'role' => $roleCode];
+
+        if ($contexteType !== null) {
+            $sql .= " AND contexte_type = :ctype";
+            $params['ctype'] = $contexteType;
+        }
+
+        if ($contexteId !== null) {
+            $sql .= " AND contexte_id = :cid";
+            $params['cid'] = $contexteId;
+        }
+
+        $sql .= " LIMIT 1";
+
+        $stmt = self::raw($sql, $params);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if (!$row) {
+            return null;
+        }
+
+        $model = new self($row);
+        $model->exists = true;
+        return $model;
+    }
+
+    // ===== MÉTHODES D'ÉTAT =====
+
+    /**
+     * Vérifie si le rôle est actif
      */
     public function estActif(): bool
     {
@@ -46,46 +153,128 @@ class RoleTemporaire extends Model
         }
 
         $now = time();
-        $valideDe = strtotime($this->valide_de);
-        $valideJusqua = strtotime($this->valide_jusqu_a);
+        $valideFrom = strtotime($this->valide_de);
+        $valideTo = strtotime($this->valide_jusqu_a);
 
-        return $now >= $valideDe && $now <= $valideJusqua;
+        return $now >= $valideFrom && $now <= $valideTo;
     }
 
     /**
-     * Retourne les permissions sous forme de tableau
+     * Vérifie si le rôle est expiré
+     */
+    public function estExpire(): bool
+    {
+        return strtotime($this->valide_jusqu_a) < time();
+    }
+
+    // ===== MÉTHODES MÉTIER =====
+
+    /**
+     * Retourne les permissions JSON décodées
      */
     public function getPermissions(): array
     {
         if (empty($this->permissions_json)) {
             return [];
         }
-
         return json_decode($this->permissions_json, true) ?? [];
+    }
+
+    /**
+     * Définit les permissions JSON
+     */
+    public function setPermissions(array $permissions): void
+    {
+        $this->permissions_json = json_encode($permissions);
     }
 
     /**
      * Vérifie si le rôle a une permission spécifique
      */
-    public function aPermission(string $permission): bool
+    public function aPermission(string $ressource, string $action): bool
     {
         $permissions = $this->getPermissions();
-        return in_array($permission, $permissions, true);
+        return isset($permissions[$ressource][$action]) && $permissions[$ressource][$action] === true;
     }
 
     /**
-     * Retourne l'utilisateur associé
+     * Crée un rôle temporaire de président de jury
      */
-    public function getUtilisateur(): ?Utilisateur
-    {
-        if ($this->utilisateur_id === null) {
-            return null;
-        }
-        return Utilisateur::find((int) $this->utilisateur_id);
+    public static function creerPresidentJury(
+        int $utilisateurId,
+        int $soutenanceId,
+        \DateTime $dateSoutenance,
+        ?int $creeParId = null
+    ): self {
+        $jour = $dateSoutenance->format('Y-m-d');
+
+        $permissions = [
+            'soutenance' => [
+                'voir' => true,
+                'saisir_notes' => true,
+                'valider_notes' => true,
+                'voir_grille' => true,
+            ],
+            'etudiant' => [
+                'voir_dossier' => true,
+            ],
+        ];
+
+        $model = new self([
+            'utilisateur_id' => $utilisateurId,
+            'role_code' => self::ROLE_PRESIDENT_JURY,
+            'contexte_type' => self::CONTEXTE_SOUTENANCE,
+            'contexte_id' => $soutenanceId,
+            'permissions_json' => json_encode($permissions),
+            'actif' => true,
+            'valide_de' => $jour . ' 00:00:00',
+            'valide_jusqu_a' => $jour . ' 23:59:59',
+            'cree_par' => $creeParId,
+        ]);
+        $model->save();
+
+        return $model;
     }
 
     /**
-     * Désactive le rôle
+     * Crée un rôle temporaire de membre de jury
+     */
+    public static function creerMembreJury(
+        int $utilisateurId,
+        int $soutenanceId,
+        \DateTime $dateSoutenance,
+        ?int $creeParId = null
+    ): self {
+        $jour = $dateSoutenance->format('Y-m-d');
+
+        $permissions = [
+            'soutenance' => [
+                'voir' => true,
+                'saisir_notes' => true,
+            ],
+            'etudiant' => [
+                'voir_dossier' => true,
+            ],
+        ];
+
+        $model = new self([
+            'utilisateur_id' => $utilisateurId,
+            'role_code' => self::ROLE_MEMBRE_JURY,
+            'contexte_type' => self::CONTEXTE_SOUTENANCE,
+            'contexte_id' => $soutenanceId,
+            'permissions_json' => json_encode($permissions),
+            'actif' => true,
+            'valide_de' => $jour . ' 00:00:00',
+            'valide_jusqu_a' => $jour . ' 23:59:59',
+            'cree_par' => $creeParId,
+        ]);
+        $model->save();
+
+        return $model;
+    }
+
+    /**
+     * Désactive le rôle temporaire
      */
     public function desactiver(): void
     {
@@ -94,107 +283,21 @@ class RoleTemporaire extends Model
     }
 
     /**
-     * Crée un nouveau rôle temporaire
+     * Prolonge le rôle temporaire
      */
-    public static function creer(
-        int $utilisateurId,
-        string $roleCode,
-        array $permissions,
-        ?string $contexteType = null,
-        ?int $contexteId = null,
-        ?int $dureeJours = 30,
-        ?int $creePar = null
-    ): self {
-        // Désactiver les rôles précédents du même type/contexte
-        self::desactiverPrecedents($utilisateurId, $roleCode, $contexteType, $contexteId);
-
-        $now = time();
-        $role = new self([
-            'utilisateur_id' => $utilisateurId,
-            'role_code' => $roleCode,
-            'contexte_type' => $contexteType,
-            'contexte_id' => $contexteId,
-            'permissions_json' => json_encode($permissions),
-            'actif' => true,
-            'valide_de' => date('Y-m-d H:i:s', $now),
-            'valide_jusqu_a' => date('Y-m-d H:i:s', $now + ($dureeJours * 86400)),
-            'cree_par' => $creePar,
-        ]);
-        $role->save();
-        return $role;
-    }
-
-    /**
-     * Désactive les rôles précédents similaires
-     */
-    private static function desactiverPrecedents(
-        int $utilisateurId,
-        string $roleCode,
-        ?string $contexteType,
-        ?int $contexteId
-    ): void {
-        $conditions = [
-            'utilisateur_id' => $utilisateurId,
-            'role_code' => $roleCode,
-            'actif' => true,
-        ];
-
-        if ($contexteType !== null) {
-            $conditions['contexte_type'] = $contexteType;
-        }
-
-        if ($contexteId !== null) {
-            $conditions['contexte_id'] = $contexteId;
-        }
-
-        $roles = self::where($conditions);
-        foreach ($roles as $role) {
-            $role->desactiver();
-        }
-    }
-
-    /**
-     * Retourne les rôles actifs d'un utilisateur
-     *
-     * @return self[]
-     */
-    public static function rolesActifs(int $utilisateurId): array
+    public function prolonger(\DateTime $nouvelleFinValidite): void
     {
-        $roles = self::where([
-            'utilisateur_id' => $utilisateurId,
-            'actif' => true,
-        ]);
-
-        return array_filter($roles, fn($r) => $r->estActif());
-    }
-
-    /**
-     * Vérifie si un utilisateur a un rôle spécifique actif
-     */
-    public static function utilisateurARole(int $utilisateurId, string $roleCode): bool
-    {
-        $roles = self::where([
-            'utilisateur_id' => $utilisateurId,
-            'role_code' => $roleCode,
-            'actif' => true,
-        ]);
-
-        foreach ($roles as $role) {
-            if ($role->estActif()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Prolonge la validité du rôle
-     */
-    public function prolonger(int $jours): void
-    {
-        $currentExpire = strtotime($this->valide_jusqu_a);
-        $this->valide_jusqu_a = date('Y-m-d H:i:s', $currentExpire + ($jours * 86400));
+        $this->valide_jusqu_a = $nouvelleFinValidite->format('Y-m-d H:i:s');
         $this->save();
+    }
+
+    /**
+     * Supprime les rôles expirés
+     */
+    public static function nettoyerExpires(): int
+    {
+        $sql = "DELETE FROM roles_temporaires WHERE valide_jusqu_a < NOW()";
+        $stmt = self::raw($sql, []);
+        return $stmt->rowCount();
     }
 }

@@ -9,7 +9,7 @@ use App\Orm\Model;
 /**
  * Modèle WorkflowEtat
  * 
- * Représente un état dans le workflow étudiant.
+ * Représente un état du workflow de suivi des dossiers.
  * Table: workflow_etats
  */
 class WorkflowEtat extends Model
@@ -27,36 +27,67 @@ class WorkflowEtat extends Model
     ];
 
     /**
-     * Codes des états du workflow
+     * Codes des états du workflow (14 états)
      */
-    public const INSCRIT = 'inscrit';
-    public const CANDIDATURE_SOUMISE = 'candidature_soumise';
-    public const VERIFICATION_SCOLARITE = 'verification_scolarite';
-    public const FILTRE_COMMUNICATION = 'filtre_communication';
-    public const EN_ATTENTE_COMMISSION = 'en_attente_commission';
-    public const EN_EVALUATION_COMMISSION = 'en_evaluation_commission';
-    public const RAPPORT_VALIDE = 'rapport_valide';
-    public const ATTENTE_AVIS_ENCADREUR = 'attente_avis_encadreur';
-    public const PRET_POUR_JURY = 'pret_pour_jury';
-    public const JURY_EN_CONSTITUTION = 'jury_en_constitution';
-    public const SOUTENANCE_PLANIFIEE = 'soutenance_planifiee';
-    public const SOUTENANCE_EN_COURS = 'soutenance_en_cours';
-    public const SOUTENANCE_TERMINEE = 'soutenance_terminee';
-    public const DIPLOME_DELIVRE = 'diplome_delivre';
-    public const ABANDON = 'abandon';
-    public const ESCALADE_DOYEN = 'escalade_doyen';
+    public const ETAT_INSCRIT = 'INSCRIT';
+    public const ETAT_CANDIDATURE_SOUMISE = 'CANDIDATURE_SOUMISE';
+    public const ETAT_VERIFICATION_SCOLARITE = 'VERIFICATION_SCOLARITE';
+    public const ETAT_FILTRE_COMMUNICATION = 'FILTRE_COMMUNICATION';
+    public const ETAT_EN_ATTENTE_COMMISSION = 'EN_ATTENTE_COMMISSION';
+    public const ETAT_EN_EVALUATION_COMMISSION = 'EN_EVALUATION_COMMISSION';
+    public const ETAT_RAPPORT_VALIDE = 'RAPPORT_VALIDE';
+    public const ETAT_ATTENTE_AVIS_ENCADREUR = 'ATTENTE_AVIS_ENCADREUR';
+    public const ETAT_PRET_POUR_JURY = 'PRET_POUR_JURY';
+    public const ETAT_JURY_EN_CONSTITUTION = 'JURY_EN_CONSTITUTION';
+    public const ETAT_SOUTENANCE_PLANIFIEE = 'SOUTENANCE_PLANIFIEE';
+    public const ETAT_SOUTENANCE_EN_COURS = 'SOUTENANCE_EN_COURS';
+    public const ETAT_SOUTENANCE_TERMINEE = 'SOUTENANCE_TERMINEE';
+    public const ETAT_DIPLOME_DELIVRE = 'DIPLOME_DELIVRE';
 
     /**
      * Phases du workflow
      */
     public const PHASE_INSCRIPTION = 'inscription';
     public const PHASE_CANDIDATURE = 'candidature';
-    public const PHASE_VALIDATION = 'validation';
+    public const PHASE_COMMISSION = 'commission';
+    public const PHASE_PRE_SOUTENANCE = 'pre_soutenance';
     public const PHASE_SOUTENANCE = 'soutenance';
-    public const PHASE_FINALE = 'finale';
+    public const PHASE_POST_SOUTENANCE = 'post_soutenance';
+    public const PHASE_CLOTURE = 'cloture';
+
+    // ===== RELATIONS =====
 
     /**
-     * Trouve un état par son code
+     * Retourne les transitions sortantes
+     * @return WorkflowTransition[]
+     */
+    public function transitionsSortantes(): array
+    {
+        return $this->hasMany(WorkflowTransition::class, 'etat_source_id', 'id_etat');
+    }
+
+    /**
+     * Retourne les transitions entrantes
+     * @return WorkflowTransition[]
+     */
+    public function transitionsEntrantes(): array
+    {
+        return $this->hasMany(WorkflowTransition::class, 'etat_cible_id', 'id_etat');
+    }
+
+    /**
+     * Retourne les dossiers dans cet état
+     * @return DossierEtudiant[]
+     */
+    public function dossiers(): array
+    {
+        return $this->hasMany(DossierEtudiant::class, 'etat_actuel_id', 'id_etat');
+    }
+
+    // ===== MÉTHODES DE RECHERCHE =====
+
+    /**
+     * Trouve par code
      */
     public static function findByCode(string $code): ?self
     {
@@ -64,64 +95,12 @@ class WorkflowEtat extends Model
     }
 
     /**
-     * Retourne les transitions sortantes de cet état
-     */
-    public function getTransitionsSortantes(): array
-    {
-        $sql = "SELECT wt.*, we.code_etat as cible_code, we.nom_etat as cible_nom
-                FROM workflow_transitions wt
-                INNER JOIN workflow_etats we ON we.id_etat = wt.etat_cible_id
-                WHERE wt.etat_source_id = :id";
-
-        $stmt = self::raw($sql, ['id' => $this->getId()]);
-        return $stmt->fetchAll(\PDO::FETCH_OBJ);
-    }
-
-    /**
-     * Retourne les transitions entrantes vers cet état
-     */
-    public function getTransitionsEntrantes(): array
-    {
-        $sql = "SELECT wt.*, we.code_etat as source_code, we.nom_etat as source_nom
-                FROM workflow_transitions wt
-                INNER JOIN workflow_etats we ON we.id_etat = wt.etat_source_id
-                WHERE wt.etat_cible_id = :id";
-
-        $stmt = self::raw($sql, ['id' => $this->getId()]);
-        return $stmt->fetchAll(\PDO::FETCH_OBJ);
-    }
-
-    /**
-     * Vérifie si une transition vers un autre état est possible
-     */
-    public function peutTransitionnerVers(string $codeEtatCible): bool
-    {
-        $transitions = $this->getTransitionsSortantes();
-        foreach ($transitions as $transition) {
-            if ($transition->cible_code === $codeEtatCible) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Vérifie si c'est un état terminal
-     */
-    public function estTerminal(): bool
-    {
-        $terminaux = [self::DIPLOME_DELIVRE, self::ABANDON];
-        return in_array($this->code_etat, $terminaux, true);
-    }
-
-    /**
-     * Retourne tous les états triés par ordre d'affichage
-     *
+     * Retourne tous les états ordonnés
      * @return self[]
      */
-    public static function tousTriees(): array
+    public static function ordonnes(): array
     {
-        $sql = "SELECT * FROM workflow_etats ORDER BY ordre_affichage ASC";
+        $sql = "SELECT * FROM workflow_etats ORDER BY ordre_affichage";
         $stmt = self::raw($sql, []);
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -134,21 +113,130 @@ class WorkflowEtat extends Model
 
     /**
      * Retourne les états d'une phase
-     *
      * @return self[]
      */
     public static function parPhase(string $phase): array
     {
-        return self::where(['phase' => $phase]);
+        $sql = "SELECT * FROM workflow_etats WHERE phase = :phase ORDER BY ordre_affichage";
+        $stmt = self::raw($sql, ['phase' => $phase]);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(function (array $row) {
+            $model = new self($row);
+            $model->exists = true;
+            return $model;
+        }, $rows);
     }
+
+    /**
+     * Retourne l'état initial du workflow
+     */
+    public static function initial(): ?self
+    {
+        return self::findByCode(self::ETAT_INSCRIT);
+    }
+
+    /**
+     * Retourne l'état final du workflow
+     */
+    public static function final(): ?self
+    {
+        return self::findByCode(self::ETAT_DIPLOME_DELIVRE);
+    }
+
+    // ===== MÉTHODES D'ÉTAT =====
+
+    /**
+     * Vérifie si c'est l'état initial
+     */
+    public function estInitial(): bool
+    {
+        return $this->code_etat === self::ETAT_INSCRIT;
+    }
+
+    /**
+     * Vérifie si c'est un état terminal
+     */
+    public function estTerminal(): bool
+    {
+        return $this->code_etat === self::ETAT_DIPLOME_DELIVRE;
+    }
+
+    /**
+     * Vérifie si cet état permet la rédaction du rapport
+     */
+    public function permetRedactionRapport(): bool
+    {
+        $etatsPermis = [
+            self::ETAT_CANDIDATURE_SOUMISE,
+            self::ETAT_VERIFICATION_SCOLARITE,
+            self::ETAT_FILTRE_COMMUNICATION,
+            self::ETAT_EN_ATTENTE_COMMISSION,
+            self::ETAT_EN_EVALUATION_COMMISSION,
+        ];
+        return in_array($this->code_etat, $etatsPermis, true);
+    }
+
+    // ===== MÉTHODES DE TRANSITION =====
+
+    /**
+     * Retourne les états cibles possibles
+     * @return self[]
+     */
+    public function getEtatsCiblesPossibles(): array
+    {
+        $sql = "SELECT we.* FROM workflow_etats we
+                INNER JOIN workflow_transitions wt ON wt.etat_cible_id = we.id_etat
+                WHERE wt.etat_source_id = :id
+                ORDER BY we.ordre_affichage";
+
+        $stmt = self::raw($sql, ['id' => $this->getId()]);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(function (array $row) {
+            $model = new self($row);
+            $model->exists = true;
+            return $model;
+        }, $rows);
+    }
+
+    /**
+     * Vérifie si une transition vers un état est possible
+     */
+    public function peutTransitionnerVers(string $codeEtatCible): bool
+    {
+        $etatsCibles = $this->getEtatsCiblesPossibles();
+        foreach ($etatsCibles as $etat) {
+            if ($etat->code_etat === $codeEtatCible) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ===== MÉTHODES MÉTIER =====
 
     /**
      * Compte les dossiers dans cet état
      */
     public function nombreDossiers(): int
     {
-        $sql = "SELECT COUNT(*) FROM dossiers_etudiants WHERE etat_actuel_id = :id";
-        $stmt = self::raw($sql, ['id' => $this->getId()]);
-        return (int) $stmt->fetchColumn();
+        return DossierEtudiant::count(['etat_actuel_id' => $this->getId()]);
+    }
+
+    /**
+     * Retourne les statistiques des dossiers par état
+     */
+    public static function statistiques(): array
+    {
+        $sql = "SELECT we.code_etat, we.nom_etat, we.couleur_hex, 
+                       COUNT(de.id_dossier) as total
+                FROM workflow_etats we
+                LEFT JOIN dossiers_etudiants de ON de.etat_actuel_id = we.id_etat
+                GROUP BY we.id_etat, we.code_etat, we.nom_etat, we.couleur_hex
+                ORDER BY we.ordre_affichage";
+
+        $stmt = self::raw($sql, []);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

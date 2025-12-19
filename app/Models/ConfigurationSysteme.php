@@ -15,12 +15,14 @@ use App\Orm\Model;
 class ConfigurationSysteme extends Model
 {
     protected string $table = 'configuration_systeme';
-    protected string $primaryKey = 'cle'; // Clé naturelle possible ou id
+    protected string $primaryKey = 'id_config';
     protected array $fillable = [
-        'cle',
-        'valeur',
+        'cle_config',
+        'valeur_config',
+        'type_valeur',
+        'groupe_config',
         'description',
-        'type_valeur', // 'string', 'int', 'bool', 'json'
+        'modifiable_ui',
     ];
 
     /**
@@ -28,45 +30,47 @@ class ConfigurationSysteme extends Model
      */
     public static function get(string $cle, mixed $default = null): mixed
     {
-        $config = self::firstWhere(['cle' => $cle]);
+        $config = self::firstWhere(['cle_config' => $cle]);
         if (!$config) {
             return $default;
         }
 
         return match ($config->type_valeur) {
-            'int' => (int) $config->valeur,
-            'float' => (float) $config->valeur,
-            'bool' => filter_var($config->valeur, FILTER_VALIDATE_BOOLEAN),
-            'json' => json_decode($config->valeur, true),
-            default => $config->valeur,
+            'int' => (int) $config->valeur_config,
+            'float' => (float) $config->valeur_config,
+            'boolean' => filter_var($config->valeur_config, FILTER_VALIDATE_BOOLEAN),
+            'json' => json_decode($config->valeur_config, true),
+            default => $config->valeur_config,
         };
     }
 
     /**
      * Définit une valeur de configuration
      */
-    public static function set(string $cle, mixed $valeur, string $type = 'string'): void
+    public static function set(string $cle, mixed $valeur, string $type = 'string', ?string $groupe = null): void
     {
-        $valeurStr = $valeur;
+        $valeurStr = (string)$valeur;
         if (is_bool($valeur)) {
             $valeurStr = $valeur ? '1' : '0';
-            $type = 'bool';
+            $type = 'boolean';
         } elseif (is_array($valeur) || is_object($valeur)) {
             $valeurStr = json_encode($valeur);
             $type = 'json';
         }
 
-        $config = self::firstWhere(['cle' => $cle]);
+        $config = self::firstWhere(['cle_config' => $cle]);
         if ($config) {
-            $config->valeur = (string) $valeurStr;
+            $config->valeur_config = $valeurStr;
             $config->type_valeur = $type;
+            if ($groupe) $config->groupe_config = $groupe;
             $config->save();
         } else {
             $new = new self([
-                'cle' => $cle,
-                'valeur' => (string) $valeurStr,
-                'description' => 'Auto-generated',
+                'cle_config' => $cle,
+                'valeur_config' => $valeurStr,
+                'description' => 'Généré automatiquement',
                 'type_valeur' => $type,
+                'groupe_config' => $groupe,
             ]);
             $new->save();
         }

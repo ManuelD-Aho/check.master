@@ -20,20 +20,21 @@ class Paiement extends Model
         'etudiant_id',
         'annee_acad_id',
         'montant',
-        'date_paiement',
         'mode_paiement',
         'reference',
+        'date_paiement',
         'recu_genere',
         'recu_chemin',
+        'enregistre_par',
     ];
 
     /**
      * Modes de paiement
      */
     public const MODE_ESPECES = 'Especes';
-    public const MODE_CHEQUE = 'Cheque';
+    public const MODE_CARTE = 'Carte';
     public const MODE_VIREMENT = 'Virement';
-    public const MODE_MOBILE = 'Mobile_Money';
+    public const MODE_CHEQUE = 'Cheque';
 
     /**
      * Retourne l'étudiant
@@ -72,16 +73,18 @@ class Paiement extends Model
         int $etudiantId,
         int $anneeAcadId,
         float $montant,
-        string $modePaiement
+        string $modePaiement,
+        ?int $userId = null
     ): self {
         $paiement = new self([
             'etudiant_id' => $etudiantId,
             'annee_acad_id' => $anneeAcadId,
             'montant' => $montant,
-            'date_paiement' => date('Y-m-d H:i:s'),
             'mode_paiement' => $modePaiement,
             'reference' => self::genererReference(),
+            'date_paiement' => date('Y-m-d'),
             'recu_genere' => false,
+            'enregistre_par' => $userId,
         ]);
         $paiement->save();
         return $paiement;

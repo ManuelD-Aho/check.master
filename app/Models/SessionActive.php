@@ -9,7 +9,7 @@ use App\Orm\Model;
 /**
  * Modèle SessionActive
  * 
- * Représente une session utilisateur active.
+ * Gère les sessions utilisateur actives.
  * Table: sessions_actives
  */
 class SessionActive extends Model
@@ -26,9 +26,21 @@ class SessionActive extends Model
     ];
 
     /**
-     * Durée de session par défaut (en secondes)
+     * Durée de vie d'une session en secondes (8 heures)
      */
-    public const SESSION_DURATION = 3600; // 1 heure
+    public const DUREE_VIE_SESSION = 28800;
+
+    // ===== RELATIONS =====
+
+    /**
+     * Retourne l'utilisateur de la session
+     */
+    public function utilisateur(): ?Utilisateur
+    {
+        return $this->belongsTo(Utilisateur::class, 'utilisateur_id', 'id_utilisateur');
+    }
+
+    // ===== MÉTHODES DE RECHERCHE =====
 
     /**
      * Trouve une session par son token
@@ -39,45 +51,56 @@ class SessionActive extends Model
     }
 
     /**
-     * Vérifie si la session est valide (non expirée)
+     * Retourne les sessions actives d'un utilisateur
+     * @return self[]
+     */
+    public static function pourUtilisateur(int $utilisateurId): array
+    {
+        return self::where(['utilisateur_id' => $utilisateurId]);
+    }
+
+    /**
+     * Retourne les sessions expirées
+     * @return self[]
+     */
+    public static function expirees(): array
+    {
+        $sql = "SELECT * FROM sessions_actives WHERE expire_a < NOW()";
+        $stmt = self::raw($sql, []);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(function (array $row) {
+            $model = new self($row);
+            $model->exists = true;
+            return $model;
+        }, $rows);
+    }
+
+    // ===== MÉTHODES D'ÉTAT =====
+
+    /**
+     * Vérifie si la session est expirée
+     */
+    public function estExpiree(): bool
+    {
+        if ($this->expire_a === null) {
+            return true;
+        }
+        return strtotime($this->expire_a) < time();
+    }
+
+    /**
+     * Vérifie si la session est valide
      */
     public function estValide(): bool
     {
-        if ($this->expire_a === null) {
-            return false;
-        }
-        return strtotime($this->expire_a) > time();
+        return !$this->estExpiree();
     }
 
-    /**
-     * Met à jour la dernière activité
-     */
-    public function majDerniereActivite(): void
-    {
-        $this->derniere_activite = date('Y-m-d H:i:s');
-    }
+    // ===== MÉTHODES MÉTIER =====
 
     /**
-     * Prolonge la session
-     */
-    public function prolonger(int $seconds = self::SESSION_DURATION): void
-    {
-        $this->expire_a = date('Y-m-d H:i:s', time() + $seconds);
-    }
-
-    /**
-     * Retourne l'utilisateur associé à cette session
-     */
-    public function getUtilisateur(): ?Utilisateur
-    {
-        if ($this->utilisateur_id === null) {
-            return null;
-        }
-        return Utilisateur::find((int) $this->utilisateur_id);
-    }
-
-    /**
-     * Génère un nouveau token de session sécurisé
+     * Génère un nouveau token de session
      */
     public static function genererToken(): string
     {
@@ -85,38 +108,51 @@ class SessionActive extends Model
     }
 
     /**
-     * Crée une nouvelle session pour un utilisateur
+     * Crée une nouvelle session
      */
     public static function creer(
         int $utilisateurId,
         string $ipAdresse,
-        string $userAgent,
-        int $duree = self::SESSION_DURATION
+        string $userAgent
     ): self {
         $session = new self([
             'utilisateur_id' => $utilisateurId,
             'token_session' => self::genererToken(),
             'ip_adresse' => $ipAdresse,
-            'user_agent' => substr($userAgent, 0, 500),
+            'user_agent' => $userAgent,
             'derniere_activite' => date('Y-m-d H:i:s'),
-            'expire_a' => date('Y-m-d H:i:s', time() + $duree),
+            'expire_a' => date('Y-m-d H:i:s', time() + self::DUREE_VIE_SESSION),
         ]);
         $session->save();
         return $session;
     }
 
     /**
-     * Invalide toutes les sessions d'un utilisateur
+     * Rafraîchit la session
      */
-    public static function invaliderTout(int $utilisateurId): int
+    public function rafraichir(): void
     {
-        $sessions = self::where(['utilisateur_id' => $utilisateurId]);
-        $count = 0;
-        foreach ($sessions as $session) {
-            $session->delete();
-            $count++;
-        }
-        return $count;
+        $this->derniere_activite = date('Y-m-d H:i:s');
+        $this->expire_a = date('Y-m-d H:i:s', time() + self::DUREE_VIE_SESSION);
+        $this->save();
+    }
+
+    /**
+     * Régénère le token de session (après action sensible)
+     */
+    public function regenererToken(): string
+    {
+        $this->token_session = self::genererToken();
+        $this->rafraichir();
+        return $this->token_session;
+    }
+
+    /**
+     * Invalide la session
+     */
+    public function invalider(): void
+    {
+        $this->delete();
     }
 
     /**
@@ -124,17 +160,66 @@ class SessionActive extends Model
      */
     public static function nettoyerExpirees(): int
     {
-        $sql = "DELETE FROM sessions_actives WHERE expire_a < :now";
-        $stmt = self::raw($sql, ['now' => date('Y-m-d H:i:s')]);
+        $sql = "DELETE FROM sessions_actives WHERE expire_a < NOW()";
+        $stmt = self::raw($sql, []);
+        return $stmt->rowCount();
+    }
+
+    /**
+     * Supprime toutes les sessions d'un utilisateur
+     */
+    public static function supprimerPourUtilisateur(int $utilisateurId): int
+    {
+        $sql = "DELETE FROM sessions_actives WHERE utilisateur_id = :id";
+        $stmt = self::raw($sql, ['id' => $utilisateurId]);
         return $stmt->rowCount();
     }
 
     /**
      * Compte les sessions actives d'un utilisateur
      */
-    public static function compterActives(int $utilisateurId): int
+    public static function compterPourUtilisateur(int $utilisateurId): int
     {
-        $sessions = self::where(['utilisateur_id' => $utilisateurId]);
-        return count(array_filter($sessions, fn($s) => $s->estValide()));
+        return self::count(['utilisateur_id' => $utilisateurId]);
+    }
+
+    /**
+     * Retourne les informations d'agent utilisateur parsées
+     */
+    public function getInfosNavigation(): array
+    {
+        $userAgent = $this->user_agent ?? '';
+
+        // Détection basique du navigateur
+        $browser = 'Inconnu';
+        if (strpos($userAgent, 'Chrome') !== false) {
+            $browser = 'Chrome';
+        } elseif (strpos($userAgent, 'Firefox') !== false) {
+            $browser = 'Firefox';
+        } elseif (strpos($userAgent, 'Safari') !== false) {
+            $browser = 'Safari';
+        } elseif (strpos($userAgent, 'Edge') !== false) {
+            $browser = 'Edge';
+        }
+
+        // Détection basique du système d'exploitation
+        $os = 'Inconnu';
+        if (strpos($userAgent, 'Windows') !== false) {
+            $os = 'Windows';
+        } elseif (strpos($userAgent, 'Mac') !== false) {
+            $os = 'macOS';
+        } elseif (strpos($userAgent, 'Linux') !== false) {
+            $os = 'Linux';
+        } elseif (strpos($userAgent, 'Android') !== false) {
+            $os = 'Android';
+        } elseif (strpos($userAgent, 'iOS') !== false) {
+            $os = 'iOS';
+        }
+
+        return [
+            'navigateur' => $browser,
+            'systeme' => $os,
+            'ip' => $this->ip_adresse,
+        ];
     }
 }

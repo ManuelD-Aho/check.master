@@ -18,8 +18,9 @@ class Salle extends Model
     protected string $primaryKey = 'id_salle';
     protected array $fillable = [
         'nom_salle',
+        'batiment',
         'capacite',
-        'equipements',
+        'equipement_json',
         'actif',
     ];
 
@@ -28,30 +29,31 @@ class Salle extends Model
      */
     public function getEquipements(): array
     {
-        if (empty($this->equipements)) {
+        if (empty($this->equipement_json)) {
             return [];
         }
-        return json_decode($this->equipements, true) ?? [];
+        return json_decode($this->equipement_json, true) ?? [];
     }
 
     /**
      * Vérifie si la salle est disponible à une date/heure
      */
-    public function estDisponible(string $date, string $heureDebut, string $heureFin): bool
+    public function estDisponible(\DateTime $dateHeure, int $dureeMinutes = 60): bool
     {
+        $debut = $dateHeure->format('Y-m-d H:i:s');
+        $fin = (clone $dateHeure)->add(new \DateInterval('PT' . $dureeMinutes . 'M'))->format('Y-m-d H:i:s');
+
         $sql = "SELECT COUNT(*) FROM soutenances 
                 WHERE salle_id = :id 
-                AND date_soutenance = :date
                 AND statut NOT IN ('Annulee', 'Reportee')
                 AND (
-                    (heure_debut < :fin AND heure_fin > :debut)
+                    (date_soutenance < :fin AND DATE_ADD(date_soutenance, INTERVAL duree_minutes MINUTE) > :debut)
                 )";
 
         $stmt = self::raw($sql, [
             'id' => $this->getId(),
-            'date' => $date,
-            'debut' => $heureDebut,
-            'fin' => $heureFin,
+            'debut' => $debut,
+            'fin' => $fin,
         ]);
 
         return (int) $stmt->fetchColumn() === 0;
@@ -60,17 +62,17 @@ class Salle extends Model
     /**
      * Retourne les soutenances planifiées dans cette salle
      */
-    public function getSoutenances(?string $date = null): array
+    public function getSoutenances(?string $dateStr = null): array
     {
         $sql = "SELECT * FROM soutenances WHERE salle_id = :id";
         $params = ['id' => $this->getId()];
 
-        if ($date !== null) {
-            $sql .= " AND date_soutenance = :date";
-            $params['date'] = $date;
+        if ($dateStr !== null) {
+            $sql .= " AND DATE(date_soutenance) = :date";
+            $params['date'] = $dateStr;
         }
 
-        $sql .= " ORDER BY date_soutenance, heure_debut";
+        $sql .= " ORDER BY date_soutenance";
 
         $stmt = self::raw($sql, $params);
         return $stmt->fetchAll(\PDO::FETCH_OBJ);
@@ -91,9 +93,9 @@ class Salle extends Model
      *
      * @return self[]
      */
-    public static function disponibles(string $date, string $heureDebut, string $heureFin): array
+    public static function disponibles(\DateTime $dateHeure, int $dureeMinutes = 60): array
     {
         $salles = self::actives();
-        return array_filter($salles, fn($s) => $s->estDisponible($date, $heureDebut, $heureFin));
+        return array_filter($salles, fn($s) => $s->estDisponible($dateHeure, $dureeMinutes));
     }
 }

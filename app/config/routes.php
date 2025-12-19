@@ -10,6 +10,12 @@
 $router->map('GET|POST', '/', 'AuthController#login', 'login');
 $router->map('GET', '/logout', 'AuthController#logout', 'logout');
 $router->map('GET|POST', '/forgot-password', 'AuthController#forgotPassword', 'forgot_password');
+$router->map('GET|POST', '/change-password', 'AuthController#changePassword', 'change_password');
+
+// Admin - Sessions Management
+$router->map('GET', '/admin/sessions', 'Admin\\SessionsController#index', 'admin_sessions');
+$router->map('GET', '/api/admin/sessions', 'Admin\\SessionsController#list', 'api_admin_sessions');
+$router->map('POST', '/api/admin/sessions/[i:id]/kill', 'Admin\\SessionsController#kill', 'api_admin_sessions_kill');
 
 // Dashboard
 $router->map('GET', '/dashboard', 'DashboardController#index', 'dashboard');

@@ -9,7 +9,7 @@ use App\Orm\Model;
 /**
  * Modèle CommissionVote
  * 
- * Représente un vote d'un membre de la commission.
+ * Représente un vote d'un membre de commission sur un rapport.
  * Table: votes_commission
  */
 class CommissionVote extends Model
@@ -32,119 +32,72 @@ class CommissionVote extends Model
     public const DECISION_A_REVOIR = 'A_revoir';
     public const DECISION_REJETER = 'Rejeter';
 
+    // ===== RELATIONS =====
+
     /**
      * Retourne la session
      */
-    public function getSession(): ?CommissionSession
+    public function session(): ?CommissionSession
     {
-        if ($this->session_id === null) {
-            return null;
-        }
-        return CommissionSession::find((int) $this->session_id);
+        return $this->belongsTo(CommissionSession::class, 'session_id', 'id_session');
     }
 
     /**
      * Retourne le rapport
      */
-    public function getRapport(): ?RapportEtudiant
+    public function rapport(): ?RapportEtudiant
     {
-        if ($this->rapport_id === null) {
-            return null;
-        }
-        return RapportEtudiant::find((int) $this->rapport_id);
+        return $this->belongsTo(RapportEtudiant::class, 'rapport_id', 'id_rapport');
     }
 
     /**
      * Retourne le membre (enseignant)
      */
-    public function getMembre(): ?Enseignant
+    public function membre(): ?Enseignant
     {
-        if ($this->membre_id === null) {
-            return null;
-        }
-        return Enseignant::find((int) $this->membre_id);
+        return $this->belongsTo(Enseignant::class, 'membre_id', 'id_enseignant');
+    }
+
+    // ===== MÉTHODES DE RECHERCHE =====
+
+    /**
+     * Retourne les votes d'une session
+     * @return self[]
+     */
+    public static function pourSession(int $sessionId): array
+    {
+        return self::where(['session_id' => $sessionId]);
     }
 
     /**
-     * Enregistre un vote
+     * Retourne les votes pour un rapport
+     * @return self[]
      */
-    public static function voter(
-        int $sessionId,
-        int $rapportId,
-        int $membreId,
-        int $tour,
-        string $decision,
-        ?string $commentaire = null
-    ): self {
-        $vote = new self([
+    public static function pourRapport(int $rapportId): array
+    {
+        return self::where(['rapport_id' => $rapportId]);
+    }
+
+    /**
+     * Retourne les votes d'un membre
+     * @return self[]
+     */
+    public static function parMembre(int $membreId): array
+    {
+        return self::where(['membre_id' => $membreId]);
+    }
+
+    /**
+     * Trouve un vote spécifique
+     */
+    public static function trouver(int $sessionId, int $rapportId, int $membreId, int $tour): ?self
+    {
+        return self::firstWhere([
             'session_id' => $sessionId,
             'rapport_id' => $rapportId,
             'membre_id' => $membreId,
             'tour' => $tour,
-            'decision' => $decision,
-            'commentaire' => $commentaire,
         ]);
-        $vote->save();
-        return $vote;
-    }
-
-    /**
-     * Retourne les votes pour un rapport dans une session
-     */
-    public static function pourRapport(int $sessionId, int $rapportId, ?int $tour = null): array
-    {
-        $conditions = [
-            'session_id' => $sessionId,
-            'rapport_id' => $rapportId,
-        ];
-
-        if ($tour !== null) {
-            $conditions['tour'] = $tour;
-        }
-
-        return self::where($conditions);
-    }
-
-    /**
-     * Calcule le résultat d'un vote (unanimité, majorité, etc.)
-     */
-    public static function resultat(int $sessionId, int $rapportId, int $tour): array
-    {
-        $votes = self::pourRapport($sessionId, $rapportId, $tour);
-
-        $compteur = [
-            self::DECISION_VALIDER => 0,
-            self::DECISION_A_REVOIR => 0,
-            self::DECISION_REJETER => 0,
-        ];
-
-        foreach ($votes as $vote) {
-            $compteur[$vote->decision] = ($compteur[$vote->decision] ?? 0) + 1;
-        }
-
-        $total = count($votes);
-        $unanimite = false;
-        $decisionFinale = null;
-
-        // Vérifier l'unanimité
-        if ($compteur[self::DECISION_VALIDER] === $total) {
-            $unanimite = true;
-            $decisionFinale = self::DECISION_VALIDER;
-        } elseif ($compteur[self::DECISION_REJETER] === $total) {
-            $unanimite = true;
-            $decisionFinale = self::DECISION_REJETER;
-        } else {
-            // Majorité simple
-            $max = max($compteur);
-            $decisionFinale = array_search($max, $compteur, true);
-        }
-
-        return [
-            'votes' => $compteur,
-            'total' => $total,
-            'unanimite' => $unanimite,
-            'decision' => $decisionFinale,
-        ];
     }
 
     /**
@@ -158,5 +111,84 @@ class CommissionVote extends Model
             'membre_id' => $membreId,
             'tour' => $tour,
         ]) > 0;
+    }
+
+    // ===== MÉTHODES MÉTIER =====
+
+    /**
+     * Enregistre un vote
+     */
+    public static function voter(
+        int $sessionId,
+        int $rapportId,
+        int $membreId,
+        int $tour,
+        string $decision,
+        ?string $commentaire = null
+    ): self {
+        // Vérifier si déjà voté
+        if (self::aDejaVote($sessionId, $rapportId, $membreId, $tour)) {
+            throw new \RuntimeException('Ce membre a déjà voté pour ce rapport à ce tour.');
+        }
+
+        $vote = new self([
+            'session_id' => $sessionId,
+            'rapport_id' => $rapportId,
+            'membre_id' => $membreId,
+            'tour' => $tour,
+            'decision' => $decision,
+            'commentaire' => $commentaire,
+        ]);
+        $vote->save();
+        return $vote;
+    }
+
+    /**
+     * Retourne les statistiques de vote pour un rapport à un tour
+     */
+    public static function statistiquesVote(int $sessionId, int $rapportId, int $tour): array
+    {
+        $sql = "SELECT decision, COUNT(*) as total
+                FROM votes_commission
+                WHERE session_id = :sid AND rapport_id = :rid AND tour = :tour
+                GROUP BY decision";
+
+        $stmt = self::raw($sql, [
+            'sid' => $sessionId,
+            'rid' => $rapportId,
+            'tour' => $tour,
+        ]);
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Compte le nombre de votes pour un rapport à un tour
+     */
+    public static function nombreVotes(int $sessionId, int $rapportId, int $tour): int
+    {
+        return self::count([
+            'session_id' => $sessionId,
+            'rapport_id' => $rapportId,
+            'tour' => $tour,
+        ]);
+    }
+
+    /**
+     * Vérifie si l'unanimité est atteinte
+     */
+    public static function unanimiteAtteinte(int $sessionId, int $rapportId, int $tour, int $nombreMembres): ?string
+    {
+        $stats = self::statistiquesVote($sessionId, $rapportId, $tour);
+
+        if (count($stats) !== 1) {
+            return null; // Votes divergents
+        }
+
+        if ((int) $stats[0]['total'] >= $nombreMembres) {
+            return $stats[0]['decision']; // Unanimité
+        }
+
+        return null; // Pas encore tous les votes
     }
 }

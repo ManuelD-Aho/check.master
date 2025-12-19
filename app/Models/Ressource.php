@@ -9,7 +9,7 @@ use App\Orm\Model;
 /**
  * Modèle Ressource
  * 
- * Représente une ressource protégée du système (module, entité).
+ * Représente une ressource du système (module, entité).
  * Table: ressources
  */
 class Ressource extends Model
@@ -23,6 +23,19 @@ class Ressource extends Model
         'module',
     ];
 
+    // ===== RELATIONS =====
+
+    /**
+     * Retourne les permissions associées
+     * @return Permission[]
+     */
+    public function permissions(): array
+    {
+        return $this->hasMany(Permission::class, 'ressource_id', 'id_ressource');
+    }
+
+    // ===== MÉTHODES DE RECHERCHE =====
+
     /**
      * Trouve une ressource par son code
      */
@@ -32,8 +45,7 @@ class Ressource extends Model
     }
 
     /**
-     * Retourne les ressources d'un module
-     *
+     * Retourne les ressources par module
      * @return self[]
      */
     public static function parModule(string $module): array
@@ -42,52 +54,34 @@ class Ressource extends Model
     }
 
     /**
-     * Retourne toutes les ressources groupées par module
+     * Retourne tous les modules distincts
      */
-    public static function groupeesParModule(): array
+    public static function getModules(): array
     {
-        $ressources = self::all();
-        $grouped = [];
-
-        foreach ($ressources as $ressource) {
-            $module = $ressource->module ?? 'Autre';
-            $grouped[$module][] = $ressource;
-        }
-
-        return $grouped;
+        $sql = "SELECT DISTINCT module FROM ressources WHERE module IS NOT NULL ORDER BY module";
+        $stmt = self::raw($sql, []);
+        return $stmt->fetchAll(\PDO::FETCH_COLUMN);
     }
 
-    /**
-     * Retourne les permissions associées à cette ressource
-     *
-     * @return Permission[]
-     */
-    public function getPermissions(): array
-    {
-        return Permission::where(['ressource_id' => $this->getId()]);
-    }
+    // ===== MÉTHODES MÉTIER =====
 
     /**
-     * Crée une nouvelle ressource si elle n'existe pas
+     * Crée ou met à jour une ressource
      */
-    public static function creerSiAbsent(
-        string $code,
-        string $nom,
-        ?string $description = null,
-        ?string $module = null
-    ): self {
-        $existing = self::findByCode($code);
-        if ($existing !== null) {
-            return $existing;
+    public static function creerOuMaj(string $code, string $nom, ?string $description = null, ?string $module = null): self
+    {
+        $ressource = self::findByCode($code);
+
+        if ($ressource === null) {
+            $ressource = new self();
+            $ressource->code_ressource = $code;
         }
 
-        $ressource = new self([
-            'code_ressource' => $code,
-            'nom_ressource' => $nom,
-            'description' => $description,
-            'module' => $module,
-        ]);
+        $ressource->nom_ressource = $nom;
+        $ressource->description = $description;
+        $ressource->module = $module;
         $ressource->save();
+
         return $ressource;
     }
 }

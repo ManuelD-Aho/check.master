@@ -9,7 +9,7 @@ use App\Orm\Model;
 /**
  * Modèle Grade
  * 
- * Représente un grade académique (Professeur, MCF, etc.).
+ * Représente un grade académique (Professeur, Maître de conférences, etc.).
  * Table: grades
  */
 class Grade extends Model
@@ -22,8 +22,21 @@ class Grade extends Model
         'actif',
     ];
 
+    // ===== RELATIONS =====
+
     /**
-     * Trouve un grade par son libellé
+     * Retourne les enseignants de ce grade
+     * @return Enseignant[]
+     */
+    public function enseignants(): array
+    {
+        return $this->hasMany(Enseignant::class, 'grade_id', 'id_grade');
+    }
+
+    // ===== MÉTHODES DE RECHERCHE =====
+
+    /**
+     * Trouve par libellé
      */
     public static function findByLibelle(string $libelle): ?self
     {
@@ -31,13 +44,21 @@ class Grade extends Model
     }
 
     /**
-     * Retourne tous les grades actifs triés par niveau
-     *
+     * Retourne tous les grades actifs
      * @return self[]
      */
     public static function actifs(): array
     {
-        $sql = "SELECT * FROM grades WHERE actif = 1 ORDER BY niveau_hierarchique ASC";
+        return self::where(['actif' => true]);
+    }
+
+    /**
+     * Retourne les grades ordonnés par niveau hiérarchique
+     * @return self[]
+     */
+    public static function parNiveauHierarchique(): array
+    {
+        $sql = "SELECT * FROM grades WHERE actif = 1 ORDER BY niveau_hierarchique DESC";
         $stmt = self::raw($sql, []);
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -48,11 +69,49 @@ class Grade extends Model
         }, $rows);
     }
 
+    // ===== MÉTHODES D'ÉTAT =====
+
     /**
-     * Retourne les enseignants avec ce grade
+     * Vérifie si le grade est actif
      */
-    public function getEnseignants(): array
+    public function estActif(): bool
     {
-        return Enseignant::where(['grade_id' => $this->getId(), 'actif' => true]);
+        return (bool) $this->actif;
+    }
+
+    // ===== MÉTHODES MÉTIER =====
+
+    /**
+     * Compte les enseignants de ce grade
+     */
+    public function nombreEnseignants(): int
+    {
+        return Enseignant::count(['grade_id' => $this->getId(), 'actif' => true]);
+    }
+
+    /**
+     * Vérifie si ce grade est supérieur à un autre
+     */
+    public function estSuperieurA(Grade $autre): bool
+    {
+        return ($this->niveau_hierarchique ?? 0) > ($autre->niveau_hierarchique ?? 0);
+    }
+
+    /**
+     * Active le grade
+     */
+    public function activer(): void
+    {
+        $this->actif = true;
+        $this->save();
+    }
+
+    /**
+     * Désactive le grade
+     */
+    public function desactiver(): void
+    {
+        $this->actif = false;
+        $this->save();
     }
 }
