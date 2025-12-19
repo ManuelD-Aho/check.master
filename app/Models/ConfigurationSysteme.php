@@ -75,4 +75,61 @@ class ConfigurationSysteme extends Model
             $new->save();
         }
     }
+
+    /**
+     * Retourne toutes les configurations d'un groupe
+     * @return self[]
+     */
+    public static function parGroupe(string $groupe): array
+    {
+        return self::where(['groupe_config' => $groupe]);
+    }
+
+    /**
+     * Retourne toutes les configurations modifiables via l'UI
+     * @return self[]
+     */
+    public static function modifiablesUI(): array
+    {
+        return self::where(['modifiable_ui' => true]);
+    }
+
+    /**
+     * Vérifie si une clé existe
+     */
+    public static function existe(string $cle): bool
+    {
+        return self::firstWhere(['cle_config' => $cle]) !== null;
+    }
+
+    /**
+     * Supprime une configuration
+     */
+    public static function supprimer(string $cle): bool
+    {
+        $config = self::firstWhere(['cle_config' => $cle]);
+        if ($config) {
+            $config->delete();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Retourne toutes les configurations en cache
+     */
+    public static function toutesEnCache(): array
+    {
+        static $cache = null;
+        
+        if ($cache === null) {
+            $configs = self::all();
+            $cache = [];
+            foreach ($configs as $config) {
+                $cache[$config->cle_config] = self::get($config->cle_config);
+            }
+        }
+        
+        return $cache;
+    }
 }
