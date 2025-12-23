@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Core;
 
-use App\Models\Configuration;
+use App\Models\ConfigurationSysteme;
 
 /**
  * Service de gestion des paramètres de l'application
@@ -16,7 +16,7 @@ class ServiceParametres
      */
     public static function get(string $key, mixed $default = null): mixed
     {
-        return Configuration::get($key, $default);
+        return ConfigurationSysteme::get($key, $default);
     }
 
     /**
@@ -24,7 +24,7 @@ class ServiceParametres
      */
     public static function set(string $key, mixed $value, ?string $type = null): void
     {
-        Configuration::set($key, $value, $type);
+        ConfigurationSysteme::set($key, $value, $type);
     }
 
     /**
@@ -32,6 +32,6 @@ class ServiceParametres
      */
     public static function all(): array
     {
-        return Configuration::toutes();
+        return ConfigurationSysteme::toutes();
     }
 }

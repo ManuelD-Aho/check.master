@@ -73,11 +73,11 @@ class Enseignant extends Model
 
     /**
      * Retourne les annotations de rapport
-     * @return RapportAnnotation[]
+     * @return AnnotationRapport[]
      */
     public function annotationsRapport(): array
     {
-        return $this->hasMany(RapportAnnotation::class, 'auteur_id', 'id_enseignant');
+        return $this->hasMany(AnnotationRapport::class, 'auteur_id', 'id_enseignant');
     }
 
     /**
