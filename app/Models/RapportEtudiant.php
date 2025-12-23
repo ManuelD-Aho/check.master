@@ -48,11 +48,11 @@ class RapportEtudiant extends Model
 
     /**
      * Retourne les annotations du rapport
-     * @return RapportAnnotation[]
+     * @return AnnotationRapport[]
      */
     public function annotations(): array
     {
-        return $this->hasMany(RapportAnnotation::class, 'rapport_id', 'id_rapport');
+        return $this->hasMany(AnnotationRapport::class, 'rapport_id', 'id_rapport');
     }
 
     /**
@@ -251,7 +251,7 @@ class RapportEtudiant extends Model
      */
     public function nombreAnnotations(): int
     {
-        return RapportAnnotation::count(['rapport_id' => $this->getId()]);
+        return AnnotationRapport::count(['rapport_id' => $this->getId()]);
     }
 
     /**
