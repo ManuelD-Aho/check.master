@@ -21,10 +21,20 @@ class ServiceParametres
 
     /**
      * Définit un paramètre de configuration
+     * 
+     * @param string $key Clé de configuration
+     * @param mixed $value Valeur à stocker
+     * @param string|null $type Type de valeur (auto-détecté si non spécifié)
+     * @param string|null $groupe Groupe de configuration optionnel
      */
-    public static function set(string $key, mixed $value, ?string $type = null): void
+    public static function set(string $key, mixed $value, ?string $type = null, ?string $groupe = null): void
     {
-        ConfigurationSysteme::set($key, $value, $type);
+        ConfigurationSysteme::set(
+            $key,
+            $value,
+            $type ?? ConfigurationSysteme::TYPE_STRING,
+            $groupe
+        );
     }
 
     /**

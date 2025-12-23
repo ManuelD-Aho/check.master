@@ -107,11 +107,25 @@ class ConfigurationSysteme extends Model
 
     /**
      * Définit une valeur de configuration
+     * 
+     * @param string $cle Clé de configuration
+     * @param mixed $valeur Valeur à stocker
+     * @param string $type Type de valeur (string par défaut, auto-détecté si null est passé explicitement)
+     * @param string|null $groupe Groupe de configuration optionnel
+     * @param string|null $description Description optionnelle pour les nouvelles configs
+     * @param bool $modifiableUI Si la config peut être modifiée via l'UI (false pour les configs système)
      */
-    public static function set(string $cle, mixed $valeur, ?string $type = null, ?string $groupe = null): void
-    {
-        // Déterminer le type automatiquement si non fourni
-        if ($type === null) {
+    public static function set(
+        string $cle,
+        mixed $valeur,
+        string $type = self::TYPE_STRING,
+        ?string $groupe = null,
+        ?string $description = null,
+        bool $modifiableUI = false
+    ): void {
+        // Si le type est passé explicitement comme 'string' mais la valeur n'est pas une chaîne,
+        // utiliser la détection automatique
+        if ($type === self::TYPE_STRING && !is_string($valeur)) {
             $type = self::determinerType($valeur);
         }
 
@@ -124,6 +138,9 @@ class ConfigurationSysteme extends Model
             if ($groupe !== null) {
                 $config->groupe_config = $groupe;
             }
+            if ($description !== null) {
+                $config->description = $description;
+            }
             $config->save();
         } else {
             $new = new self([
@@ -131,15 +148,15 @@ class ConfigurationSysteme extends Model
                 'valeur_config' => $valeurStr,
                 'type_valeur' => $type,
                 'groupe_config' => $groupe,
-                'description' => 'Généré automatiquement',
-                'modifiable_ui' => true,
+                'description' => $description ?? 'Configuration générée automatiquement pour: ' . $cle,
+                'modifiable_ui' => $modifiableUI,
             ]);
             $new->save();
         }
     }
 
     /**
-     * Détermine le type de la valeur
+     * Détermine le type de la valeur automatiquement
      */
     private static function determinerType(mixed $valeur): string
     {
@@ -187,7 +204,8 @@ class ConfigurationSysteme extends Model
      */
     public static function getGroupes(): array
     {
-        $sql = "SELECT DISTINCT groupe_config FROM configuration_systeme 
+        $table = (new self())->table;
+        $sql = "SELECT DISTINCT groupe_config FROM {$table} 
                 WHERE groupe_config IS NOT NULL 
                 ORDER BY groupe_config";
         $stmt = self::raw($sql, []);
