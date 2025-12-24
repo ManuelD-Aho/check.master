@@ -7,6 +7,7 @@ declare(strict_types=1);
  */
 
 use Src\Kernel;
+use Src\Router;
 use Src\Http\Request;
 
 // 1. Initialisation (Autoload, Config, etc.)
@@ -18,8 +19,14 @@ $request = Request::getInstance();
 // 3. Initialisation du noyau
 $kernel = new Kernel();
 
-// 4. Traitement de la requête
+// 4. Initialisation du routeur
+$router = new Router();
+$router->setKernel($kernel);
+$router->loadRoutes(__DIR__ . '/app/config/routes.php');
+$kernel->setRouter($router);
+
+// 5. Traitement de la requête
 $response = $kernel->handle($request);
 
-// 5. Envoi de la réponse
+// 6. Envoi de la réponse
 $response->send();

@@ -196,12 +196,17 @@ class Kernel
     protected function runMiddlewarePipeline(Request $request, callable $destination): Response
     {
         $pipeline = array_reverse($this->middleware);
-        $next = $destination;
+        
+        // Wrapper initial pour la destination finale
+        $next = function () use ($destination, $request): Response {
+            return $destination($request);
+        };
 
         foreach ($pipeline as $middlewareClass) {
-            $next = function (Request $req) use ($middlewareClass, $next): Response {
+            $currentNext = $next;
+            $next = function () use ($middlewareClass, $currentNext): Response {
                 $middleware = $this->resolveMiddleware($middlewareClass);
-                $result = $middleware->handle($next);
+                $result = $middleware->handle($currentNext);
 
                 // Si le middleware retourne déjà une Response, la retourner
                 if ($result instanceof Response) {
@@ -213,7 +218,7 @@ class Kernel
             };
         }
 
-        return $next($request);
+        return $next();
     }
 
     /**
@@ -244,17 +249,22 @@ class Kernel
         }
 
         $pipeline = array_reverse($middlewareClasses);
-        $next = $destination;
+        
+        // Wrapper initial pour la destination finale
+        $next = function () use ($destination, $request): Response {
+            return $destination($request);
+        };
 
         foreach ($pipeline as $middlewareClass) {
-            $next = function (Request $req) use ($middlewareClass, $next): Response {
+            $currentNext = $next;
+            $next = function () use ($middlewareClass, $currentNext): Response {
                 $middleware = $this->resolveMiddleware($middlewareClass);
-                $result = $middleware->handle($next);
+                $result = $middleware->handle($currentNext);
                 return $result instanceof Response ? $result : $result;
             };
         }
 
-        return $next($request);
+        return $next();
     }
 
     /**
