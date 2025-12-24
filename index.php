@@ -10,7 +10,7 @@ use Src\Kernel;
 use Src\Http\Request;
 
 // 1. Initialisation (Autoload, Config, etc.)
-require_once __DIR__ . '/app/Config/bootstrap.php';
+require_once __DIR__ . '/app/config/bootstrap.php';
 
 // 2. Création de la requête
 $request = Request::getInstance();
