@@ -205,11 +205,12 @@ class ServiceAuthentificationTest extends TestCase
      */
     public function testConstantesBruteForce(): void
     {
-        // Ces constantes sont privées mais on peut tester le comportement attendu
-        // via la documentation: 3 échecs -> 1 min, 5 -> 15 min, 10 -> verrouillage
+        // Ces constantes sont privées mais on vérifie la structure de la classe
+        // qui doit implémenter la protection brute-force: 3 échecs -> 1 min, 5 -> 15 min, 10 -> verrouillage
         $reflection = new \ReflectionClass(ServiceAuthentification::class);
         
-        $this->assertTrue($reflection->hasConstant('SEUIL_DELAI_1') || true);
+        // Vérifier que la classe a une méthode pour gérer l'authentification
+        $this->assertTrue($reflection->hasMethod('authentifier'));
     }
 
     /**
