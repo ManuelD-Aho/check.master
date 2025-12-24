@@ -7,6 +7,7 @@ namespace Src;
 use Src\Http\Request;
 use Src\Http\Response;
 use Src\Exceptions\NotFoundException;
+use Src\Kernel;
 
 /**
  * Routeur HTTP pour CheckMaster
@@ -202,9 +203,10 @@ class Router
         
         $url = $this->namedRoutes[$name];
         
-        // Remplacer les paramètres
+        // Remplacer les paramètres (échapper la clé pour éviter injection regex)
         foreach ($params as $key => $value) {
-            $url = preg_replace('/\[[aic\*]:' . $key . '\]/', (string) $value, $url);
+            $safeKey = preg_quote($key, '/');
+            $url = preg_replace('/\[[aic\*]:' . $safeKey . '\]/', (string) $value, $url);
         }
         
         return $url;
