@@ -34,7 +34,7 @@
             "Database\\": "database/"
         },
         "files": [
-            "src/Support/Helpers.php"
+            "src/Support/helpers.php"
         ]
     },
     "autoload-dev": {

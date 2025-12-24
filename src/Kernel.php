@@ -202,12 +202,12 @@ class Kernel
             $next = function (Request $req) use ($middlewareClass, $next): Response {
                 $middleware = $this->resolveMiddleware($middlewareClass);
                 $result = $middleware->handle($next);
-                
+
                 // Si le middleware retourne déjà une Response, la retourner
                 if ($result instanceof Response) {
                     return $result;
                 }
-                
+
                 // Sinon c'est le résultat du next()
                 return $result;
             };
@@ -414,7 +414,7 @@ class Kernel
      */
     protected function wantsJson(Request $request): bool
     {
-        return $request::isAjax() 
+        return $request::isAjax()
             || $request::header('Accept') === 'application/json'
             || str_contains($request::header('Accept') ?? '', 'application/json')
             || str_starts_with($request::uri(), '/api/');

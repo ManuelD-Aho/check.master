@@ -35,7 +35,8 @@ class FeatureController
 declare(strict_types=1);
 namespace App\Services\Module;
 
-use App\Services\Core\{ServiceAudit, ServiceWorkflow};
+use App\Services\Security\ServiceAudit;
+use App\Services\Workflow\ServiceWorkflow;
 use Src\Database\DB;
 
 class ServiceFeature

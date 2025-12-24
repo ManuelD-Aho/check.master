@@ -11,10 +11,11 @@ use Src\Kernel;
 
 /**
  * Routeur HTTP pour CheckMaster
- * 
+ *
  * Gère le mapping des URLs vers les contrôleurs.
  * Compatible avec le format AltoRouter pour les routes existantes.
  */
+
 class Router
 {
     /**
@@ -50,7 +51,7 @@ class Router
 
     /**
      * Enregistre une route (format AltoRouter compatible)
-     * 
+     *
      * @param string $methods Méthodes HTTP séparées par | (ex: "GET|POST")
      * @param string $uri URI de la route
      * @param string $handler Handler au format "Controller#action" ou "Controller@action"
@@ -62,7 +63,7 @@ class Router
         // Parser le handler (supporte # et @)
         $separator = strpos($handler, '#') !== false ? '#' : '@';
         [$controller, $action] = explode($separator, $handler);
-        
+
         // Enregistrer pour chaque méthode
         foreach (explode('|', $methods) as $method) {
             $method = strtoupper(trim($method));
@@ -73,12 +74,12 @@ class Router
                 'name' => $name ?? '',
             ];
         }
-        
+
         // Enregistrer le nom de route
         if ($name !== null) {
             $this->namedRoutes[$name] = $uri;
         }
-        
+
         return $this;
     }
 
@@ -113,25 +114,25 @@ class Router
     {
         $method = $request::method();
         $uri = $request::uri();
-        
+
         // Normaliser l'URI
         $uri = '/' . trim($uri, '/');
         if ($uri !== '/') {
             $uri = rtrim($uri, '/');
         }
-        
+
         // Chercher une route exacte
         if (isset($this->routes[$method][$uri])) {
             return $this->executeRoute($this->routes[$method][$uri], $request);
         }
-        
+
         // Chercher une route avec paramètres
         foreach ($this->routes[$method] ?? [] as $pattern => $route) {
             if ($params = $this->matchRoute($pattern, $uri)) {
                 return $this->executeRoute($route, $request, $params);
             }
         }
-        
+
         throw new NotFoundException('Route', $uri);
     }
 
@@ -143,18 +144,18 @@ class Router
     {
         // Échapper les caractères spéciaux regex
         $regex = preg_quote($pattern, '#');
-        
+
         // Convertir les patterns AltoRouter en regex
         $regex = preg_replace('/\\\\\[i:(\w+)\\\\\]/', '(?P<$1>\d+)', $regex);
         $regex = preg_replace('/\\\\\[a:(\w+)\\\\\]/', '(?P<$1>[a-zA-Z0-9_-]+)', $regex);
         $regex = preg_replace('/\\\\\[\*:(\w+)\\\\\]/', '(?P<$1>.+)', $regex);
         $regex = '#^' . $regex . '$#';
-        
+
         if (preg_match($regex, $uri, $matches)) {
             // Filtrer uniquement les clés nommées
             return array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
         }
-        
+
         return null;
     }
 
@@ -164,22 +165,22 @@ class Router
     private function executeRoute(array $route, Request $request, array $params = []): Response
     {
         $controllerName = $route['controller'];
-        
+
         // Gérer les namespaces (ex: "Admin\\SessionsController" ou "Api\\UsersController")
         $controllerClass = $this->controllerNamespace . $controllerName;
-        
+
         $action = $route['action'];
-        
+
         if (!class_exists($controllerClass)) {
             throw new NotFoundException('Controller', $controllerClass);
         }
-        
+
         $controller = new $controllerClass();
-        
+
         if (!method_exists($controller, $action)) {
             throw new NotFoundException('Action', "{$controllerClass}::{$action}");
         }
-        
+
         // Exécuter avec middleware si kernel disponible
         if ($this->kernel !== null && !empty($route['middleware'])) {
             return $this->kernel->runRouteMiddleware(
@@ -188,7 +189,7 @@ class Router
                 fn() => $controller->$action(...array_values($params))
             );
         }
-        
+
         return $controller->$action(...array_values($params));
     }
 
@@ -200,15 +201,15 @@ class Router
         if (!isset($this->namedRoutes[$name])) {
             throw new \InvalidArgumentException("Route '{$name}' non trouvée");
         }
-        
+
         $url = $this->namedRoutes[$name];
-        
+
         // Remplacer les paramètres (échapper la clé pour éviter injection regex)
         foreach ($params as $key => $value) {
             $safeKey = preg_quote($key, '/');
             $url = preg_replace('/\[[aic\*]:' . $safeKey . '\]/', (string) $value, $url);
         }
-        
+
         return $url;
     }
 

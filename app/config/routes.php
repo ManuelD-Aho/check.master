@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Définition des routes de l'application
- * Utilise AltoRouter
- * @var \AltoRouter $router
+ * Utilise le routeur natif CheckMaster
+ * @var \Src\Router $router
  */
 
 // Pages publiques

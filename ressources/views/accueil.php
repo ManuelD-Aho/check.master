@@ -757,7 +757,7 @@ $stats = [
                     Gérez vos <span>mémoires</span> de fin d'études simplement
                 </h1>
                 <p class="hero-description">
-                    CheckMaster digitalise l'ensemble du processus de validation des mémoires, 
+                    CheckMaster digitalise l'ensemble du processus de validation des mémoires,
                     de la candidature à la délivrance du diplôme, pour l'Université Félix Houphouët-Boigny.
                 </p>
                 <div class="hero-actions">
@@ -832,7 +832,7 @@ $stats = [
                 <span class="section-subtitle">Fonctionnalités</span>
                 <h2 class="section-title">Tout ce dont vous avez besoin</h2>
                 <p class="section-description">
-                    CheckMaster offre une suite complète d'outils pour gérer efficacement 
+                    CheckMaster offre une suite complète d'outils pour gérer efficacement
                     le parcours des mémoires de fin d'études.
                 </p>
             </div>
@@ -846,7 +846,7 @@ $stats = [
                     </div>
                     <h3 class="feature-title">Gestion des candidatures</h3>
                     <p class="feature-description">
-                        Soumettez et suivez vos candidatures en temps réel. 
+                        Soumettez et suivez vos candidatures en temps réel.
                         Validation automatique par la scolarité et le service communication.
                     </p>
                 </div>
@@ -860,7 +860,7 @@ $stats = [
                     </div>
                     <h3 class="feature-title">Commission de validation</h3>
                     <p class="feature-description">
-                        Système de vote à l'unanimité avec médiation automatique. 
+                        Système de vote à l'unanimité avec médiation automatique.
                         Annotations collaboratives sur les rapports.
                     </p>
                 </div>
@@ -875,7 +875,7 @@ $stats = [
                     </div>
                     <h3 class="feature-title">Planification des soutenances</h3>
                     <p class="feature-description">
-                        Constitution des jurys, planification intelligente et 
+                        Constitution des jurys, planification intelligente et
                         génération automatique des convocations.
                     </p>
                 </div>
@@ -888,7 +888,7 @@ $stats = [
                     </div>
                     <h3 class="feature-title">Gestion financière</h3>
                     <p class="feature-description">
-                        Suivi des paiements, calcul automatique des pénalités et 
+                        Suivi des paiements, calcul automatique des pénalités et
                         gestion des exonérations avec génération de reçus.
                     </p>
                 </div>
@@ -901,7 +901,7 @@ $stats = [
                     </div>
                     <h3 class="feature-title">Notifications temps réel</h3>
                     <p class="feature-description">
-                        Alertes automatiques par email à chaque étape. 
+                        Alertes automatiques par email à chaque étape.
                         Rappels SLA et escalade vers le Doyen si nécessaire.
                     </p>
                 </div>
@@ -914,7 +914,7 @@ $stats = [
                     </div>
                     <h3 class="feature-title">Sécurité et traçabilité</h3>
                     <p class="feature-description">
-                        Authentification sécurisée, audit complet et archivage 
+                        Authentification sécurisée, audit complet et archivage
                         des documents avec vérification d'intégrité.
                     </p>
                 </div>
