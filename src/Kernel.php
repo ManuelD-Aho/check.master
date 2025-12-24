@@ -259,8 +259,7 @@ class Kernel
             $currentNext = $next;
             $next = function () use ($middlewareClass, $currentNext): Response {
                 $middleware = $this->resolveMiddleware($middlewareClass);
-                $result = $middleware->handle($currentNext);
-                return $result instanceof Response ? $result : $result;
+                return $middleware->handle($currentNext);
             };
         }
 
