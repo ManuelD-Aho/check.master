@@ -31,27 +31,32 @@ class AuthController
     }
 
     /**
-     * GET / - Affiche la page de connexion
+     * GET|POST /connexion - Gère la connexion
      */
-    public function showLogin(): Response
+    public function login(): Response
     {
         // Si déjà connecté, rediriger vers dashboard
         if (Auth::check()) {
             return Response::redirect('/dashboard');
         }
 
-        // Inclure la vue de connexion
+        // Si POST, traiter le formulaire
+        if (Request::method() === 'POST') {
+            return $this->processLogin();
+        }
+
+        // GET: Afficher le formulaire
         ob_start();
-        include dirname(__DIR__, 2) . '/public/page_connexion.php';
+        include dirname(__DIR__, 2) . '/ressources/views/connexion.php';
         $content = ob_get_clean();
 
         return Response::html($content);
     }
 
     /**
-     * POST / - Traite la connexion
+     * Traite la soumission du formulaire de connexion
      */
-    public function login(): Response
+    private function processLogin(): Response
     {
         $email = trim(Request::post('email', ''));
         $password = Request::post('password', '');
@@ -93,7 +98,7 @@ class AuthController
         // Réinitialiser Auth
         Auth::logout();
 
-        return Response::redirect('/');
+        return Response::redirect('/connexion');
     }
 
     /**
@@ -157,7 +162,7 @@ class AuthController
             session_start();
         }
         $_SESSION['flash_error'] = $message;
-        return Response::redirect('/');
+        return Response::redirect('/connexion');
     }
 
     /**

@@ -216,7 +216,7 @@ unset($_SESSION['flash_error']);
             <div class="error-message"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
         <?php endif; ?>
 
-        <form action="/" method="POST" id="login-form">
+        <form action="/connexion" method="POST" id="login-form">
             <?= CSRF::field() ?>
 
             <div class="form-group">
