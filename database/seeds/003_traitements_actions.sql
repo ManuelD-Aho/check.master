@@ -4,8 +4,8 @@
 -- Date: 2025-12-24
 -- =====================================================
 
--- Les 6 actions système
-INSERT INTO actions (id_action, lib_action, description) VALUES
+-- Les 6 actions système (table: action - singulier)
+INSERT INTO action (id_action, lib_action, description) VALUES
 (1, 'Lire', 'Consulter et visualiser les données'),
 (2, 'Creer', 'Créer de nouvelles entrées'),
 (3, 'Modifier', 'Modifier les entrées existantes'),
@@ -16,57 +16,59 @@ ON DUPLICATE KEY UPDATE
     lib_action = VALUES(lib_action),
     description = VALUES(description);
 
--- Les traitements par module
-INSERT INTO traitements (id_traitement, lib_traitement, module, description) VALUES
--- Module Authentification
-(1, 'Gestion Utilisateurs', 'authentification', 'CRUD des comptes utilisateurs'),
-(2, 'Gestion Sessions', 'authentification', 'Surveillance des sessions actives'),
-(3, 'Gestion Groupes', 'authentification', 'Administration des groupes et rôles'),
-(4, 'Gestion Permissions', 'authentification', 'Configuration des droits d''accès'),
--- Module Entités Académiques
-(5, 'Gestion Étudiants', 'entites_academiques', 'Gestion des dossiers étudiants'),
-(6, 'Gestion Enseignants', 'entites_academiques', 'Gestion des enseignants'),
-(7, 'Gestion Personnel', 'entites_academiques', 'Gestion du personnel administratif'),
-(8, 'Gestion Entreprises', 'entites_academiques', 'Référentiel des entreprises partenaires'),
-(9, 'Gestion Années Académiques', 'entites_academiques', 'Configuration des années académiques'),
-(10, 'Gestion UE/ECUE', 'entites_academiques', 'Gestion des unités d''enseignement'),
--- Module Workflow
-(11, 'Gestion Workflow', 'workflow', 'Configuration états et transitions'),
-(12, 'Gestion Dossiers', 'workflow', 'Suivi des dossiers étudiants'),
-(13, 'Gestion Candidatures', 'workflow', 'Traitement des candidatures'),
--- Module Commission
-(14, 'Gestion Sessions Commission', 'commission', 'Planification et gestion des sessions'),
-(15, 'Évaluation Rapports', 'commission', 'Évaluation et vote sur les rapports'),
--- Module Soutenance
-(16, 'Gestion Jurys', 'soutenance', 'Constitution des jurys'),
-(17, 'Planification Soutenances', 'soutenance', 'Planification des soutenances'),
-(18, 'Gestion Notes', 'soutenance', 'Saisie et consultation des notes'),
--- Module Financier
-(19, 'Gestion Paiements', 'financier', 'Enregistrement des paiements'),
-(20, 'Gestion Pénalités', 'financier', 'Gestion des pénalités de retard'),
-(21, 'Gestion Exonérations', 'financier', 'Gestion des exonérations'),
--- Module Communication
-(22, 'Gestion Notifications', 'communication', 'Envoi et suivi des notifications'),
-(23, 'Messagerie Interne', 'communication', 'Messages entre utilisateurs'),
-(24, 'Gestion Calendrier', 'communication', 'Calendrier académique'),
--- Module Documents
-(25, 'Génération Documents', 'documents', 'Génération de PDFs et documents'),
-(26, 'Gestion Archives', 'documents', 'Archivage et intégrité'),
--- Module Administration
-(27, 'Configuration Système', 'administration', 'Paramètres système'),
-(28, 'Consultation Audit', 'administration', 'Logs et traçabilité'),
-(29, 'Gestion Réclamations', 'administration', 'Traitement des réclamations'),
-(30, 'Maintenance', 'administration', 'Opérations de maintenance')
+-- Les traitements par module (table: traitement - singulier)
+-- Note: la table traitement n'a pas de colonne 'module', on utilise la description pour documenter le module
+INSERT INTO traitement (id_traitement, lib_traitement, description, ordre_traitement, actif) VALUES
+-- Module Authentification (ordre 1-4)
+(1, 'Gestion Utilisateurs', 'CRUD des comptes utilisateurs (module: authentification)', 1, TRUE),
+(2, 'Gestion Sessions', 'Surveillance des sessions actives (module: authentification)', 2, TRUE),
+(3, 'Gestion Groupes', 'Administration des groupes et rôles (module: authentification)', 3, TRUE),
+(4, 'Gestion Permissions', 'Configuration des droits d''accès (module: authentification)', 4, TRUE),
+-- Module Entités Académiques (ordre 5-10)
+(5, 'Gestion Étudiants', 'Gestion des dossiers étudiants (module: entites_academiques)', 5, TRUE),
+(6, 'Gestion Enseignants', 'Gestion des enseignants (module: entites_academiques)', 6, TRUE),
+(7, 'Gestion Personnel', 'Gestion du personnel administratif (module: entites_academiques)', 7, TRUE),
+(8, 'Gestion Entreprises', 'Référentiel des entreprises partenaires (module: entites_academiques)', 8, TRUE),
+(9, 'Gestion Années Académiques', 'Configuration des années académiques (module: entites_academiques)', 9, TRUE),
+(10, 'Gestion UE/ECUE', 'Gestion des unités d''enseignement (module: entites_academiques)', 10, TRUE),
+-- Module Workflow (ordre 11-13)
+(11, 'Gestion Workflow', 'Configuration états et transitions (module: workflow)', 11, TRUE),
+(12, 'Gestion Dossiers', 'Suivi des dossiers étudiants (module: workflow)', 12, TRUE),
+(13, 'Gestion Candidatures', 'Traitement des candidatures (module: workflow)', 13, TRUE),
+-- Module Commission (ordre 14-15)
+(14, 'Gestion Sessions Commission', 'Planification et gestion des sessions (module: commission)', 14, TRUE),
+(15, 'Évaluation Rapports', 'Évaluation et vote sur les rapports (module: commission)', 15, TRUE),
+-- Module Soutenance (ordre 16-18)
+(16, 'Gestion Jurys', 'Constitution des jurys (module: soutenance)', 16, TRUE),
+(17, 'Planification Soutenances', 'Planification des soutenances (module: soutenance)', 17, TRUE),
+(18, 'Gestion Notes', 'Saisie et consultation des notes (module: soutenance)', 18, TRUE),
+-- Module Financier (ordre 19-21)
+(19, 'Gestion Paiements', 'Enregistrement des paiements (module: financier)', 19, TRUE),
+(20, 'Gestion Pénalités', 'Gestion des pénalités de retard (module: financier)', 20, TRUE),
+(21, 'Gestion Exonérations', 'Gestion des exonérations (module: financier)', 21, TRUE),
+-- Module Communication (ordre 22-24)
+(22, 'Gestion Notifications', 'Envoi et suivi des notifications (module: communication)', 22, TRUE),
+(23, 'Messagerie Interne', 'Messages entre utilisateurs (module: communication)', 23, TRUE),
+(24, 'Gestion Calendrier', 'Calendrier académique (module: communication)', 24, TRUE),
+-- Module Documents (ordre 25-26)
+(25, 'Génération Documents', 'Génération de PDFs et documents (module: documents)', 25, TRUE),
+(26, 'Gestion Archives', 'Archivage et intégrité (module: documents)', 26, TRUE),
+-- Module Administration (ordre 27-30)
+(27, 'Configuration Système', 'Paramètres système (module: administration)', 27, TRUE),
+(28, 'Consultation Audit', 'Logs et traçabilité (module: administration)', 28, TRUE),
+(29, 'Gestion Réclamations', 'Traitement des réclamations (module: administration)', 29, TRUE),
+(30, 'Maintenance', 'Opérations de maintenance (module: administration)', 30, TRUE)
 ON DUPLICATE KEY UPDATE 
     lib_traitement = VALUES(lib_traitement),
-    module = VALUES(module),
-    description = VALUES(description);
+    description = VALUES(description),
+    ordre_traitement = VALUES(ordre_traitement),
+    actif = VALUES(actif);
 
 -- Rattachements: groupe_utilisateur → traitement → action
 -- Administrateur (groupe 1) - accès total à tout
 INSERT INTO rattacher (id_GU, id_traitement, id_action) 
 SELECT 1, t.id_traitement, a.id_action 
-FROM traitements t CROSS JOIN actions a
+FROM traitement t CROSS JOIN action a
 ON DUPLICATE KEY UPDATE id_GU = 1;
 
 -- Secrétaire (groupe 2) - Documents, Archives
