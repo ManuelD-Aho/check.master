@@ -115,10 +115,10 @@ class WorkflowGateMiddleware
     public static function redaction(): self
     {
         return new self('Rédaction du rapport', [
-            WorkflowEtat::RAPPORT_VALIDE,
-            WorkflowEtat::ATTENTE_AVIS_ENCADREUR,
-            WorkflowEtat::PRET_POUR_JURY,
-            WorkflowEtat::JURY_EN_CONSTITUTION,
+            WorkflowEtat::ETAT_RAPPORT_VALIDE,
+            WorkflowEtat::ETAT_ATTENTE_AVIS_ENCADREUR,
+            WorkflowEtat::ETAT_PRET_POUR_JURY,
+            WorkflowEtat::ETAT_JURY_EN_CONSTITUTION,
         ]);
     }
 
@@ -128,9 +128,9 @@ class WorkflowGateMiddleware
     public static function soutenance(): self
     {
         return new self('Soutenance', [
-            WorkflowEtat::SOUTENANCE_PLANIFIEE,
-            WorkflowEtat::SOUTENANCE_EN_COURS,
-            WorkflowEtat::SOUTENANCE_TERMINEE,
+            WorkflowEtat::ETAT_SOUTENANCE_PLANIFIEE,
+            WorkflowEtat::ETAT_SOUTENANCE_EN_COURS,
+            WorkflowEtat::ETAT_SOUTENANCE_TERMINEE,
         ]);
     }
 
@@ -140,8 +140,8 @@ class WorkflowGateMiddleware
     public static function commission(): self
     {
         return new self('Commission', [
-            WorkflowEtat::EN_ATTENTE_COMMISSION,
-            WorkflowEtat::EN_EVALUATION_COMMISSION,
+            WorkflowEtat::ETAT_EN_ATTENTE_COMMISSION,
+            WorkflowEtat::ETAT_EN_EVALUATION_COMMISSION,
         ]);
     }
 }

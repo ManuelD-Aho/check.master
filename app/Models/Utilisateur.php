@@ -56,9 +56,9 @@ class Utilisateur extends Model
     /**
      * Retourne le groupe utilisateur principal
      */
-    public function groupeUtilisateur(): ?GroupeUtilisateur
+    public function groupe(): ?Groupe
     {
-        return $this->belongsTo(GroupeUtilisateur::class, 'id_GU', 'id_GU');
+        return $this->belongsTo(Groupe::class, 'id_GU', 'id_groupe');
     }
 
     /**

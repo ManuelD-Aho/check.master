@@ -40,6 +40,22 @@ class SessionActive extends Model
         return $this->belongsTo(Utilisateur::class, 'utilisateur_id', 'id_utilisateur');
     }
 
+    /**
+     * Retourne l'utilisateur associé à la session (alias)
+     */
+    public function getUtilisateur(): ?Utilisateur
+    {
+        return $this->utilisateur();
+    }
+
+    /**
+     * Met à jour la dernière activité
+     */
+    public function majDerniereActivite(): void
+    {
+        $this->derniere_activite = date('Y-m-d H:i:s');
+    }
+
     // ===== MÉTHODES DE RECHERCHE =====
 
     /**
