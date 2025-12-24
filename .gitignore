@@ -17,6 +17,9 @@ storage/sessions/
 # Archives
 storage/archives/
 
+# Rate limiting
+storage/rate_limit/
+
 # Test coverage
 tests/coverage/
 

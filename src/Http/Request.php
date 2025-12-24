@@ -169,17 +169,52 @@ class Request
     }
 
     /**
-     * Retourne l'URI de la requête
+     * Retourne l'URI de la requête (sans le base path)
      */
     public static function uri(): string
     {
         $instance = self::getInstance();
         $uri = $instance->server['REQUEST_URI'] ?? '/';
+        
         // Retirer la query string
         if (($pos = strpos($uri, '?')) !== false) {
             $uri = substr($uri, 0, $pos);
         }
+        
+        // Détecter et retirer le base path (ex: /check.master)
+        $scriptName = $instance->server['SCRIPT_NAME'] ?? '';
+        $basePath = dirname($scriptName);
+        
+        // Si le base path n'est pas la racine, le retirer de l'URI
+        if ($basePath !== '/' && $basePath !== '\\' && $basePath !== '') {
+            $basePath = rtrim($basePath, '/');
+            if (str_starts_with($uri, $basePath)) {
+                $uri = substr($uri, strlen($basePath));
+            }
+        }
+        
+        // S'assurer que l'URI commence par /
+        if ($uri === '' || $uri[0] !== '/') {
+            $uri = '/' . $uri;
+        }
+        
         return $uri;
+    }
+
+    /**
+     * Retourne le base path de l'application (ex: /check.master)
+     */
+    public static function basePath(): string
+    {
+        $instance = self::getInstance();
+        $scriptName = $instance->server['SCRIPT_NAME'] ?? '';
+        $basePath = dirname($scriptName);
+        
+        if ($basePath === '/' || $basePath === '\\') {
+            return '';
+        }
+        
+        return rtrim($basePath, '/');
     }
 
     /**
