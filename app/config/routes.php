@@ -6,8 +6,12 @@
  * @var \AltoRouter $router
  */
 
+// Pages publiques
+$router->map('GET', '/', 'AccueilController#index', 'home');
+$router->map('GET', '/accueil', 'AccueilController#index', 'accueil');
+
 // Authentification
-$router->map('GET|POST', '/', 'AuthController#login', 'login');
+$router->map('GET|POST', '/connexion', 'AuthController#login', 'login');
 $router->map('GET', '/logout', 'AuthController#logout', 'logout');
 $router->map('GET|POST', '/forgot-password', 'AuthController#forgotPassword', 'forgot_password');
 $router->map('GET|POST', '/change-password', 'AuthController#changePassword', 'change_password');
