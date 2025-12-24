@@ -25,12 +25,14 @@ ON DUPLICATE KEY UPDATE
     niveau_hierarchique = VALUES(niveau_hierarchique);
 
 -- Type Utilisateur (référencé par id_type_utilisateur)
-INSERT INTO type_utilisateur (id_type, lib_type) VALUES
-(1, 'Administrateur'),
-(2, 'Personnel Administratif'),
-(3, 'Enseignant'),
-(4, 'Étudiant')
-ON DUPLICATE KEY UPDATE lib_type = VALUES(lib_type);
+INSERT INTO type_utilisateur (id_type_utilisateur, lib_type_utilisateur, description) VALUES
+(1, 'Administrateur', 'Administrateur système avec contrôle total'),
+(2, 'Personnel Administratif', 'Personnel administratif (Secrétaire, Scolarité, Communication)'),
+(3, 'Enseignant', 'Enseignant (Commission, Jury, Encadreur)'),
+(4, 'Étudiant', 'Étudiant inscrit au programme')
+ON DUPLICATE KEY UPDATE 
+    lib_type_utilisateur = VALUES(lib_type_utilisateur),
+    description = VALUES(description);
 
 -- Ressources système (pour le système de permissions)
 INSERT INTO ressources (id_ressource, code_ressource, nom_ressource, description, module) VALUES
