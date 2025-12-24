@@ -90,4 +90,15 @@ class ValidationException extends AppException
     {
         return new self($errors, $message);
     }
+
+    /**
+     * Factory avec détails (alias de fromErrors)
+     * 
+     * @param string $message Message principal
+     * @param array $details Détails des erreurs de validation
+     */
+    public static function withDetails(string $message, array $details = []): self
+    {
+        return new self($details, $message);
+    }
 }

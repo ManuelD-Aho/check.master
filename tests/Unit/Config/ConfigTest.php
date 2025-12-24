@@ -63,7 +63,7 @@ class ConfigTest extends TestCase
      */
     public function testSecurityConfigExists(): void
     {
-        $this->markTestSkipped('Config file security.php not yet created');
+        $this->assertFileExists(dirname(__DIR__, 3) . '/app/config/security.php');
     }
 
     /**
@@ -71,7 +71,7 @@ class ConfigTest extends TestCase
      */
     public function testSessionConfigExists(): void
     {
-        $this->markTestSkipped('Config file session.php not yet created');
+        $this->assertFileExists(dirname(__DIR__, 3) . '/app/config/session.php');
     }
 
     /**
@@ -79,7 +79,7 @@ class ConfigTest extends TestCase
      */
     public function testEmailConfigExists(): void
     {
-        $this->markTestSkipped('Config file email.php not yet created');
+        $this->assertFileExists(dirname(__DIR__, 3) . '/app/config/email.php');
     }
 
     /**
@@ -87,6 +87,6 @@ class ConfigTest extends TestCase
      */
     public function testWorkflowConfigExists(): void
     {
-        $this->markTestSkipped('Config file workflow.php not yet created');
+        $this->assertFileExists(dirname(__DIR__, 3) . '/app/config/workflow.php');
     }
 }

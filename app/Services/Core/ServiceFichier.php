@@ -350,7 +350,7 @@ class ServiceFichier
     /**
      * Retourne le répertoire d'upload
      */
-    private static function getUploadDirectory(string $subDirectory = ''): string
+    public static function getUploadDirectory(string $subDirectory = ''): string
     {
         $baseDir = self::getStorageRoot();
         $uploadDir = $subDirectory !== '' ? $baseDir . '/' . trim($subDirectory, '/') : $baseDir;
@@ -365,7 +365,7 @@ class ServiceFichier
     /**
      * Retourne le répertoire racine de stockage
      */
-    private static function getStorageRoot(): string
+    public static function getStorageRoot(): string
     {
         return dirname(__DIR__, 3) . '/' . self::STORAGE_DIR;
     }
@@ -373,7 +373,7 @@ class ServiceFichier
     /**
      * Retourne le message d'erreur d'upload
      */
-    private static function getUploadError(int $errorCode): string
+    public static function getUploadError(int $errorCode): string
     {
         $errors = [
             UPLOAD_ERR_INI_SIZE => 'Le fichier dépasse la taille maximale autorisée par le serveur',

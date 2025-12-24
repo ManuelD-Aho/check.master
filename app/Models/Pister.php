@@ -41,6 +41,12 @@ class Pister extends Model
     public const ACTION_TRANSITION = 'transition_workflow';
     public const ACTION_UPLOAD = 'upload';
     public const ACTION_TELECHARGEMENT = 'telechargement';
+    public const ACTION_DECONNEXION_FORCEE = 'deconnexion_forcee';
+
+    // Alias pour compatibilité
+    public const ACTION_LOGIN = self::ACTION_CONNEXION;
+    public const ACTION_LOGOUT = self::ACTION_DECONNEXION;
+    public const ACTION_LOGIN_ECHEC = self::ACTION_ECHEC_CONNEXION;
 
     // ===== RELATIONS =====
 
