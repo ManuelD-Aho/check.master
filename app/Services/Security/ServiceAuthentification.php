@@ -260,7 +260,7 @@ class ServiceAuthentification
      */
     public function supprimerToutesSessions(int $userId): int
     {
-        return SessionActive::supprimerToutesSessionsUtilisateur($userId);
+        return SessionActive::supprimerPourUtilisateur($userId);
     }
 
     /**

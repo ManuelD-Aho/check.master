@@ -116,7 +116,7 @@ class AuthController
             return JsonResponse::error('ID utilisateur invalide', 'INVALID_USER');
         }
 
-        $sessions = SessionActive::getSessionsUtilisateur($targetUserId);
+        $sessions = SessionActive::pourUtilisateur($targetUserId);
 
         $data = array_map(fn($s) => [
             'id' => $s->getId(),
