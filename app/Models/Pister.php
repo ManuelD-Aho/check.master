@@ -24,6 +24,7 @@ class Pister extends Model
         'donnees_snapshot',
         'ip_adresse',
         'user_agent',
+        'created_at',
     ];
 
     /**
@@ -222,6 +223,42 @@ class Pister extends Model
             return [];
         }
         return json_decode($this->donnees_snapshot, true) ?? [];
+    }
+
+    /**
+     * Enregistre une nouvelle entrée d'audit
+     *
+     * @param string $action L'action effectuée
+     * @param int|null $utilisateurId L'ID de l'utilisateur (peut être null)
+     * @param string|null $entiteType Le type d'entité concernée
+     * @param int|null $entiteId L'ID de l'entité
+     * @param array|null $snapshot Données contextuelles (sera converti en JSON)
+     * @param string|null $ipAdresse Adresse IP
+     * @param string|null $userAgent Navigateur
+     */
+    public static function enregistrer(
+        string $action,
+        ?int $utilisateurId = null,
+        ?string $entiteType = null,
+        ?int $entiteId = null,
+        ?array $snapshot = null,
+        ?string $ipAdresse = null,
+        ?string $userAgent = null
+    ): self {
+        $pister = new self([
+            'action' => $action,
+            'utilisateur_id' => $utilisateurId,
+            'entite_type' => $entiteType,
+            'entite_id' => $entiteId,
+            'donnees_snapshot' => $snapshot ? json_encode($snapshot) : null,
+            'ip_adresse' => $ipAdresse,
+            'user_agent' => $userAgent,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        $pister->save();
+
+        return $pister;
     }
 
     /**

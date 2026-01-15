@@ -18,6 +18,7 @@ $router->map('GET', '/accueil', 'AccueilController#index', 'accueil');
 // Authentification
 // ============================================================================
 $router->map('GET|POST', '/connexion', 'AuthController#login', 'login');
+$router->map('GET|POST', '/login', 'AuthController#login', 'login_alias');
 $router->map('GET', '/logout', 'AuthController#logout', 'logout');
 $router->map('GET|POST', '/forgot-password', 'AuthController#forgotPassword', 'forgot_password');
 $router->map('GET|POST', '/change-password', 'AuthController#changePassword', 'change_password');

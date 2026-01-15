@@ -60,13 +60,13 @@ class AuthMiddlewareTest extends TestCase
     /**
      * @test
      */
-    public function testRoutePubliqueLogin(): void
+    public function testRoutePubliqueConnexion(): void
     {
         $reflection = new \ReflectionClass($this->middleware);
         $method = $reflection->getMethod('estRoutePublique');
         $method->setAccessible(true);
 
-        $this->assertTrue($method->invoke($this->middleware, '/login'));
+        $this->assertTrue($method->invoke($this->middleware, '/connexion'));
     }
 
     /**

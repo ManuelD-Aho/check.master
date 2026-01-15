@@ -21,8 +21,11 @@ class AuthMiddleware
      */
     private const ROUTES_PUBLIQUES = [
         '/',
+        '/connexion',
         '/login',
         '/logout',
+        '/forgot-password',
+        '/change-password',
     ];
 
     /**
@@ -48,7 +51,7 @@ class AuthMiddleware
             }
             $_SESSION['redirect_after_login'] = Request::fullUrl();
 
-            return Response::redirect('/');
+            return Response::redirect('/connexion');
         }
 
         // Vérifier que le compte est toujours actif

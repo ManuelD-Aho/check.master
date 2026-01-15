@@ -69,7 +69,7 @@ if (!function_exists('asset')) {
      */
     function asset(string $path): string
     {
-        return url('assets/' . ltrim($path, '/'));
+        return '/public/assets/' . ltrim($path, '/');
     }
 }
 

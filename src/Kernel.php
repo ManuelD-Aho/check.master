@@ -312,7 +312,7 @@ class Kernel
             if ($this->wantsJson($request)) {
                 return JsonResponse::unauthorized($e->getMessage());
             }
-            return Response::redirect('/login');
+            return Response::redirect('/connexion');
         };
 
         $this->exceptionHandlers[MaintenanceException::class] = function (MaintenanceException $e, Request $request): Response {
@@ -461,7 +461,7 @@ class Kernel
             <div class="container">
                 <h1>✓ CheckMaster</h1>
                 <p>Système de Gestion des Mémoires</p>
-                <p><a href="/login">Se connecter</a></p>
+                <p><a href="/connexion">Se connecter</a></p>
             </div>
         </body>
         </html>

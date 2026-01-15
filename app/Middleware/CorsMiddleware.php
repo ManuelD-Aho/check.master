@@ -21,6 +21,9 @@ class CorsMiddleware
     private const ALLOWED_ORIGINS = [
         'https://checkmaster.edu',
         'https://admin.checkmaster.edu',
+        'http://localhost:8000', // <--- AJOUTEZ CETTE LIGNE
+        'http://localhost',      // <--- ET CELLE-CI (pour WAMP classique)
+        'http://localhost/check.master',
     ];
 
     /**

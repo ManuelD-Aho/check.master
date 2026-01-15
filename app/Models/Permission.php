@@ -237,6 +237,22 @@ class Permission extends Model
     }
 
     /**
+     * Alias pour trouver() utilisé par ServicePermissions
+     */
+    public static function getPermissionsGroupeRessource(int $groupeId, int $ressourceId): ?self
+    {
+        return self::trouver($groupeId, $ressourceId);
+    }
+
+    /**
+     * Vérifie si une action est permise (utilisé par ServicePermissions)
+     */
+    public function peutFaire(string $action): bool
+    {
+        return $this->peutAction($action);
+    }
+
+    /**
      * Accorde toutes les permissions
      */
     public function accorderTout(): void

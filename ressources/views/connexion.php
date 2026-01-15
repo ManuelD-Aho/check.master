@@ -12,10 +12,15 @@ use Src\Support\CSRF;
 use Src\Http\Request;
 use App\Services\Core\ServiceSession;
 
+if (!defined('BASE_PATH')) {
+    require dirname(__DIR__, 2) . '/app/config/bootstrap.php';
+}
+
 // Récupérer les messages flash
 $basePath = Request::basePath();
 $error = ServiceSession::getFlashError();
 $success = ServiceSession::getFlashSuccess();
+
 ?>
 <!DOCTYPE html>
 <html lang="fr">

@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use Src\Support\CSRF;
 /**
  * CheckMaster - Main Application Layout
  * =======================================
@@ -36,7 +37,7 @@ $user = $user ?? ['name' => 'Utilisateur', 'role' => 'Rôle', 'initials' => 'U']
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Main CSS -->
-    <link rel="stylesheet" href="/assets/css/app.css">
+    <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
 
     <!-- CSRF Meta -->
     <?= CSRF::meta() ?? '' ?>
@@ -73,7 +74,7 @@ $user = $user ?? ['name' => 'Utilisateur', 'role' => 'Rôle', 'initials' => 'U']
     </div>
 
     <!-- Scripts -->
-    <script src="/assets/js/app.js" defer></script>
+    <script src="<?= asset('js/app.js') ?>" defer></script>
 
     <!-- Additional scripts -->
     <?php if (isset($scripts)) echo $scripts; ?>

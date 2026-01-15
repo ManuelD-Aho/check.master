@@ -12,7 +12,11 @@ use Src\Support\CSRF;
 use Src\Support\Auth;
 use Src\Http\Request;
 
-// Récupérer messages flash
+if (!defined('BASE_PATH')) {
+    require dirname(__DIR__, 2) . '/app/config/bootstrap.php';
+}
+
+// Récupérer les messages flash
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -22,6 +26,7 @@ unset($_SESSION['flash_errors'], $_SESSION['flash_success']);
 
 $basePath = Request::basePath();
 $user = Auth::user();
+
 $isForced = $isForced ?? ($user ? $user->doitChangerMotDePasse() : false);
 ?>
 <!DOCTYPE html>

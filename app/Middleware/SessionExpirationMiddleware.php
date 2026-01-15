@@ -41,6 +41,7 @@ class SessionExpirationMiddleware
      */
     private const EXEMPT_ROUTES = [
         '/',
+        '/connexion',
         '/login',
         '/logout',
         '/api/session/refresh',
@@ -168,12 +169,12 @@ class SessionExpirationMiddleware
                 'error' => true,
                 'code' => 'SESSION_EXPIRED',
                 'message' => 'Votre session a expiré. Veuillez vous reconnecter.',
-                'redirect' => '/login?expired=1',
+                'redirect' => '/connexion?expired=1',
             ]), 401)->header('Content-Type', 'application/json');
         }
 
         // Requête normale : rediriger
-        return Response::redirect('/login?expired=1');
+        return Response::redirect('/connexion?expired=1');
     }
 
     /**

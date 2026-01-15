@@ -10,6 +10,10 @@ declare(strict_types=1);
 
 use Src\Http\Request;
 
+if (!defined('BASE_PATH')) {
+    require dirname(__DIR__, 2) . '/app/config/bootstrap.php';
+}
+
 // Base path pour les URLs lorsque l'application est en sous-dossier
 $basePath = Request::basePath();
 
