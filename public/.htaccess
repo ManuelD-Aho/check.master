@@ -75,7 +75,6 @@ RewriteRule ^ - [F,L]
 <IfModule mod_mime.c>
     # JavaScript
     AddType application/javascript .js
-    AddType text/javascript .js
     
     # CSS
     AddType text/css .css
