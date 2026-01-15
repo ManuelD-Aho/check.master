@@ -14,8 +14,8 @@ use Src\Kernel;
  *
  * Gère le mapping des URLs vers les contrôleurs.
  * Compatible avec le format AltoRouter pour les routes existantes.
+ * Supporte: [i:id] pour int, [a:slug] pour alphanum, [*:path] pour tout, [h:hash] pour hash
  */
-
 class Router
 {
     /**
@@ -41,11 +41,26 @@ class Router
     private ?Kernel $kernel = null;
 
     /**
+     * Instance du container pour DI
+     */
+    private ?Container $container = null;
+
+    /**
      * Définit le kernel
      */
     public function setKernel(Kernel $kernel): self
     {
         $this->kernel = $kernel;
+        $this->container = $kernel->getContainer();
+        return $this;
+    }
+
+    /**
+     * Définit le container
+     */
+    public function setContainer(Container $container): self
+    {
+        $this->container = $container;
         return $this;
     }
 
@@ -138,7 +153,7 @@ class Router
 
     /**
      * Match une route avec paramètres (format AltoRouter)
-     * Supporte: [i:id] pour int, [a:slug] pour alphanum, [*:path] pour tout
+     * Supporte: [i:id] pour int, [a:slug] pour alphanum, [*:path] pour tout, [h:hash] pour hash
      */
     private function matchRoute(string $pattern, string $uri): ?array
     {
@@ -146,9 +161,17 @@ class Router
         $regex = preg_quote($pattern, '#');
 
         // Convertir les patterns AltoRouter en regex
+        // [i:name] = integer
         $regex = preg_replace('/\\\\\[i:(\w+)\\\\\]/', '(?P<$1>\d+)', $regex);
+        // [a:name] = alphanumeric
         $regex = preg_replace('/\\\\\[a:(\w+)\\\\\]/', '(?P<$1>[a-zA-Z0-9_-]+)', $regex);
+        // [h:name] = hash (hexadecimal characters)
+        $regex = preg_replace('/\\\\\[h:(\w+)\\\\\]/', '(?P<$1>[a-zA-Z0-9]+)', $regex);
+        // [*:name] = anything
         $regex = preg_replace('/\\\\\[\*:(\w+)\\\\\]/', '(?P<$1>.+)', $regex);
+        // [:name] = any word characters (fallback)
+        $regex = preg_replace('/\\\\\[:(\w+)\\\\\]/', '(?P<$1>\w+)', $regex);
+        
         $regex = '#^' . $regex . '$#';
 
         if (preg_match($regex, $uri, $matches)) {
@@ -175,13 +198,18 @@ class Router
             throw new NotFoundException('Controller', $controllerClass);
         }
 
-        $controller = new $controllerClass();
+        // Instancier le controller via le Container si disponible (DI)
+        if ($this->container !== null) {
+            $controller = $this->container->make($controllerClass);
+        } else {
+            $controller = new $controllerClass();
+        }
 
         if (!method_exists($controller, $action)) {
             throw new NotFoundException('Action', "{$controllerClass}::{$action}");
         }
 
-        // Exécuter avec middleware si kernel disponible
+        // Exécuter avec middleware si kernel disponible et middleware défini
         if ($this->kernel !== null && !empty($route['middleware'])) {
             return $this->kernel->runRouteMiddleware(
                 $route['middleware'],
