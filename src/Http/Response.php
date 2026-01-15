@@ -89,7 +89,7 @@ class Response
             $basePath = Request::basePath();
             if ($basePath !== '') {
                 $normalizedUrl = rtrim($url, '/');
-                if ($normalizedUrl !== $basePath && !str_starts_with($url, $basePath . '/')) {
+                if ($normalizedUrl !== $basePath && !str_starts_with($normalizedUrl, $basePath . '/')) {
                     $url = $basePath . $url;
                 }
             }
