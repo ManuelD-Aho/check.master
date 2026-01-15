@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace App\Services\Core;
 
-use App\Models\SessionActive;
 use App\Models\Utilisateur;
 use Src\Http\Request;
 
 /**
  * Service Session
- * 
+ *
  * Gère les sessions utilisateur, cookies, messages flash et redirections post-login.
  * Centralise toute la logique de gestion des sessions pour l'authentification.
- * 
+ *
  * @see Constitution III - Sécurité Par Défaut
  */
 class ServiceSession
@@ -56,7 +55,7 @@ class ServiceSession
     public static function setCookie(string $token): void
     {
         $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
-        
+
         setcookie(
             self::COOKIE_SESSION,
             $token,
@@ -66,7 +65,7 @@ class ServiceSession
                 'secure' => $secure,
                 'httponly' => true,
                 'samesite' => 'Lax',
-            ]
+            ],
         );
     }
 
@@ -84,7 +83,7 @@ class ServiceSession
                 'secure' => true,
                 'httponly' => true,
                 'samesite' => 'Lax',
-            ]
+            ],
         );
     }
 
@@ -131,6 +130,7 @@ class ServiceSession
         self::start();
         $message = $_SESSION[self::FLASH_ERROR] ?? null;
         unset($_SESSION[self::FLASH_ERROR]);
+
         return $message;
     }
 
@@ -142,6 +142,7 @@ class ServiceSession
         self::start();
         $message = $_SESSION[self::FLASH_SUCCESS] ?? null;
         unset($_SESSION[self::FLASH_SUCCESS]);
+
         return $message;
     }
 
@@ -153,6 +154,7 @@ class ServiceSession
         self::start();
         $message = $_SESSION[self::FLASH_INFO] ?? null;
         unset($_SESSION[self::FLASH_INFO]);
+
         return $message;
     }
 
@@ -173,6 +175,7 @@ class ServiceSession
         self::start();
         $url = $_SESSION[self::REDIRECT_AFTER_LOGIN] ?? $default;
         unset($_SESSION[self::REDIRECT_AFTER_LOGIN]);
+
         return $url;
     }
 
@@ -182,13 +185,13 @@ class ServiceSession
     public static function destroy(): void
     {
         self::start();
-        
+
         // Supprimer le cookie de session
         self::deleteCookie();
-        
+
         // Vider et détruire la session PHP
         $_SESSION = [];
-        
+
         if (ini_get('session.use_cookies')) {
             $params = session_get_cookie_params();
             setcookie(
@@ -200,10 +203,10 @@ class ServiceSession
                     'domain' => $params['domain'],
                     'secure' => $params['secure'],
                     'httponly' => $params['httponly'],
-                ]
+                ],
             );
         }
-        
+
         session_destroy();
     }
 

@@ -41,7 +41,13 @@ if (session_status() === PHP_SESSION_NONE && PHP_SAPI !== 'cli') {
     ini_set('session.cookie_samesite', 'Strict');
     ini_set('session.use_strict_mode', '1');
     ini_set('session.gc_maxlifetime', '3600'); // 1 heure
-    session_save_path(STORAGE_PATH . '/sessions');
+    
+    // Créer le dossier sessions s'il n'existe pas
+    $sessionsPath = STORAGE_PATH . '/sessions';
+    if (!is_dir($sessionsPath)) {
+        mkdir($sessionsPath, 0755, true);
+    }
+    session_save_path($sessionsPath);
     session_start();
 }
 
@@ -52,6 +58,34 @@ if (file_exists($dbConfigPath)) {
 
     // Enregistrer la configuration dans un conteneur ou une variable globale
     $GLOBALS['db_config'] = $dbConfig;
+
+    // Initialiser la connexion PDO pour l'ORM
+    if (isset($dbConfig['connections']['mysql'])) {
+        $mysqlConfig = $dbConfig['connections']['mysql'];
+        try {
+            $dsn = sprintf(
+                'mysql:host=%s;port=%s;dbname=%s;charset=%s',
+                $mysqlConfig['host'],
+                $mysqlConfig['port'],
+                $mysqlConfig['database'],
+                $mysqlConfig['charset']
+            );
+            $pdo = new PDO($dsn, $mysqlConfig['username'], $mysqlConfig['password'], [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ]);
+            \App\Orm\Model::setConnection($pdo);
+            $GLOBALS['pdo'] = $pdo;
+        } catch (PDOException $e) {
+            // En développement, afficher l'erreur
+            if (defined('APP_DEBUG') && APP_DEBUG) {
+                die('Erreur de connexion à la base de données: ' . $e->getMessage());
+            }
+            // En production, logger silencieusement
+            error_log('Database connection failed: ' . $e->getMessage());
+        }
+    }
 }
 
 // Initialiser le logger si disponible

@@ -6,6 +6,8 @@ declare(strict_types=1);
  * Point d'entrée de l'application CheckMaster
  */
 
+require_once __DIR__ . '/../vendor/autoload.php';
+
 use Src\Kernel;
 use Src\Router;
 use Src\Http\Request;
