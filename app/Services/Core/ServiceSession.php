@@ -74,13 +74,15 @@ class ServiceSession
      */
     public static function deleteCookie(): void
     {
+        $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+
         setcookie(
             self::COOKIE_SESSION,
             '',
             [
                 'expires' => time() - 3600,
                 'path' => '/',
-                'secure' => true,
+                'secure' => $secure,
                 'httponly' => true,
                 'samesite' => 'Lax',
             ],

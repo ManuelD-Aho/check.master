@@ -36,8 +36,9 @@ date_default_timezone_set('Africa/Abidjan');
 
 // Configurer la session de manière sécurisée
 if (session_status() === PHP_SESSION_NONE && PHP_SAPI !== 'cli') {
+    $secureCookie = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
     ini_set('session.cookie_httponly', '1');
-    ini_set('session.cookie_secure', '1');
+    ini_set('session.cookie_secure', $secureCookie ? '1' : '0');
     ini_set('session.cookie_samesite', 'Strict');
     ini_set('session.use_strict_mode', '1');
     ini_set('session.gc_maxlifetime', '3600'); // 1 heure
