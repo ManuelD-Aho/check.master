@@ -6,7 +6,7 @@ namespace App\Controllers\Commission;
 
 use App\Services\Security\ServicePermissions;
 use App\Services\Security\ServiceAudit;
-use App\Models\SessionCommission;
+use App\Models\CommissionSession;
 use Src\Http\Response;
 use Src\Http\JsonResponse;
 use Src\Support\Auth;
@@ -31,7 +31,7 @@ class PvController
         if (!$this->checkAccess()) {
             return JsonResponse::forbidden();
         }
-        $session = SessionCommission::find($sessionId);
+        $session = CommissionSession::find($sessionId);
         if ($session === null) {
             return JsonResponse::notFound();
         }
@@ -47,7 +47,7 @@ class PvController
         if (!$this->checkAccess()) {
             return Response::redirect('/dashboard');
         }
-        $session = SessionCommission::find($sessionId);
+        $session = CommissionSession::find($sessionId);
         if ($session === null || !$session->pv_genere) {
             return Response::redirect('/commission/pv');
         }

@@ -219,6 +219,31 @@ class DossierEtudiant extends Model
     }
 
     /**
+     * Trouve le dossier actif d'un étudiant (alias pour les contrôleurs)
+     */
+    public static function findByEtudiant(int $etudiantId): ?self
+    {
+        // Retourne le dossier de l'année académique active
+        $sql = "SELECT de.* FROM dossiers_etudiants de
+                INNER JOIN annees_academiques aa ON aa.id_annee_acad = de.annee_acad_id
+                WHERE de.etudiant_id = :id AND aa.active = 1
+                ORDER BY aa.id_annee_acad DESC
+                LIMIT 1";
+        
+        $stmt = self::raw($sql, ['id' => $etudiantId]);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        
+        if (!$row) {
+            // Si pas d'année active, retourne le dossier le plus récent
+            return self::firstWhere(['etudiant_id' => $etudiantId], 'id_dossier DESC');
+        }
+        
+        $model = new self($row);
+        $model->exists = true;
+        return $model;
+    }
+
+    /**
      * Retourne les dossiers dans un état donné
      *
      * @return self[]

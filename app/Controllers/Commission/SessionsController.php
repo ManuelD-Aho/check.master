@@ -6,7 +6,7 @@ namespace App\Controllers\Commission;
 
 use App\Services\Security\ServicePermissions;
 use App\Services\Security\ServiceAudit;
-use App\Models\SessionCommission;
+use App\Models\CommissionSession;
 use Src\Http\Request;
 use Src\Http\Response;
 use Src\Http\JsonResponse;
@@ -32,7 +32,7 @@ class SessionsController
         if (!$this->checkAccess('lire')) {
             return JsonResponse::forbidden();
         }
-        $sessions = SessionCommission::all();
+        $sessions = CommissionSession::all();
         return JsonResponse::success(array_map(fn($s) => $s->toArray(), $sessions));
     }
 
@@ -42,7 +42,7 @@ class SessionsController
             return JsonResponse::forbidden();
         }
         $data = Request::all();
-        $session = new SessionCommission($data);
+        $session = new CommissionSession($data);
         $session->save();
         ServiceAudit::log('session_creee', 'session_commission', $session->getId());
         return JsonResponse::success($session->toArray(), 'Session créée');
@@ -53,7 +53,7 @@ class SessionsController
         if (!$this->checkAccess('modifier')) {
             return JsonResponse::forbidden();
         }
-        $session = SessionCommission::find($id);
+        $session = CommissionSession::find($id);
         if ($session === null) {
             return JsonResponse::notFound();
         }

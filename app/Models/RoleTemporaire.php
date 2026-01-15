@@ -87,6 +87,15 @@ class RoleTemporaire extends Model
     }
 
     /**
+     * Alias pour actifsPourUtilisateur() - utilisé par ServicePermissions
+     * @return self[]
+     */
+    public static function getRolesActifsUtilisateur(int $utilisateurId): array
+    {
+        return self::actifsPourUtilisateur($utilisateurId);
+    }
+
+    /**
      * Trouve les rôles pour un contexte donné
      * @return self[]
      */

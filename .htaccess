@@ -1,0 +1,100 @@
+# =============================================================================
+# CheckMaster - Root .htaccess
+# =============================================================================
+# This file secures the application by redirecting all traffic to the public/
+# directory. Source code (app/, src/, vendor/, etc.) is not accessible.
+# =============================================================================
+
+# Enable Rewrite Engine
+RewriteEngine On
+
+# Deny access to sensitive directories and files
+RewriteRule ^(app|src|vendor|storage|database|tests|docs|bin|\.specify)(/|$) - [F,L]
+
+# Deny access to sensitive files
+RewriteRule ^(composer\.(json|lock)|phpunit\.xml|phpstan\.neon|\.php-cs-fixer\.php|checkmaster\.sql)$ - [F,L]
+
+# Deny access to hidden files (starting with .)
+RewriteRule (^|/)\.(?!htaccess|well-known) - [F,L]
+
+# Handle Direct Access to Root index.php (legacy support)
+# If someone directly accesses /index.php, redirect to clean URL
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /index\.php(/[^\?\ ]*)?(\?[^\ ]*)? [NC]
+RewriteRule ^index\.php(/(.*))?$ /$2 [R=301,L,QSA]
+
+# ============================================================================
+# MAIN REWRITE RULE - Redirect all traffic to public/ folder
+# ============================================================================
+# If the file doesn't exist in root AND doesn't start with public/
+# Then internally redirect to public/{REQUEST_URI}
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteRule ^(.*)$ public/$1 [L]
+
+# =============================================================================
+# Security Headers (if mod_headers is available)
+# =============================================================================
+<IfModule mod_headers.c>
+    # Prevent clickjacking
+    Header always set X-Frame-Options "SAMEORIGIN"
+    
+    # Prevent MIME type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # Enable XSS protection
+    Header always set X-XSS-Protection "1; mode=block"
+    
+    # Referrer Policy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Content Security Policy (basic)
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self';"
+</IfModule>
+
+# =============================================================================
+# Compression (if mod_deflate is available)
+# =============================================================================
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+    AddOutputFilterByType DEFLATE text/javascript application/javascript application/json
+    AddOutputFilterByType DEFLATE application/xml application/xhtml+xml
+</IfModule>
+
+# =============================================================================
+# Browser Caching (if mod_expires is available)
+# =============================================================================
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # Images
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    
+    # CSS and JavaScript
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    
+    # Fonts
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/ttf "access plus 1 year"
+</IfModule>
+
+# =============================================================================
+# PHP Settings (if applicable)
+# =============================================================================
+<IfModule mod_php.c>
+    # Disable directory listing
+    Options -Indexes
+    
+    # Hide PHP version
+    php_flag expose_php Off
+    
+    # Session security
+    php_flag session.cookie_httponly On
+    php_value session.cookie_samesite Strict
+</IfModule>

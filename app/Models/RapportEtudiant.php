@@ -89,6 +89,14 @@ class RapportEtudiant extends Model
     }
 
     /**
+     * Alias pour actuelPourDossier() - utilisé par les contrôleurs
+     */
+    public static function findByDossier(int $dossierId): ?self
+    {
+        return self::actuelPourDossier($dossierId);
+    }
+
+    /**
      * Retourne toutes les versions d'un dossier
      * @return self[]
      */
@@ -124,6 +132,15 @@ class RapportEtudiant extends Model
     public static function enAttenteEvaluation(): array
     {
         return self::where(['statut' => self::STATUT_SOUMIS]);
+    }
+
+    /**
+     * Alias pour enAttenteEvaluation() - utilisé par les contrôleurs
+     * @return self[]
+     */
+    public static function enAttente(): array
+    {
+        return self::enAttenteEvaluation();
     }
 
     // ===== MÉTHODES D'ÉTAT =====
