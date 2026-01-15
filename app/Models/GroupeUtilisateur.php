@@ -71,7 +71,8 @@ class GroupeUtilisateur extends Model
      */
     public static function ordonnes(): array
     {
-        $sql = "SELECT * FROM groupe_utilisateur ORDER BY niveau_hierarchique DESC, lib_GU";
+        $sql = "SELECT id_GU, lib_GU, description, niveau_hierarchique 
+                FROM groupe_utilisateur ORDER BY niveau_hierarchique DESC, lib_GU";
         $stmt = self::raw($sql, []);
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 

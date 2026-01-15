@@ -48,34 +48,40 @@ class EtudiantsController
     }
 
     /**
+     * Colonnes requises pour la liste des étudiants
+     */
+    private const ETUDIANT_COLUMNS = 'id_etudiant, num_etu, nom_etu, prenom_etu, email_etu, promotion_etu, actif';
+
+    /**
      * Récupère les étudiants avec pagination
      */
     private function getEtudiantsPagines(int $page, string $search = ''): array
     {
         $offset = ($page - 1) * self::PER_PAGE;
+        $perPage = self::PER_PAGE;
         
         if (!empty($search)) {
+            $whereClause = $this->buildSearchWhereClause();
             $searchTerm = "%{$search}%";
-            $countSql = "SELECT COUNT(*) FROM etudiants WHERE actif = 1 AND (
-                nom_etu LIKE :terme OR prenom_etu LIKE :terme OR 
-                num_etu LIKE :terme OR email_etu LIKE :terme
-            )";
+            
+            $countSql = "SELECT COUNT(*) FROM etudiants WHERE actif = 1 AND ({$whereClause})";
             $stmt = Etudiant::raw($countSql, ['terme' => $searchTerm]);
             $total = (int) $stmt->fetchColumn();
             
-            $sql = "SELECT * FROM etudiants WHERE actif = 1 AND (
-                nom_etu LIKE :terme OR prenom_etu LIKE :terme OR 
-                num_etu LIKE :terme OR email_etu LIKE :terme
-            ) ORDER BY nom_etu, prenom_etu LIMIT " . self::PER_PAGE . " OFFSET " . $offset;
+            $sql = "SELECT " . self::ETUDIANT_COLUMNS . " FROM etudiants 
+                    WHERE actif = 1 AND ({$whereClause})
+                    ORDER BY nom_etu, prenom_etu LIMIT :limit OFFSET :offset";
             
-            $stmt = Etudiant::raw($sql, ['terme' => $searchTerm]);
+            $pdo = Etudiant::raw("SELECT 1", [])->getConnection ?? null;
+            $stmt = Etudiant::raw($sql, ['terme' => $searchTerm, 'limit' => $perPage, 'offset' => $offset]);
         } else {
             $stmt = Etudiant::raw("SELECT COUNT(*) FROM etudiants WHERE actif = 1", []);
             $total = (int) $stmt->fetchColumn();
             
-            $sql = "SELECT * FROM etudiants WHERE actif = 1 
-                    ORDER BY nom_etu, prenom_etu LIMIT " . self::PER_PAGE . " OFFSET " . $offset;
-            $stmt = Etudiant::raw($sql, []);
+            $sql = "SELECT " . self::ETUDIANT_COLUMNS . " FROM etudiants 
+                    WHERE actif = 1 ORDER BY nom_etu, prenom_etu 
+                    LIMIT :limit OFFSET :offset";
+            $stmt = Etudiant::raw($sql, ['limit' => $perPage, 'offset' => $offset]);
         }
         
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -98,6 +104,15 @@ class EtudiantsController
                 'hasPrev' => $page > 1,
             ],
         ];
+    }
+
+    /**
+     * Construit la clause WHERE pour la recherche
+     */
+    private function buildSearchWhereClause(): string
+    {
+        return "nom_etu LIKE :terme OR prenom_etu LIKE :terme OR 
+                num_etu LIKE :terme OR email_etu LIKE :terme";
     }
 
     public function list(): JsonResponse

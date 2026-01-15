@@ -165,7 +165,7 @@ class Router
         $regex = preg_replace('/\\\\\[i:(\w+)\\\\\]/', '(?P<$1>\d+)', $regex);
         // [a:name] = alphanumeric
         $regex = preg_replace('/\\\\\[a:(\w+)\\\\\]/', '(?P<$1>[a-zA-Z0-9_-]+)', $regex);
-        // [h:name] = hash (alphanumeric with lowercase)
+        // [h:name] = hash (hexadecimal characters)
         $regex = preg_replace('/\\\\\[h:(\w+)\\\\\]/', '(?P<$1>[a-zA-Z0-9]+)', $regex);
         // [*:name] = anything
         $regex = preg_replace('/\\\\\[\*:(\w+)\\\\\]/', '(?P<$1>.+)', $regex);
