@@ -302,7 +302,7 @@ $isForced = $isForced ?? ($user ? $user->doitChangerMotDePasse() : false);
             <div class="success-message"><?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?></div>
         <?php endif; ?>
 
-        <form action="<?= $basePath ?>/change-password" method="POST" id="password-form">
+        <form action="<?= $basePath . '/change-password' ?>" method="POST" id="password-form">
             <?= CSRF::field() ?>
 
             <div class="form-group">

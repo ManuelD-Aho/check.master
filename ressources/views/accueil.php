@@ -744,7 +744,7 @@ $stats = [
         <div class="navbar-nav">
             <a href="#features" class="navbar-link">Fonctionnalités</a>
             <a href="#workflow" class="navbar-link">Processus</a>
-            <a href="<?= $basePath ?>/connexion" class="btn btn-primary">Se connecter</a>
+            <a href="<?= $basePath . '/connexion' ?>" class="btn btn-primary">Se connecter</a>
         </div>
     </nav>
 
@@ -766,7 +766,7 @@ $stats = [
                     de la candidature à la délivrance du diplôme, pour l'Université Félix Houphouët-Boigny.
                 </p>
                 <div class="hero-actions">
-                    <a href="<?= $basePath ?>/connexion" class="btn btn-primary btn-lg">
+                    <a href="<?= $basePath . '/connexion' ?>" class="btn btn-primary btn-lg">
                         Accéder à mon espace
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -970,7 +970,7 @@ $stats = [
                 Connectez-vous à votre espace pour suivre votre parcours ou gérer les dossiers de votre département.
             </p>
             <div class="cta-actions">
-                <a href="<?= $basePath ?>/connexion" class="btn btn-primary btn-lg">
+                <a href="<?= $basePath . '/connexion' ?>" class="btn btn-primary btn-lg">
                     Se connecter
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="5" y1="12" x2="19" y2="12"></line>

@@ -100,7 +100,7 @@ $error = ServiceSession::getFlashError();
             <div class="message error"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
         <?php endif; ?>
 
-        <form action="<?= $basePath ?>/forgot-password" method="POST">
+        <form action="<?= $basePath . '/forgot-password' ?>" method="POST">
             <?= CSRF::field() ?>
             <div class="form-group">
                 <label for="email">Adresse email</label>
@@ -110,7 +110,7 @@ $error = ServiceSession::getFlashError();
         </form>
 
         <div class="footer">
-            <a href="<?= $basePath ?>/connexion">← Retour à la connexion</a>
+            <a href="<?= $basePath . '/connexion' ?>">← Retour à la connexion</a>
         </div>
     </div>
 </body>

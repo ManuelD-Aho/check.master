@@ -87,8 +87,11 @@ class Response
     {
         if ($url !== '' && str_starts_with($url, '/')) {
             $basePath = Request::basePath();
-            if ($basePath !== '' && !str_starts_with($url, $basePath . '/') && $url !== $basePath) {
-                $url = $basePath . $url;
+            if ($basePath !== '') {
+                $normalizedUrl = rtrim($url, '/');
+                if ($normalizedUrl !== $basePath && !str_starts_with($url, $basePath . '/')) {
+                    $url = $basePath . $url;
+                }
             }
         }
 
