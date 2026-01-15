@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 use Src\Support\CSRF;
 use Src\Support\Auth;
+use Src\Http\Request;
 
 // Récupérer messages flash
 if (session_status() === PHP_SESSION_NONE) {
@@ -19,6 +20,7 @@ $errors = $_SESSION['flash_errors'] ?? [];
 $success = $_SESSION['flash_success'] ?? null;
 unset($_SESSION['flash_errors'], $_SESSION['flash_success']);
 
+$basePath = Request::basePath();
 $user = Auth::user();
 $isForced = $isForced ?? ($user ? $user->doitChangerMotDePasse() : false);
 ?>
@@ -300,7 +302,7 @@ $isForced = $isForced ?? ($user ? $user->doitChangerMotDePasse() : false);
             <div class="success-message"><?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?></div>
         <?php endif; ?>
 
-        <form action="/change-password" method="POST" id="password-form">
+        <form action="<?= $basePath . '/change-password' ?>" method="POST" id="password-form">
             <?= CSRF::field() ?>
 
             <div class="form-group">

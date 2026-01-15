@@ -85,6 +85,16 @@ class Response
      */
     public static function redirect(string $url, int $statusCode = 302): self
     {
+        if ($url !== '' && str_starts_with($url, '/')) {
+            $basePath = Request::basePath();
+            if ($basePath !== '') {
+                $normalizedUrl = rtrim($url, '/');
+                if ($normalizedUrl !== $basePath && !str_starts_with($normalizedUrl, $basePath . '/')) {
+                    $url = $basePath . $url;
+                }
+            }
+        }
+
         return (new self('', $statusCode))
             ->header('Location', $url);
     }

@@ -210,7 +210,7 @@ class Request
         $scriptName = $instance->server['SCRIPT_NAME'] ?? '';
         $basePath = dirname($scriptName);
         
-        if ($basePath === '/' || $basePath === '\\') {
+        if ($basePath === '/' || $basePath === '\\' || $basePath === '.') {
             return '';
         }
         
