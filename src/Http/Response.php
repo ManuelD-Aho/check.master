@@ -88,8 +88,12 @@ class Response
         if ($url !== '' && str_starts_with($url, '/')) {
             $basePath = Request::basePath();
             if ($basePath !== '') {
+                // Only prefix if URL doesn't already start with the base path
+                // Check both "basePath/" and "basePath" (exact match) to avoid double-prefixing
                 $normalizedUrl = rtrim($url, '/');
-                if ($normalizedUrl !== $basePath && !str_starts_with($normalizedUrl, $basePath . '/')) {
+                $normalizedBasePath = rtrim($basePath, '/');
+                
+                if ($normalizedUrl !== $normalizedBasePath && !str_starts_with($url, $basePath . '/')) {
                     $url = $basePath . $url;
                 }
             }
