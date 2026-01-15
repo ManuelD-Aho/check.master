@@ -9,13 +9,11 @@
 declare(strict_types=1);
 
 use Src\Support\CSRF;
+use App\Services\Core\ServiceSession;
 
-// Récupérer message flash d'erreur
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-$error = $_SESSION['flash_error'] ?? null;
-unset($_SESSION['flash_error']);
+// Récupérer les messages flash
+$error = ServiceSession::getFlashError();
+$success = ServiceSession::getFlashSuccess();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -245,7 +243,7 @@ unset($_SESSION['flash_error']);
         </form>
 
         <div class="login-footer">
-            <a href="/mot-de-passe-oublie">Mot de passe oublié ?</a>
+            <a href="/forgot-password">Mot de passe oublié ?</a>
         </div>
     </div>
 </body>
