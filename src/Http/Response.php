@@ -120,4 +120,16 @@ class Response
         return (new self($content, $statusCode))
             ->header('Content-Type', 'text/plain; charset=UTF-8');
     }
+
+    /**
+     * Créer une réponse JSON
+     */
+    public static function json(array $data, int $statusCode = 200): self
+    {
+        return (new self(
+            json_encode($data, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR),
+            $statusCode
+        ))
+        ->header('Content-Type', 'application/json; charset=UTF-8');
+    }
 }

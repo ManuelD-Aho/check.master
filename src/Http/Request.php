@@ -277,6 +277,14 @@ class Request
     }
 
     /**
+     * Retourne une valeur de session
+     */
+    public static function session(string $key, mixed $default = null): mixed
+    {
+        return $_SESSION[$key] ?? $default;
+    }
+
+    /**
      * Retourne l'URL complète
      */
     public static function fullUrl(): string

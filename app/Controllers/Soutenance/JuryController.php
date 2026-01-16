@@ -38,7 +38,11 @@ class JuryController
      */
     public function index(): Response
     {
-        return Response::view('modules/soutenance/jury/index');
+        ob_start();
+        include dirname(__DIR__, 2) . '/ressources/views/modules/soutenance/jury/index.php';
+        $content = ob_get_clean();
+
+        return Response::html($content);
     }
 
     /**
