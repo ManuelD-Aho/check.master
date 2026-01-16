@@ -19,11 +19,27 @@ class Exoneration extends Model
     protected array $fillable = [
         'etudiant_id',
         'annee_acad_id',
+        'montant',
         'montant_exonere',
+        'pourcentage',
         'pourcentage_exonere',
+        'type',
         'motif',
+        'justificatif',
+        'statut',
+        'demandee_par',
+        'demandee_le',
+        'approuvee_par',
+        'approuvee_le',
+        'refusee_par',
+        'refusee_le',
+        'motif_refus',
+        'commentaire_decision',
         'date_attribution',
         'approuve_par',
+        'annulee_par',
+        'annulee_le',
+        'motif_annulation',
     ];
 
     /**

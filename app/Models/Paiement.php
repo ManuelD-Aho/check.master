@@ -20,12 +20,19 @@ class Paiement extends Model
         'etudiant_id',
         'annee_acad_id',
         'montant',
+        'montant_paye',
         'mode_paiement',
         'reference',
         'date_paiement',
+        'statut',
+        'motif',
         'recu_genere',
         'recu_chemin',
+        'chemin_recu',
         'enregistre_par',
+        'annule_par',
+        'annule_le',
+        'motif_annulation',
     ];
 
     /**
