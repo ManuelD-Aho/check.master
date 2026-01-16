@@ -57,6 +57,14 @@ class Soutenance extends Model
     }
 
     /**
+     * Trouve la soutenance d'un dossier
+     */
+    public static function findByDossier(int $dossierId): ?self
+    {
+        return self::firstWhere(['dossier_id' => $dossierId]);
+    }
+
+    /**
      * Retourne la salle
      */
     public function getSalle(): ?object

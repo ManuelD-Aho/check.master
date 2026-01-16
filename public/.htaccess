@@ -1,0 +1,161 @@
+# =============================================================================
+# CheckMaster - Public .htaccess
+# =============================================================================
+# Front Controller pattern: All requests that don't match existing files
+# are routed to index.php for handling by the PHP framework.
+# =============================================================================
+
+# Enable Rewrite Engine
+RewriteEngine On
+
+# Disable directory listing for security
+Options -Indexes
+
+# Follow symbolic links
+Options +FollowSymLinks
+
+# Set the base directory for rewrites (important for subdirectory installations)
+# RewriteBase /
+
+# =============================================================================
+# URL Rewriting - Front Controller Pattern
+# =============================================================================
+
+# If the request is for an existing file, serve it directly
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# If the request is for an existing directory, serve it directly
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Otherwise, route the request to index.php (Front Controller)
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# =============================================================================
+# Security: Block access to sensitive files
+# =============================================================================
+
+# Deny access to hidden files and directories (except .well-known)
+RewriteCond %{REQUEST_URI} (^|/)\.(?!well-known)
+RewriteRule ^ - [F,L]
+
+# Deny access to backup and source files
+<FilesMatch "\.(bak|config|sql|fla|psd|ini|log|sh|inc|swp|dist|env)$">
+    Require all denied
+</FilesMatch>
+
+# Deny access to PHP files in certain directories (prevent direct execution)
+<FilesMatch "^(test_ui\.php)$">
+    <IfModule mod_authz_core.c>
+        Require local
+    </IfModule>
+</FilesMatch>
+
+# =============================================================================
+# Security Headers (if not set by root .htaccess)
+# =============================================================================
+<IfModule mod_headers.c>
+    # Prevent clickjacking
+    Header always set X-Frame-Options "SAMEORIGIN"
+    
+    # Prevent MIME type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # Enable XSS protection
+    Header always set X-XSS-Protection "1; mode=block"
+    
+    # Referrer Policy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# =============================================================================
+# MIME Types
+# =============================================================================
+<IfModule mod_mime.c>
+    # JavaScript
+    AddType application/javascript .js
+    
+    # CSS
+    AddType text/css .css
+    
+    # Fonts
+    AddType font/woff2 .woff2
+    AddType font/woff .woff
+    AddType font/ttf .ttf
+    AddType font/otf .otf
+    AddType font/eot .eot
+    AddType image/svg+xml .svg
+    
+    # Images
+    AddType image/webp .webp
+    AddType image/png .png
+    AddType image/jpeg .jpg .jpeg
+    AddType image/gif .gif
+    AddType image/x-icon .ico
+</IfModule>
+
+# =============================================================================
+# UTF-8 Encoding
+# =============================================================================
+AddDefaultCharset UTF-8
+
+<IfModule mod_mime.c>
+    AddCharset UTF-8 .html .htm .css .js .json .xml .txt
+</IfModule>
+
+# =============================================================================
+# Compression (if mod_deflate is available)
+# =============================================================================
+<IfModule mod_deflate.c>
+    # Compress HTML, CSS, JavaScript, Text, XML and fonts
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+    AddOutputFilterByType DEFLATE text/javascript application/javascript application/json
+    AddOutputFilterByType DEFLATE application/xml application/xhtml+xml
+    AddOutputFilterByType DEFLATE font/woff font/woff2 font/ttf font/otf
+    AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# =============================================================================
+# Browser Caching (if mod_expires is available)
+# =============================================================================
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # Default expiration: 1 day
+    ExpiresDefault "access plus 1 day"
+    
+    # HTML pages (no cache for dynamic content routed via index.php)
+    ExpiresByType text/html "access plus 0 seconds"
+    
+    # CSS and JavaScript
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    
+    # Images
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    
+    # Fonts
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType font/eot "access plus 1 year"
+</IfModule>
+
+# =============================================================================
+# ETags (for better caching)
+# =============================================================================
+<IfModule mod_headers.c>
+    # Remove ETags for static files (use expires instead)
+    <FilesMatch "\.(css|js|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|otf|eot|svg)$">
+        Header unset ETag
+        FileETag None
+    </FilesMatch>
+</IfModule>

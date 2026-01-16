@@ -64,6 +64,34 @@ class Candidature extends Model
     }
 
     /**
+     * Alias pour pourDossier() - utilisé par les contrôleurs
+     */
+    public static function findByDossier(int $dossierId): ?self
+    {
+        return self::pourDossier($dossierId);
+    }
+
+    /**
+     * Retourne les candidatures en attente de validation (non validées)
+     * @return self[]
+     */
+    public static function enAttente(): array
+    {
+        $sql = "SELECT * FROM candidatures 
+                WHERE validee_scolarite = 0 OR validee_communication = 0
+                ORDER BY date_soumission DESC";
+        
+        $stmt = self::raw($sql, []);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        
+        return array_map(function (array $row) {
+            $model = new self($row);
+            $model->exists = true;
+            return $model;
+        }, $rows);
+    }
+
+    /**
      * Retourne les candidatures non validées par scolarité
      * @return self[]
      */
