@@ -285,7 +285,7 @@ function paiementsModule() {
             formData.append('montant', this.form.montant);
             formData.append('mode_paiement', this.form.mode_paiement);
             formData.append('motif', this.form.motif);
-            formData.append('annee_acad_id', '<?= $anneeAcadId ?? 1 ?>');
+            formData.append('annee_acad_id', '<?= htmlspecialchars((string)($anneeAcadId ?? 1), ENT_QUOTES, 'UTF-8') ?>');
 
             const response = await fetch('/api/finance/paiements', {
                 method: 'POST',

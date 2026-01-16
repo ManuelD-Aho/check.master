@@ -227,13 +227,13 @@ class ServiceCandidature
      */
     private function verifierCompletude(Candidature $candidature): void
     {
-        $champsMandantes = [
+        $champsMandatoires = [
             'theme' => 'Le thème du mémoire',
             'maitre_stage_nom' => 'Le nom du maître de stage',
             'maitre_stage_email' => 'L\'email du maître de stage',
         ];
 
-        foreach ($champsMandantes as $champ => $libelle) {
+        foreach ($champsMandatoires as $champ => $libelle) {
             if (empty($candidature->$champ)) {
                 throw new ValidationException("{$libelle} est requis");
             }
