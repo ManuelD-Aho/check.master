@@ -269,3 +269,193 @@ $router->map('POST', '/api/admin/utilisateurs/[i:id]/activer', 'Admin\\Utilisate
 $router->map('POST', '/api/admin/utilisateurs/[i:id]/desactiver', 'Admin\\UtilisateursController#desactiver', 'api_admin_utilisateur_desactiver');
 $router->map('POST', '/api/admin/utilisateurs/[i:id]/reset-password', 'Admin\\UtilisateursController#resetPassword', 'api_admin_utilisateur_reset_pwd');
 $router->map('GET', '/api/admin/utilisateurs/statistiques', 'Admin\\UtilisateursController#statistiques', 'api_admin_utilisateurs_stats');
+
+// ============================================================================
+// PRD 04 - Mémoire & Soutenance - Candidatures API
+// ============================================================================
+$router->map('GET', '/api/candidatures', 'Soutenance\\CandidaturesController#list', 'api_candidatures');
+$router->map('GET', '/api/candidatures/[i:id]', 'Soutenance\\CandidaturesController#show', 'api_candidature_show');
+$router->map('POST', '/api/candidatures', 'Soutenance\\CandidaturesController#store', 'api_candidature_store');
+$router->map('PUT', '/api/candidatures/[i:id]', 'Soutenance\\CandidaturesController#update', 'api_candidature_update');
+$router->map('POST', '/api/candidatures/[i:id]/soumettre', 'Soutenance\\CandidaturesController#soumettre', 'api_candidature_soumettre');
+$router->map('POST', '/api/candidatures/[i:id]/valider', 'Soutenance\\CandidaturesController#valider', 'api_candidature_valider');
+$router->map('POST', '/api/candidatures/[i:id]/rejeter', 'Soutenance\\CandidaturesController#rejeter', 'api_candidature_rejeter');
+$router->map('POST', '/api/candidatures/[i:id]/complements', 'Soutenance\\CandidaturesController#demanderComplements', 'api_candidature_complements');
+$router->map('GET', '/api/candidatures/statistiques', 'Soutenance\\CandidaturesController#statistiques', 'api_candidatures_stats');
+
+// ============================================================================
+// PRD 04 - Mémoire & Soutenance - Jury API
+// ============================================================================
+$router->map('GET', '/api/jury', 'Soutenance\\JuryController#list', 'api_jury');
+$router->map('GET', '/api/jury/[i:id]', 'Soutenance\\JuryController#show', 'api_jury_show');
+$router->map('POST', '/api/jury', 'Soutenance\\JuryController#store', 'api_jury_store');
+$router->map('POST', '/api/jury/[i:id]/accepter', 'Soutenance\\JuryController#accepter', 'api_jury_accepter');
+$router->map('POST', '/api/jury/[i:id]/refuser', 'Soutenance\\JuryController#refuser', 'api_jury_refuser');
+$router->map('DELETE', '/api/jury/[i:id]', 'Soutenance\\JuryController#retirer', 'api_jury_retirer');
+$router->map('GET', '/api/jury/dossier/[i:id]', 'Soutenance\\JuryController#parDossier', 'api_jury_dossier');
+$router->map('GET', '/api/jury/enseignants-disponibles', 'Soutenance\\JuryController#enseignantsDisponibles', 'api_jury_enseignants');
+$router->map('GET', '/api/jury/mes-invitations', 'Soutenance\\JuryController#mesInvitations', 'api_jury_invitations');
+$router->map('GET', '/api/jury/statistiques', 'Soutenance\\JuryController#statistiques', 'api_jury_stats');
+
+// ============================================================================
+// PRD 04 - Mémoire & Soutenance - Soutenances API
+// ============================================================================
+$router->map('GET', '/api/soutenances', 'Soutenance\\SoutenancesController#list', 'api_soutenances');
+$router->map('GET', '/api/soutenances/[i:id]', 'Soutenance\\SoutenancesController#show', 'api_soutenance_show');
+$router->map('POST', '/api/soutenances', 'Soutenance\\SoutenancesController#store', 'api_soutenance_store');
+$router->map('POST', '/api/soutenances/[i:id]/demarrer', 'Soutenance\\SoutenancesController#demarrer', 'api_soutenance_demarrer');
+$router->map('POST', '/api/soutenances/[i:id]/terminer', 'Soutenance\\SoutenancesController#terminer', 'api_soutenance_terminer');
+$router->map('POST', '/api/soutenances/[i:id]/reporter', 'Soutenance\\SoutenancesController#reporter', 'api_soutenance_reporter');
+$router->map('POST', '/api/soutenances/[i:id]/corrections', 'Soutenance\\SoutenancesController#demanderCorrections', 'api_soutenance_corrections');
+$router->map('POST', '/api/soutenances/[i:id]/valider-corrections', 'Soutenance\\SoutenancesController#validerCorrections', 'api_soutenance_valider_corrections');
+$router->map('GET', '/api/soutenances/[i:id]/pv', 'Soutenance\\SoutenancesController#telechargerPV', 'api_soutenance_pv');
+$router->map('GET', '/api/soutenances/planning/jour', 'Soutenance\\SoutenancesController#planningJour', 'api_soutenances_jour');
+$router->map('GET', '/api/soutenances/planning/a-venir', 'Soutenance\\SoutenancesController#aVenir', 'api_soutenances_a_venir');
+$router->map('GET', '/api/soutenances/statistiques', 'Soutenance\\SoutenancesController#statistiques', 'api_soutenances_stats');
+
+// ============================================================================
+// PRD 04 - Mémoire & Soutenance - Notes API
+// ============================================================================
+$router->map('GET', '/api/notes/soutenance/[i:id]', 'Soutenance\\NotesController#parSoutenance', 'api_notes_soutenance');
+$router->map('POST', '/api/notes', 'Soutenance\\NotesController#store', 'api_note_store');
+$router->map('POST', '/api/notes/finaliser/[i:id]', 'Soutenance\\NotesController#finaliser', 'api_notes_finaliser');
+
+// ============================================================================
+// PRD 04 - Mémoire & Soutenance - Rapports Étudiants API
+// ============================================================================
+$router->map('GET', '/api/rapports', 'Rapport\\RapportsController#list', 'api_rapports');
+$router->map('GET', '/api/rapports/[i:id]', 'Rapport\\RapportsController#show', 'api_rapport_show');
+$router->map('POST', '/api/rapports', 'Rapport\\RapportsController#store', 'api_rapport_store');
+$router->map('PUT', '/api/rapports/[i:id]', 'Rapport\\RapportsController#update', 'api_rapport_update');
+$router->map('POST', '/api/rapports/[i:id]/soumettre', 'Rapport\\RapportsController#soumettre', 'api_rapport_soumettre');
+$router->map('POST', '/api/rapports/[i:id]/upload', 'Rapport\\RapportsController#uploadFichier', 'api_rapport_upload');
+$router->map('GET', '/api/rapports/[i:id]/versions', 'Rapport\\RapportsController#versions', 'api_rapport_versions');
+$router->map('POST', '/api/rapports/[i:id]/nouvelle-version', 'Rapport\\RapportsController#creerVersion', 'api_rapport_nouvelle_version');
+
+// ============================================================================
+// PRD 04 - Mémoire & Soutenance - Annotations API
+// ============================================================================
+$router->map('GET', '/api/annotations/rapport/[i:id]', 'Rapport\\AnnotationsController#parRapport', 'api_annotations_rapport');
+$router->map('POST', '/api/annotations', 'Rapport\\AnnotationsController#store', 'api_annotation_store');
+$router->map('PUT', '/api/annotations/[i:id]', 'Rapport\\AnnotationsController#update', 'api_annotation_update');
+$router->map('DELETE', '/api/annotations/[i:id]', 'Rapport\\AnnotationsController#destroy', 'api_annotation_delete');
+
+// ============================================================================
+// PRD 05 - Communication - Messagerie API
+// ============================================================================
+$router->map('GET', '/api/messages/recus', 'Communication\\MessagerieController#recus', 'api_messages_recus');
+$router->map('GET', '/api/messages/envoyes', 'Communication\\MessagerieController#envoyes', 'api_messages_envoyes');
+$router->map('GET', '/api/messages/[i:id]', 'Communication\\MessagerieController#show', 'api_message_show');
+$router->map('POST', '/api/messages', 'Communication\\MessagerieController#store', 'api_message_store');
+$router->map('POST', '/api/messages/[i:id]/lu', 'Communication\\MessagerieController#marquerLu', 'api_message_lu');
+$router->map('POST', '/api/messages/[i:id]/repondre', 'Communication\\MessagerieController#repondre', 'api_message_repondre');
+$router->map('DELETE', '/api/messages/[i:id]', 'Communication\\MessagerieController#destroy', 'api_message_delete');
+$router->map('GET', '/api/messages/non-lus/count', 'Communication\\MessagerieController#compterNonLus', 'api_messages_non_lus');
+
+// ============================================================================
+// PRD 05 - Communication - Conversations Dossiers API
+// ============================================================================
+$router->map('GET', '/api/conversations/mes', 'Communication\\ConversationsController#mesConversations', 'api_conversations_mes');
+$router->map('GET', '/api/conversations/dossier/[i:id]', 'Communication\\ConversationsController#parDossier', 'api_conversation_dossier');
+$router->map('POST', '/api/conversations/dossier/[i:id]/message', 'Communication\\ConversationsController#envoyerMessage', 'api_conversation_message');
+$router->map('POST', '/api/conversations/dossier/[i:id]/lu', 'Communication\\ConversationsController#marquerLue', 'api_conversation_lu');
+
+// ============================================================================
+// PRD 05 - Communication - Notifications API
+// ============================================================================
+$router->map('GET', '/api/notifications', 'Communication\\NotificationsController#list', 'api_notifications');
+$router->map('GET', '/api/notifications/historique', 'Communication\\NotificationsController#historique', 'api_notifications_historique');
+$router->map('GET', '/api/notifications/templates', 'Communication\\NotificationsController#templates', 'api_notifications_templates');
+$router->map('POST', '/api/notifications/envoyer', 'Communication\\NotificationsController#envoyer', 'api_notification_envoyer');
+$router->map('POST', '/api/notifications/traiter-file', 'Communication\\NotificationsController#traiterFile', 'api_notifications_traiter');
+$router->map('GET', '/api/notifications/statistiques', 'Communication\\NotificationsController#statistiques', 'api_notifications_stats');
+
+// ============================================================================
+// PRD 05 - Communication - Calendrier API
+// ============================================================================
+$router->map('GET', '/api/calendrier/salles-disponibles', 'Communication\\CalendrierController#sallesDisponibles', 'api_calendrier_salles');
+$router->map('GET', '/api/calendrier/planning/[a:date]', 'Communication\\CalendrierController#planning', 'api_calendrier_planning');
+$router->map('POST', '/api/calendrier/verifier-conflits', 'Communication\\CalendrierController#verifierConflits', 'api_calendrier_conflits');
+
+// ============================================================================
+// PRD 06 - Documents & Archives - Documents API
+// ============================================================================
+$router->map('GET', '/api/documents', 'Documents\\DocumentsController#list', 'api_documents');
+$router->map('GET', '/api/documents/[i:id]', 'Documents\\DocumentsController#show', 'api_document_show');
+$router->map('GET', '/api/documents/[i:id]/telecharger', 'Documents\\DocumentsController#telecharger', 'api_document_telecharger');
+$router->map('POST', '/api/documents/generer', 'Documents\\DocumentsController#generer', 'api_document_generer');
+$router->map('POST', '/api/documents/[i:id]/regenerer', 'Documents\\DocumentsController#regenerer', 'api_document_regenerer');
+$router->map('GET', '/api/documents/types', 'Documents\\DocumentsController#types', 'api_documents_types');
+
+// ============================================================================
+// PRD 06 - Documents & Archives - Archives API
+// ============================================================================
+$router->map('GET', '/api/archives', 'Documents\\ArchivesController#list', 'api_archives');
+$router->map('GET', '/api/archives/[i:id]', 'Documents\\ArchivesController#show', 'api_archive_show');
+$router->map('POST', '/api/archives/[i:id]/verifier', 'Documents\\ArchivesController#verifierIntegrite', 'api_archive_verifier');
+$router->map('POST', '/api/archives/verifier-tout', 'Documents\\ArchivesController#verifierTout', 'api_archives_verifier_tout');
+$router->map('POST', '/api/archives/[i:id]/verrouiller', 'Documents\\ArchivesController#verrouiller', 'api_archive_verrouiller');
+$router->map('GET', '/api/archives/statistiques', 'Documents\\ArchivesController#statistiques', 'api_archives_stats');
+
+// ============================================================================
+// PRD 06 - Documents & Archives - Brouillons API
+// ============================================================================
+$router->map('GET', '/api/brouillons', 'Documents\\BrouillonsController#list', 'api_brouillons');
+$router->map('GET', '/api/brouillons/[a:type]/[i:ctx]/[a:code]', 'Documents\\BrouillonsController#recuperer', 'api_brouillon_get');
+$router->map('POST', '/api/brouillons', 'Documents\\BrouillonsController#sauvegarder', 'api_brouillon_save');
+$router->map('DELETE', '/api/brouillons/[i:id]', 'Documents\\BrouillonsController#supprimer', 'api_brouillon_delete');
+
+// ============================================================================
+// PRD 06 - Documents & Archives - Historique Entités API
+// ============================================================================
+$router->map('GET', '/api/historique/[a:type]/[i:id]', 'Documents\\HistoriqueController#show', 'api_historique_show');
+$router->map('GET', '/api/historique/[a:type]/[i:id]/version/[i:version]', 'Documents\\HistoriqueController#version', 'api_historique_version');
+$router->map('GET', '/api/historique/[a:type]/[i:id]/comparer', 'Documents\\HistoriqueController#comparer', 'api_historique_comparer');
+$router->map('POST', '/api/historique/[a:type]/[i:id]/restaurer/[i:version]', 'Documents\\HistoriqueController#restaurer', 'api_historique_restaurer');
+
+// ============================================================================
+// PRD 07 - Financier - Paiements API
+// ============================================================================
+$router->map('GET', '/finance/paiements', 'Finance\\PaiementsController#index', 'finance_paiements');
+$router->map('GET', '/api/finance/paiements', 'Finance\\PaiementsController#list', 'api_finance_paiements');
+$router->map('GET', '/api/finance/paiements/[i:id]', 'Finance\\PaiementsController#show', 'api_finance_paiement_show');
+$router->map('POST', '/api/finance/paiements', 'Finance\\PaiementsController#store', 'api_finance_paiement_store');
+$router->map('POST', '/api/finance/paiements/[i:id]/annuler', 'Finance\\PaiementsController#annuler', 'api_finance_paiement_annuler');
+$router->map('GET', '/api/finance/paiements/etudiant/[i:id]/solde', 'Finance\\PaiementsController#solde', 'api_finance_solde');
+$router->map('GET', '/api/finance/paiements/etudiant/[i:id]/historique', 'Finance\\PaiementsController#historique', 'api_finance_historique');
+$router->map('GET', '/api/finance/paiements/[i:id]/recu', 'Finance\\PaiementsController#telechargerRecu', 'api_finance_recu');
+$router->map('POST', '/api/finance/paiements/[i:id]/regenerer-recu', 'Finance\\PaiementsController#regenererRecu', 'api_finance_regenerer_recu');
+$router->map('GET', '/api/finance/paiements/statistiques', 'Finance\\PaiementsController#statistiques', 'api_finance_paiements_stats');
+
+// ============================================================================
+// PRD 07 - Financier - Pénalités API
+// ============================================================================
+$router->map('GET', '/finance/penalites', 'Finance\\PenalitesController#index', 'finance_penalites');
+$router->map('GET', '/api/finance/penalites', 'Finance\\PenalitesController#list', 'api_finance_penalites');
+$router->map('GET', '/api/finance/penalites/[i:id]', 'Finance\\PenalitesController#show', 'api_finance_penalite_show');
+$router->map('POST', '/api/finance/penalites', 'Finance\\PenalitesController#store', 'api_finance_penalite_store');
+$router->map('POST', '/api/finance/penalites/[i:id]/payer', 'Finance\\PenalitesController#payer', 'api_finance_penalite_payer');
+$router->map('POST', '/api/finance/penalites/[i:id]/annuler', 'Finance\\PenalitesController#annuler', 'api_finance_penalite_annuler');
+$router->map('POST', '/api/finance/penalites/calculer-auto', 'Finance\\PenalitesController#calculerAuto', 'api_finance_penalites_calcul');
+$router->map('GET', '/api/finance/penalites/etudiant/[i:id]', 'Finance\\PenalitesController#parEtudiant', 'api_finance_penalites_etudiant');
+$router->map('GET', '/api/finance/penalites/statistiques', 'Finance\\PenalitesController#statistiques', 'api_finance_penalites_stats');
+
+// ============================================================================
+// PRD 07 - Financier - Exonérations API
+// ============================================================================
+$router->map('GET', '/finance/exonerations', 'Finance\\ExonerationsController#index', 'finance_exonerations');
+$router->map('GET', '/api/finance/exonerations', 'Finance\\ExonerationsController#list', 'api_finance_exonerations');
+$router->map('GET', '/api/finance/exonerations/[i:id]', 'Finance\\ExonerationsController#show', 'api_finance_exoneration_show');
+$router->map('POST', '/api/finance/exonerations', 'Finance\\ExonerationsController#store', 'api_finance_exoneration_store');
+$router->map('POST', '/api/finance/exonerations/[i:id]/approuver', 'Finance\\ExonerationsController#approuver', 'api_finance_exoneration_approuver');
+$router->map('POST', '/api/finance/exonerations/[i:id]/refuser', 'Finance\\ExonerationsController#refuser', 'api_finance_exoneration_refuser');
+$router->map('POST', '/api/finance/exonerations/[i:id]/annuler', 'Finance\\ExonerationsController#annuler', 'api_finance_exoneration_annuler');
+$router->map('GET', '/api/finance/exonerations/en-attente', 'Finance\\ExonerationsController#enAttente', 'api_finance_exonerations_attente');
+$router->map('GET', '/api/finance/exonerations/etudiant/[i:id]', 'Finance\\ExonerationsController#parEtudiant', 'api_finance_exonerations_etudiant');
+$router->map('GET', '/api/finance/exonerations/statistiques', 'Finance\\ExonerationsController#statistiques', 'api_finance_exonerations_stats');
+
+// ============================================================================
+// PRD 07 - Financier - Dashboard Étudiant
+// ============================================================================
+$router->map('GET', '/etudiant/finances', 'Etudiant\\FinancesController#index', 'etudiant_finances');
+$router->map('GET', '/api/etudiant/finances/resume', 'Etudiant\\FinancesController#resume', 'api_etudiant_finances_resume');
