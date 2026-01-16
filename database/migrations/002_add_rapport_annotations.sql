@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS rapport_annotations (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (rapport_id) REFERENCES rapports_commission(id_rapport) ON DELETE CASCADE,
+    FOREIGN KEY (rapport_id) REFERENCES rapports_etudiants(id_rapport) ON DELETE CASCADE,
     FOREIGN KEY (annotateur_id) REFERENCES utilisateurs(id_utilisateur) ON DELETE RESTRICT,
     FOREIGN KEY (resolu_par) REFERENCES utilisateurs(id_utilisateur) ON DELETE SET NULL,
     
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS rapport_fichiers_attaches (
     upload_par INT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (rapport_id) REFERENCES rapports_commission(id_rapport) ON DELETE CASCADE,
+    FOREIGN KEY (rapport_id) REFERENCES rapports_etudiants(id_rapport) ON DELETE CASCADE,
     FOREIGN KEY (upload_par) REFERENCES utilisateurs(id_utilisateur) ON DELETE RESTRICT,
     
     INDEX idx_rapport (rapport_id),
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS rapport_versions (
     commentaire_version TEXT,
     date_version DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (rapport_id) REFERENCES rapports_commission(id_rapport) ON DELETE CASCADE,
+    FOREIGN KEY (rapport_id) REFERENCES rapports_etudiants(id_rapport) ON DELETE CASCADE,
     FOREIGN KEY (modifie_par) REFERENCES utilisateurs(id_utilisateur) ON DELETE RESTRICT,
     
     INDEX idx_rapport (rapport_id),
@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS rapport_validations (
     ordre_validation INT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (rapport_id) REFERENCES rapports_commission(id_rapport) ON DELETE CASCADE,
+    FOREIGN KEY (rapport_id) REFERENCES rapports_etudiants(id_rapport) ON DELETE CASCADE,
     FOREIGN KEY (validateur_id) REFERENCES utilisateurs(id_utilisateur) ON DELETE RESTRICT,
     
     INDEX idx_rapport (rapport_id),

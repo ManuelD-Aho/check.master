@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS participants_sessions_presences (
     notes TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (session_id) REFERENCES sessions_commission(id_session_commission) ON DELETE CASCADE,
+    FOREIGN KEY (session_id) REFERENCES sessions_commission(id_session) ON DELETE CASCADE,
     FOREIGN KEY (participant_id) REFERENCES utilisateurs(id_utilisateur) ON DELETE CASCADE,
     FOREIGN KEY (verifie_par) REFERENCES utilisateurs(id_utilisateur),
     INDEX idx_session (session_id),
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS participants_interventions (
     transcription TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (session_id) REFERENCES sessions_commission(id_session_commission) ON DELETE CASCADE,
+    FOREIGN KEY (session_id) REFERENCES sessions_commission(id_session) ON DELETE CASCADE,
     FOREIGN KEY (agenda_item_id) REFERENCES sessions_commission_agendas(id_agenda_item),
     FOREIGN KEY (participant_id) REFERENCES utilisateurs(id_utilisateur),
     INDEX idx_session (session_id),
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS sessions_enregistrements (
     enregistre_par INT,
     date_enregistrement DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (session_id) REFERENCES sessions_commission(id_session_commission) ON DELETE CASCADE,
+    FOREIGN KEY (session_id) REFERENCES sessions_commission(id_session) ON DELETE CASCADE,
     FOREIGN KEY (enregistre_par) REFERENCES utilisateurs(id_utilisateur),
     INDEX idx_session (session_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

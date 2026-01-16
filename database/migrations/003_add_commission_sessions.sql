@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS sessions_commission_convocations (
     motif_absence TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (session_id) REFERENCES sessions_commission(id_session_commission) ON DELETE CASCADE,
+    FOREIGN KEY (session_id) REFERENCES sessions_commission(id_session) ON DELETE CASCADE,
     FOREIGN KEY (membre_id) REFERENCES utilisateurs(id_utilisateur) ON DELETE CASCADE,
     
     INDEX idx_session (session_id),
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS sessions_commission_agendas (
     notes TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (session_id) REFERENCES sessions_commission(id_session_commission) ON DELETE CASCADE,
+    FOREIGN KEY (session_id) REFERENCES sessions_commission(id_session) ON DELETE CASCADE,
     FOREIGN KEY (dossier_id) REFERENCES dossiers_etudiants(id_dossier) ON DELETE SET NULL,
     FOREIGN KEY (rapporteur_id) REFERENCES utilisateurs(id_utilisateur) ON DELETE SET NULL,
     
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS sessions_commission_votes (
     details_vote JSON COMMENT 'Détails si vote nominal',
     date_vote DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (session_id) REFERENCES sessions_commission(id_session_commission) ON DELETE CASCADE,
+    FOREIGN KEY (session_id) REFERENCES sessions_commission(id_session) ON DELETE CASCADE,
     FOREIGN KEY (agenda_item_id) REFERENCES sessions_commission_agendas(id_agenda_item) ON DELETE SET NULL,
     
     INDEX idx_session (session_id),
@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS sessions_commission_absences (
     id_absence INT PRIMARY KEY AUTO_INCREMENT,
     session_id INT NOT NULL,
     membre_absent_id INT NOT NULL,
-    remplac ant_id INT,
+    remplacant_id INT,
     type_absence ENUM('justifiee', 'non_justifiee', 'excuse') NOT NULL,
     motif TEXT,
     document_justificatif VARCHAR(500),
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS sessions_commission_absences (
     date_approbation DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (session_id) REFERENCES sessions_commission(id_session_commission) ON DELETE CASCADE,
+    FOREIGN KEY (session_id) REFERENCES sessions_commission(id_session) ON DELETE CASCADE,
     FOREIGN KEY (membre_absent_id) REFERENCES utilisateurs(id_utilisateur) ON DELETE CASCADE,
     FOREIGN KEY (remplacant_id) REFERENCES utilisateurs(id_utilisateur) ON DELETE SET NULL,
     FOREIGN KEY (approuve_par) REFERENCES utilisateurs(id_utilisateur) ON DELETE SET NULL,
@@ -119,7 +119,7 @@ CREATE TABLE IF NOT EXISTS sessions_commission_documents (
     confidentialite ENUM('public', 'restreint', 'confidentiel') DEFAULT 'restreint',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (session_id) REFERENCES sessions_commission(id_session_commission) ON DELETE CASCADE,
+    FOREIGN KEY (session_id) REFERENCES sessions_commission(id_session) ON DELETE CASCADE,
     FOREIGN KEY (agenda_item_id) REFERENCES sessions_commission_agendas(id_agenda_item) ON DELETE SET NULL,
     FOREIGN KEY (upload_par) REFERENCES utilisateurs(id_utilisateur) ON DELETE RESTRICT,
     

@@ -20,7 +20,8 @@
         "tecnickcom/tcpdf": "^6.6",
         "phpoffice/phpspreadsheet": "^1.18",
         "phpmailer/phpmailer": "^6.9",
-        "monolog/monolog": "^2.0"
+        "monolog/monolog": "^2.0",
+        "ext-pdo": "*"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.48",

@@ -6,7 +6,7 @@
 -- =====================================================
 
 -- Réclamations
-INSERT INTO reclamations (id_reclamation, etudiant_id, type_reclamation, priorite, objet, description, statut, assigne_a) VALUES
+INSERT INTO reclamations (id_reclamation, etudiant_id, type_reclamation, priorite, sujet, description, statut, prise_en_charge_par) VALUES
 -- Réclamations résolues
 (1, 12, 'Financiere', 'Haute', 'Erreur de calcul sur le montant des pénalités', 
 'Bonjour,\n\nJe constate que la pénalité de retard qui m''a été appliquée est de 50,000 FCFA alors que mon retard n''était que de 10 jours.\n\nSelon le règlement, le taux est de 0.5% par jour, ce qui devrait donner 27,500 FCFA et non 50,000 FCFA.\n\nMerci de vérifier ce calcul.\n\nCordialement,\nTAPE Didier', 
@@ -28,10 +28,10 @@ INSERT INTO reclamations (id_reclamation, etudiant_id, type_reclamation, priorit
 -- Réclamation ouverte
 (5, 28, 'Financiere', 'Basse', 'Demande d''échelonnement de paiement',
 'Bonjour,\n\nSuite à des difficultés financières temporaires, je souhaiterais solliciter un échelonnement pour le solde restant de mes frais de scolarité (150,000 FCFA).\n\nJe m''engage à régler ce montant en 3 versements mensuels.\n\nMerci de considérer ma demande.',
-'Ouverte', NULL)
+'En_attente', NULL)
 ON DUPLICATE KEY UPDATE 
     statut = VALUES(statut),
-    assigne_a = VALUES(assigne_a);
+    prise_en_charge_par = VALUES(prise_en_charge_par);
 
 -- Réponses aux réclamations
 INSERT INTO reclamation_reponses (id_reponse, reclamation_id, auteur_id, contenu) VALUES
@@ -48,27 +48,24 @@ ON DUPLICATE KEY UPDATE
     contenu = VALUES(contenu);
 
 -- Escalades
-INSERT INTO escalades (id_escalade, dossier_id, type_escalade, niveau, motif, statut, escalade_vers, contexte_json) VALUES
+INSERT INTO escalades (id_escalade, dossier_id, type_escalade, niveau_escalade, description, statut, cree_par, assignee_a) VALUES
 -- Escalade résolue (Commission bloquée)
-(1, 5, 'Commission_blocage', 2, 'Blocage au tour 2 - pas d''unanimité après discussion', 
-'Resolue', 80, 
-'{"tour_initial": 1, "tour_blocage": 2, "votes_pour": 3, "votes_contre": 2, "resolution": "Validation après médiation du président"}'),
+(1, 5, 'commission_blocage', 2, 'Blocage au tour 2 - pas d''unanimité après discussion', 
+'Resolue', 1, 80),
 
 -- Escalade en cours (Délai SLA dépassé)
-(2, 6, 'Delai_SLA', 1, 'Délai de 7 jours dépassé pour l''avis encadreur',
-'En_cours', 50,
-'{"etat_actuel": "ATTENTE_AVIS_ENCADREUR", "delai_max_jours": 7, "jours_ecoules": 12, "encadreur_id": 70}'),
+(2, 6, 'delai_depasse', 1, 'Délai de 7 jours dépassé pour l''avis encadreur',
+'En_cours', 1, 50),
 
 -- Escalade ouverte (Absence jury)
-(3, 4, 'Absence_jury', 1, 'Un membre du jury a décliné sa participation à J-5',
-'Ouverte', 80,
-'{"membre_absent": "Dr. DIABATE Fatoumata", "role": "RAPPORTEUR", "date_soutenance": "2024-12-22", "motif_absence": "Urgence médicale"}')
+(3, 4, 'jury_incomplet', 1, 'Un membre du jury a décliné sa participation à J-5',
+'Ouverte', 1, 80)
 ON DUPLICATE KEY UPDATE 
     statut = VALUES(statut),
-    contexte_json = VALUES(contexte_json);
+    assignee_a = VALUES(assignee_a);
 
 -- Actions sur escalades
-INSERT INTO escalade_actions (id_action, escalade_id, action_type, auteur_id, commentaire) VALUES
+INSERT INTO escalades_actions (id_action, escalade_id, type_action, utilisateur_id, description) VALUES
 -- Actions sur escalade 1
 (1, 1, 'Prise_en_charge', 80, 'Escalade prise en charge pour médiation'),
 (2, 1, 'Communication', 80, 'Réunion organisée avec les membres divergents'),
@@ -82,4 +79,4 @@ INSERT INTO escalade_actions (id_action, escalade_id, action_type, auteur_id, co
 -- Actions sur escalade 3
 (7, 3, 'Prise_en_charge', 80, 'Recherche d''un remplaçant en cours')
 ON DUPLICATE KEY UPDATE 
-    commentaire = VALUES(commentaire);
+    description = VALUES(description);

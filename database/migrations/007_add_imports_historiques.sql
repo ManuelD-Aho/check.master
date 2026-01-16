@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS imports_rollback_data (
     table_name VARCHAR(100) NOT NULL,
     record_id INT NOT NULL,
     operation ENUM('insert', 'update', 'delete') NOT NULL,
-    ancien ne_valeur JSON,
+    ancienne_valeur JSON,
     nouvelle_valeur JSON,
     rollback_effectue BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
