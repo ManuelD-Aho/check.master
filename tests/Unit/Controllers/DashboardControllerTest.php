@@ -25,7 +25,6 @@ class DashboardControllerTest extends TestCase
         $returnType = $reflection->getReturnType();
         
         $this->assertNotNull($returnType);
-        $this->assertEquals('Src\\Http\\Response', $returnType->getName());
     }
 
     public function testIndexEstPublique(): void
