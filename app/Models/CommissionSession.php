@@ -41,6 +41,15 @@ class CommissionSession extends Model
     // ===== RELATIONS =====
 
     /**
+     * Retourne les membres de la session
+     * @return CommissionMembre[]
+     */
+    public function membres(): array
+    {
+        return $this->hasMany(CommissionMembre::class, 'session_id', 'id_session');
+    }
+
+    /**
      * Retourne les votes de la session
      * @return CommissionVote[]
      */
