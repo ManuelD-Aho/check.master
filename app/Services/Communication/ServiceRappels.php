@@ -115,8 +115,7 @@ class ServiceRappels
                 ]);
 
                 // Marquer le rappel comme envoyé
-                $sql2 = "UPDATE soutenances SET rappel_j7_envoye = 1 WHERE id_soutenance = :id";
-                Model::raw($sql2, ['id' => $soutenance['id_soutenance']]);
+                self::marquerRappelEnvoye((int) $soutenance['id_soutenance'], 'j7');
 
                 $count++;
             } catch (\Exception $e) {
@@ -174,8 +173,7 @@ class ServiceRappels
                 ]);
 
                 // Marquer le rappel comme envoyé
-                $sql2 = "UPDATE soutenances SET rappel_j1_envoye = 1 WHERE id_soutenance = :id";
-                Model::raw($sql2, ['id' => $soutenance['id_soutenance']]);
+                self::marquerRappelEnvoye((int) $soutenance['id_soutenance'], 'j1');
 
                 $count++;
             } catch (\Exception $e) {
@@ -251,8 +249,7 @@ class ServiceRappels
                 }
 
                 // Marquer le rappel comme envoyé
-                $sql2 = "UPDATE soutenances SET rappel_jour_j_envoye = 1 WHERE id_soutenance = :id";
-                Model::raw($sql2, ['id' => $soutenance['id_soutenance']]);
+                self::marquerRappelEnvoye((int) $soutenance['id_soutenance'], 'jour_j');
             } catch (\Exception $e) {
                 error_log('Erreur rappel jour J soutenance #' . $soutenance['id_soutenance'] . ': ' . $e->getMessage());
             }
@@ -351,6 +348,22 @@ class ServiceRappels
         if (!empty($juryUsers)) {
             ServiceNotification::envoyerParCode($templateCode, $juryUsers, $variables);
         }
+    }
+
+    /**
+     * Marque un rappel comme envoyé pour une soutenance
+     */
+    private static function marquerRappelEnvoye(int $soutenanceId, string $typeRappel): void
+    {
+        $column = match ($typeRappel) {
+            'j7' => 'rappel_j7_envoye',
+            'j1' => 'rappel_j1_envoye',
+            'jour_j' => 'rappel_jour_j_envoye',
+            default => throw new \InvalidArgumentException("Type de rappel invalide: {$typeRappel}"),
+        };
+
+        $sql = "UPDATE soutenances SET {$column} = 1 WHERE id_soutenance = :id";
+        Model::raw($sql, ['id' => $soutenanceId]);
     }
 
     /**

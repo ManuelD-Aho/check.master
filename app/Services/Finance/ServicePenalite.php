@@ -117,21 +117,32 @@ class ServicePenalite
 
         $montantPenalite = min($penaliteCalculee, $penaliteMax);
 
-        // Vérifier si une pénalité existe déjà pour ce mois
+        // Vérifier si une pénalité automatique existe déjà pour ce mois et cette année
         $moisActuel = date('Y-m');
-        $penaliteExistante = Penalite::firstWhere([
-            'etudiant_id' => $etudiantId,
-            'annee_acad_id' => $anneeAcadId,
-            'type' => 'Automatique',
+        $sqlExistante = "SELECT * FROM penalites 
+                         WHERE etudiant_id = :etudiant 
+                         AND annee_acad_id = :annee 
+                         AND type = 'Automatique'
+                         AND DATE_FORMAT(date_application, '%Y-%m') = :mois
+                         AND payee = 0 AND (annulee IS NULL OR annulee = 0)
+                         LIMIT 1";
+        $stmt = \App\Orm\Model::raw($sqlExistante, [
+            'etudiant' => $etudiantId,
+            'annee' => $anneeAcadId,
+            'mois' => $moisActuel,
         ]);
+        $penaliteExistanteData = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        if ($penaliteExistante !== null) {
-            // Mettre à jour la pénalité existante
-            $penaliteExistante->montant = $montantPenalite;
-            $penaliteExistante->motif = "Retard de paiement ({$joursRetard} jours)";
-            $penaliteExistante->save();
-
-            return $penaliteExistante;
+        if ($penaliteExistanteData !== false) {
+            // Mettre à jour la pénalité existante du même mois
+            $penaliteExistante = Penalite::find((int) $penaliteExistanteData['id_penalite']);
+            if ($penaliteExistante !== null) {
+                $penaliteExistante->montant = $montantPenalite;
+                $penaliteExistante->motif = "Retard de paiement ({$joursRetard} jours)";
+                $penaliteExistante->jours_retard = $joursRetard;
+                $penaliteExistante->save();
+                return $penaliteExistante;
+            }
         }
 
         // Créer une nouvelle pénalité automatique
