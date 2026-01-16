@@ -61,13 +61,6 @@ class AuthMiddleware
             return Response::redirect('/?error=compte_inactif');
         }
 
-        // Vérifier si l'utilisateur doit changer son mot de passe
-        if ($user !== null && $user->doitChangerMotDePasse()) {
-            $changePasswordUri = '/change-password';
-            if ($uri !== $changePasswordUri) {
-                return Response::redirect($changePasswordUri);
-            }
-        }
 
         return $next();
     }

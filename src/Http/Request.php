@@ -185,12 +185,28 @@ class Request
         $scriptName = $instance->server['SCRIPT_NAME'] ?? '';
         $basePath = dirname($scriptName);
         
-        // Si le base path n'est pas la racine, le retirer de l'URI
-        if ($basePath !== '/' && $basePath !== '\\' && $basePath !== '') {
-            $basePath = rtrim($basePath, '/');
-            if (str_starts_with($uri, $basePath)) {
-                $uri = substr($uri, strlen($basePath));
+        // Liste des bases paths potentiels à retirer
+        // On inclut le basePath de SCRIPT_NAME et son parent si on est dans /public
+        $basePaths = [$basePath];
+        $normBasePath = str_replace('\\', '/', $basePath);
+        if (basename($normBasePath) === 'public') {
+            $basePaths[] = dirname($normBasePath);
+        }
+
+        foreach ($basePaths as $bp) {
+            $bp = str_replace('\\', '/', $bp);
+            if ($bp !== '/' && $bp !== '\\' && $bp !== '' && $bp !== '.') {
+                $bp = rtrim($bp, '/');
+                if (str_starts_with($uri, $bp)) {
+                    $uri = substr($uri, strlen($bp));
+                    break;
+                }
             }
+        }
+
+        // Retirer index.php s'il est présent au début de l'URI résultante
+        if (str_starts_with($uri, '/index.php')) {
+            $uri = substr($uri, 10);
         }
         
         // S'assurer que l'URI commence par /
@@ -208,8 +224,14 @@ class Request
     {
         $instance = self::getInstance();
         $scriptName = $instance->server['SCRIPT_NAME'] ?? '';
-        $basePath = dirname($scriptName);
+        $basePath = str_replace('\\', '/', dirname($scriptName));
         
+        // Si on est dans un sous-répertoire public, on remonte d'un cran
+        if (basename($basePath) === 'public') {
+            $basePath = dirname($basePath);
+        }
+        
+        $basePath = str_replace('\\', '/', $basePath);
         if ($basePath === '/' || $basePath === '\\' || $basePath === '.') {
             return '';
         }

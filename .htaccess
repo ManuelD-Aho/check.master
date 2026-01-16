@@ -27,8 +27,8 @@ RewriteRule ^index\.php(/(.*))?$ /$2 [R=301,L,QSA]
 # ============================================================================
 # If the file doesn't exist in root AND doesn't start with public/
 # Then internally redirect to public/{REQUEST_URI}
-RewriteCond %{REQUEST_URI} !^/public/
-RewriteRule ^(.*)$ public/$1 [L]
+# If the request doesn't start with public/, internally redirect to public/
+RewriteRule ^(?!public/)(.*)$ public/$1 [L,NC]
 
 # =============================================================================
 # Security Headers (if mod_headers is available)

@@ -76,6 +76,30 @@ $user = $user ?? ['name' => 'Utilisateur', 'role' => 'Rôle', 'initials' => 'U']
     <!-- Scripts -->
     <script src="<?= asset('js/app.js') ?>" defer></script>
 
+    <script>
+        (function() {
+            var basePath = '<?= \Src\Http\Request::basePath(); ?>';
+            if (!basePath) return;
+
+            var prefix = basePath.charAt(0) === '/' ? basePath : '/' + basePath;
+            var shouldPrefix = function(url) {
+                if (!url) return false;
+                if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')) return false;
+                if (!url.startsWith('/')) return false;
+                if (url === prefix || url.startsWith(prefix + '/')) return false;
+                return true;
+            };
+
+            var elements = document.querySelectorAll('a[href], link[href], form[action]');
+            elements.forEach(function(el) {
+                var attr = el.tagName === 'FORM' ? 'action' : 'href';
+                var value = el.getAttribute(attr);
+                if (!shouldPrefix(value)) return;
+                el.setAttribute(attr, prefix + value);
+            });
+        })();
+    </script>
+
     <!-- Additional scripts -->
     <?php if (isset($scripts)) echo $scripts; ?>
 </body>

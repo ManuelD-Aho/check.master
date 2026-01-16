@@ -58,8 +58,8 @@ if (!function_exists('url')) {
      */
     function url(string $path = ''): string
     {
-        $baseUrl = config('app.url', '/check.master');
-        return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
+        $basePath = \Src\Http\Request::basePath();
+        return rtrim($basePath, '/') . '/' . ltrim($path, '/');
     }
 }
 
@@ -69,7 +69,8 @@ if (!function_exists('asset')) {
      */
     function asset(string $path): string
     {
-        return '/public/assets/' . ltrim($path, '/');
+        $basePath = \Src\Http\Request::basePath();
+        return rtrim($basePath, '/') . '/assets/' . ltrim($path, '/');
     }
 }
 

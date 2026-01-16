@@ -3,7 +3,7 @@
 /**
  * Vue de changement de mot de passe CheckMaster
  * 
- * @var bool $isForced Indique si le changement est forcé (première connexion)
+ * 
  */
 
 declare(strict_types=1);
@@ -27,7 +27,7 @@ unset($_SESSION['flash_errors'], $_SESSION['flash_success']);
 $basePath = Request::basePath();
 $user = Auth::user();
 
-$isForced = $isForced ?? ($user ? $user->doitChangerMotDePasse() : false);
+$isForced = false;
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -275,22 +275,10 @@ $isForced = $isForced ?? ($user ? $user->doitChangerMotDePasse() : false);
             <div class="icon">🔐</div>
             <h1>Changement de mot de passe</h1>
             <p>
-                <?php if ($isForced): ?>
-                    Pour des raisons de sécurité, vous devez modifier votre mot de passe avant de continuer.
-                <?php else: ?>
-                    Saisissez votre mot de passe actuel et choisissez un nouveau mot de passe sécurisé.
-                <?php endif; ?>
+                Saisissez votre mot de passe actuel et choisissez un nouveau mot de passe sécurisé.
             </p>
         </div>
 
-        <?php if ($isForced): ?>
-            <div class="forced-notice">
-                <div>
-                    <strong>Première connexion détectée</strong><br>
-                    Pour sécuriser votre compte, veuillez définir un nouveau mot de passe personnel.
-                </div>
-            </div>
-        <?php endif; ?>
 
         <?php if (!empty($errors)): ?>
             <div class="error-list">
@@ -357,9 +345,7 @@ $isForced = $isForced ?? ($user ? $user->doitChangerMotDePasse() : false);
             <button type="submit" class="btn-submit">Modifier le mot de passe</button>
         </form>
 
-        <?php if (!$isForced): ?>
-            <a href="/dashboard" class="cancel-link">Annuler et retourner au tableau de bord</a>
-        <?php endif; ?>
+        <a href="/dashboard" class="cancel-link">Annuler et retourner au tableau de bord</a>
     </div>
 
     <script>
