@@ -21,8 +21,14 @@ class MessageInterne extends Model
         'destinataire_id',
         'sujet',
         'contenu',
+        'contexte_type',
+        'contexte_id',
+        'piece_jointe',
         'lu',
+        'lu_le',
         'date_lecture',
+        'supprime',
+        'supprime_le',
     ];
 
     // ===== RELATIONS =====

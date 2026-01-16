@@ -18,12 +18,22 @@ class Penalite extends Model
     protected string $primaryKey = 'id_penalite';
     protected array $fillable = [
         'etudiant_id',
+        'annee_acad_id',
         'montant',
         'motif',
         'date_application',
         'payee',
         'date_paiement',
+        'payee_par',
+        'chemin_recu',
         'recu_chemin',
+        'type',
+        'jours_retard',
+        'annulee',
+        'motif_annulation',
+        'annulee_par',
+        'annulee_le',
+        'creee_par',
     ];
 
     /**
