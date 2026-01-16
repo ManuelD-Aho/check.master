@@ -238,14 +238,16 @@ class ServiceCommission
 
         $nbVotes = CommissionVote::nombreVotes($sessionId, $rapportId, $tour);
 
-        // Tous les membres ont voté
-        if ($nbVotes >= $nbMembresPresents) {
-            $decision = CommissionVote::unanimiteAtteinte($sessionId, $rapportId, $tour, $nbMembresPresents);
+        // Vérifier si tous les membres présents ont voté
+        if ($nbVotes >= $nbMembresPresents && $nbMembresPresents > 0) {
+            // Vérifier l'unanimité - la méthode retourne la décision si unanime, null sinon
+            $decisionUnanime = CommissionVote::unanimiteAtteinte($sessionId, $rapportId, $tour, $nbMembresPresents);
 
-            if ($decision !== null) {
-                // Appliquer la décision au rapport
-                $this->appliquerDecisionRapport($rapportId, $decision);
+            if ($decisionUnanime !== null) {
+                // Unanimité atteinte - appliquer la décision au rapport
+                $this->appliquerDecisionRapport($rapportId, $decisionUnanime);
             }
+            // Sinon, pas d'unanimité - pas de décision automatique, passage au tour suivant requis
         }
     }
 

@@ -208,6 +208,12 @@ class ServiceEntitesAcademiques
                 }
             }
 
+            // Vérifier les cas d'échec
+            if ($resultats['total'] === 0) {
+                Model::rollBack();
+                throw new ValidationException('Fichier vide ou format invalide. Aucune donnée à importer.');
+            }
+
             if ($resultats['reussis'] === 0 && !empty($resultats['erreurs'])) {
                 Model::rollBack();
                 throw new ValidationException('Aucun étudiant importé. Vérifiez le fichier.');

@@ -152,11 +152,11 @@ class ServiceAdministration
             throw new NotFoundException('Réclamation non trouvée');
         }
 
-        if ($reclamation->statut !== 'En_attente') {
+        if ($reclamation->statut !== Reclamation::STATUT_EN_ATTENTE) {
             throw new ValidationException('Cette réclamation est déjà prise en charge ou traitée');
         }
 
-        $reclamation->statut = 'En_cours';
+        $reclamation->statut = Reclamation::STATUT_EN_COURS;
         $reclamation->prise_en_charge_par = $utilisateurId;
         $reclamation->prise_en_charge_le = date('Y-m-d H:i:s');
         $reclamation->save();
@@ -179,11 +179,11 @@ class ServiceAdministration
             throw new NotFoundException('Réclamation non trouvée');
         }
 
-        if ($reclamation->statut === 'Resolue' || $reclamation->statut === 'Rejetee') {
+        if ($reclamation->statut === Reclamation::STATUT_RESOLUE || $reclamation->statut === Reclamation::STATUT_REJETEE) {
             throw new ValidationException('Cette réclamation est déjà traitée');
         }
 
-        $reclamation->statut = 'Resolue';
+        $reclamation->statut = Reclamation::STATUT_RESOLUE;
         $reclamation->resolution = $resolution;
         $reclamation->resolue_par = $utilisateurId;
         $reclamation->resolue_le = date('Y-m-d H:i:s');
@@ -209,11 +209,11 @@ class ServiceAdministration
             throw new NotFoundException('Réclamation non trouvée');
         }
 
-        if ($reclamation->statut === 'Resolue' || $reclamation->statut === 'Rejetee') {
+        if ($reclamation->statut === Reclamation::STATUT_RESOLUE || $reclamation->statut === Reclamation::STATUT_REJETEE) {
             throw new ValidationException('Cette réclamation est déjà traitée');
         }
 
-        $reclamation->statut = 'Rejetee';
+        $reclamation->statut = Reclamation::STATUT_REJETEE;
         $reclamation->motif_rejet = $motif;
         $reclamation->resolue_par = $utilisateurId;
         $reclamation->resolue_le = date('Y-m-d H:i:s');
