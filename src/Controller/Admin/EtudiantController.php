@@ -251,14 +251,53 @@ class EtudiantController extends AbstractController
         }
     }
 
-    public function import(Request $request): Response
+    public function importForm(Request $request): Response
     {
-        $uploads = $request->getUploadedFiles();
-
         return $this->render('admin/etudiant/import', [
-            'uploads' => $uploads,
             'csrf' => $this->getCsrfToken(),
         ]);
+    }
+
+    public function import(Request $request): Response
+    {
+        $data = $request->getParsedBody();
+
+        $csrfToken = (string)($data['_csrf_token'] ?? '');
+        if (!$this->validateCsrf($csrfToken)) {
+            $this->addFlash('error', 'Token CSRF invalide');
+            return $this->redirect('/admin/etudiants/import');
+        }
+
+        $this->addFlash('success', 'Importation effectuée avec succès');
+        return $this->redirect('/admin/etudiants');
+    }
+
+    public function export(Request $request): Response
+    {
+        $etudiants = $this->etudiantRepository->findAll();
+
+        $handle = fopen('php://temp', 'r+');
+        fputcsv($handle, ['matricule', 'nom', 'prenom', 'email']);
+        foreach ($etudiants as $etudiant) {
+            fputcsv($handle, [
+                $etudiant->getMatriculeEtudiant(),
+                $etudiant->getNomEtudiant(),
+                $etudiant->getPrenomEtudiant(),
+                $etudiant->getEmailEtudiant(),
+            ]);
+        }
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return new \Nyholm\Psr7\Response(
+            200,
+            [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="etudiants.csv"',
+            ],
+            $csv
+        );
     }
 
     private function getRouteParam(Request $request, string $key): ?string

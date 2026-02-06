@@ -100,4 +100,24 @@ class CandidatureController extends AbstractController
             'matricule' => $matricule,
         ]);
     }
+
+    public function formulaire(Request $request): ResponseInterface
+    {
+        return $this->create($request);
+    }
+
+    public function sauvegarder(Request $request): ResponseInterface
+    {
+        return $this->store($request);
+    }
+
+    public function soumettre(Request $request): ResponseInterface
+    {
+        return $this->submit($request);
+    }
+
+    public function recapitulatif(Request $request): ResponseInterface
+    {
+        return $this->show($request);
+    }
 }

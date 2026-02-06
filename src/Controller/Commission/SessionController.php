@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Controller\Commission;
 
 use App\Controller\AbstractController;
+use App\Service\Auth\AuthenticationService;
+use App\Service\Auth\AuthorizationService;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use App\Repository\Commission\SessionCommissionRepository;
@@ -18,10 +21,14 @@ class SessionController extends AbstractController
     private RapportRepository $rapportRepository;
 
     public function __construct(
+        ContainerInterface $container,
+        AuthenticationService $authenticationService,
+        AuthorizationService $authorizationService,
         SessionCommissionRepository $sessionRepository,
         CompteRenduCommissionRepository $compteRenduRepository,
         RapportRepository $rapportRepository
     ) {
+        parent::__construct($container, $authenticationService, $authorizationService);
         $this->sessionRepository = $sessionRepository;
         $this->compteRenduRepository = $compteRenduRepository;
         $this->rapportRepository = $rapportRepository;

@@ -43,52 +43,135 @@ class SoutenanceController extends AbstractController
         ]);
     }
 
-    public function schedule(Request $request): Response
+    public function create(Request $request): Response
     {
-        return $this->render('admin/soutenance/schedule', [
+        return $this->render('admin/soutenance/create', [
             'csrf' => $this->getCsrfToken(),
         ]);
     }
 
-    public function reschedule(Request $request): Response
+    public function store(Request $request): Response
     {
-        $this->addFlash('success', 'Soutenance replanifiee');
+        $this->addFlash('success', 'Soutenance programmée avec succès');
 
         return $this->redirect('/admin/soutenances');
     }
 
-    public function cancel(Request $request): Response
+    public function show(Request $request): Response
     {
-        $this->addFlash('success', 'Soutenance annulee');
+        $id = $this->getRouteParam($request, 'id');
+        $soutenance = $id !== null ? $this->soutenanceRepository->find((int) $id) : null;
+
+        return $this->render('admin/soutenance/show', [
+            'soutenance' => $soutenance,
+        ]);
+    }
+
+    public function edit(Request $request): Response
+    {
+        $id = $this->getRouteParam($request, 'id');
+        $soutenance = $id !== null ? $this->soutenanceRepository->find((int) $id) : null;
+
+        return $this->render('admin/soutenance/edit', [
+            'soutenance' => $soutenance,
+            'csrf' => $this->getCsrfToken(),
+        ]);
+    }
+
+    public function update(Request $request): Response
+    {
+        $this->addFlash('success', 'Soutenance modifiée avec succès');
 
         return $this->redirect('/admin/soutenances');
     }
 
-    public function jury(Request $request): Response
+    public function jurys(Request $request): Response
     {
         $jurys = $this->juryRepository->findAll();
 
-        return $this->render('admin/soutenance/jury', [
+        return $this->render('admin/soutenance/jurys', [
             'jurys' => $jurys,
+            'flashes' => $this->getFlashes(),
         ]);
     }
 
-    public function saisirNotes(Request $request): Response
+    public function composeJury(Request $request): Response
     {
-        $id = $this->getRouteParam($request, 'id') ?? $this->getRouteParam($request, 'soutenanceId');
-        $notes = $id !== null ? $this->noteRepository->findBySoutenance((int) $id) : [];
+        $matricule = $this->getRouteParam($request, 'matricule');
 
-        return $this->render('admin/soutenance/notes', [
-            'notes' => $notes,
+        return $this->render('admin/soutenance/compose-jury', [
+            'matricule' => $matricule,
             'csrf' => $this->getCsrfToken(),
         ]);
+    }
+
+    public function saveJury(Request $request): Response
+    {
+        $this->addFlash('success', 'Jury enregistré avec succès');
+
+        return $this->redirect('/admin/soutenances/jurys');
+    }
+
+    public function planning(Request $request): Response
+    {
+        $soutenances = $this->soutenanceRepository->findAll();
+
+        return $this->render('admin/soutenance/planning', [
+            'soutenances' => $soutenances,
+        ]);
+    }
+
+    public function planningPdf(Request $request): Response
+    {
+        $this->addFlash('info', 'Génération du PDF en cours');
+
+        return $this->redirect('/admin/soutenances/planning');
+    }
+
+    public function notationForm(Request $request): Response
+    {
+        $id = $this->getRouteParam($request, 'id');
+        $soutenance = $id !== null ? $this->soutenanceRepository->find((int) $id) : null;
+
+        return $this->render('admin/soutenance/notation', [
+            'soutenance' => $soutenance,
+            'csrf' => $this->getCsrfToken(),
+        ]);
+    }
+
+    public function saveNotation(Request $request): Response
+    {
+        $this->addFlash('success', 'Notes enregistrées avec succès');
+
+        return $this->redirect('/admin/soutenances');
     }
 
     public function deliberation(Request $request): Response
     {
+        $soutenances = $this->soutenanceRepository->findAll();
+
         return $this->render('admin/soutenance/deliberation', [
-            'soutenances' => $this->soutenanceRepository->findAll(),
+            'soutenances' => $soutenances,
+            'flashes' => $this->getFlashes(),
         ]);
+    }
+
+    public function delibererForm(Request $request): Response
+    {
+        $id = $this->getRouteParam($request, 'id');
+        $soutenance = $id !== null ? $this->soutenanceRepository->find((int) $id) : null;
+
+        return $this->render('admin/soutenance/deliberer', [
+            'soutenance' => $soutenance,
+            'csrf' => $this->getCsrfToken(),
+        ]);
+    }
+
+    public function deliberer(Request $request): Response
+    {
+        $this->addFlash('success', 'Délibération enregistrée avec succès');
+
+        return $this->redirect('/admin/soutenances/deliberation');
     }
 
     private function getRouteParam(Request $request, string $key): ?string

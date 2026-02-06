@@ -23,11 +23,67 @@ use App\Service\Auth\TwoFactorService;
 use App\Service\Auth\RateLimiterService;
 use App\Service\Email\EmailService;
 use App\Service\Email\TemplateRenderer;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\User\UtilisateurRepository;
 use App\Repository\User\GroupeUtilisateurRepository;
 use App\Repository\User\PermissionRepository;
+use App\Repository\User\TypeUtilisateurRepository;
+use App\Repository\Student\EtudiantRepository;
+use App\Repository\Student\InscriptionRepository;
+use App\Repository\Student\VersementRepository;
+use App\Repository\Student\EcheanceRepository;
+use App\Repository\Academic\AnneeAcademiqueRepository;
+use App\Repository\Academic\NiveauEtudeRepository;
+use App\Repository\Academic\FiliereRepository;
+use App\Repository\Academic\SemestreRepository;
+use App\Repository\Academic\UniteEnseignementRepository;
+use App\Repository\Academic\ElementConstitutifRepository;
+use App\Repository\Academic\NoteRepository;
+use App\Repository\Staff\EnseignantRepository;
+use App\Repository\Staff\GradeRepository;
+use App\Repository\Staff\FonctionRepository;
+use App\Repository\Staff\SpecialiteRepository;
+use App\Repository\Staff\PersonnelAdministratifRepository;
+use App\Repository\Stage\CandidatureRepository;
+use App\Repository\Stage\EntrepriseRepository;
+use App\Repository\Stage\HistoriqueCandidatureRepository;
+use App\Repository\Stage\InformationStageRepository;
+use App\Repository\Stage\MotifRejetCandidatureRepository;
+use App\Repository\Report\RapportRepository;
+use App\Repository\Report\VersionRapportRepository;
+use App\Repository\Report\CommentaireRapportRepository;
+use App\Repository\Report\ValidationRapportRepository;
+use App\Repository\Report\ModeleRapportRepository;
+use App\Repository\Commission\SessionCommissionRepository;
+use App\Repository\Commission\MembreCommissionRepository;
+use App\Repository\Commission\CompteRenduCommissionRepository;
+use App\Repository\Commission\CompteRenduRapportRepository;
+use App\Repository\Commission\EvaluationRapportRepository;
+use App\Repository\Commission\AffectationEncadrantRepository;
+use App\Repository\Soutenance\SoutenanceRepository;
+use App\Repository\Soutenance\JuryRepository;
+use App\Repository\Soutenance\CompositionJuryRepository;
+use App\Repository\Soutenance\RoleJuryRepository;
+use App\Repository\Soutenance\NoteSoutenanceRepository;
+use App\Repository\Soutenance\ResultatFinalRepository;
+use App\Repository\Soutenance\AptitudeSoutenanceRepository;
+use App\Repository\Soutenance\CritereEvaluationRepository;
+use App\Repository\Soutenance\BaremeCritereRepository;
+use App\Repository\Soutenance\SalleRepository;
+use App\Repository\Soutenance\MentionRepository;
 use App\Repository\System\AppSettingRepository;
 use App\Repository\System\FonctionnaliteRepository;
+use App\Repository\System\AuditLogRepository;
+use App\Service\Student\EtudiantService;
+use App\Service\Student\InscriptionService;
+use App\Service\Stage\CandidatureService;
+use App\Service\Stage\EntrepriseService;
+use App\Service\Report\RapportService;
+use App\Service\Commission\CommissionService;
+use App\Service\Commission\VoteService;
+use App\Service\Commission\AffectationService;
+use App\Service\Soutenance\JuryService;
+use App\Service\Soutenance\SoutenanceService;
 
 $containerBuilder = new ContainerBuilder();
 
@@ -238,6 +294,285 @@ $containerBuilder->addDefinitions([
             $c->get(EncryptionService::class),
             $c->get(Logger::class),
             $settings['smtp']
+        );
+    },
+
+    // EntityManagerInterface alias
+    EntityManagerInterface::class => function ($c) {
+        return $c->get(EntityManager::class);
+    },
+
+    // User repositories
+    TypeUtilisateurRepository::class => function ($c) {
+        return new TypeUtilisateurRepository($c->get(EntityManager::class));
+    },
+
+    // Student repositories
+    EtudiantRepository::class => function ($c) {
+        return new EtudiantRepository($c->get(EntityManager::class));
+    },
+
+    InscriptionRepository::class => function ($c) {
+        return new InscriptionRepository($c->get(EntityManager::class));
+    },
+
+    VersementRepository::class => function ($c) {
+        return new VersementRepository($c->get(EntityManager::class));
+    },
+
+    EcheanceRepository::class => function ($c) {
+        return new EcheanceRepository($c->get(EntityManager::class));
+    },
+
+    // Academic repositories
+    AnneeAcademiqueRepository::class => function ($c) {
+        return new AnneeAcademiqueRepository($c->get(EntityManager::class));
+    },
+
+    NiveauEtudeRepository::class => function ($c) {
+        return new NiveauEtudeRepository($c->get(EntityManager::class));
+    },
+
+    FiliereRepository::class => function ($c) {
+        return new FiliereRepository($c->get(EntityManager::class));
+    },
+
+    SemestreRepository::class => function ($c) {
+        return new SemestreRepository($c->get(EntityManager::class));
+    },
+
+    UniteEnseignementRepository::class => function ($c) {
+        return new UniteEnseignementRepository($c->get(EntityManager::class));
+    },
+
+    ElementConstitutifRepository::class => function ($c) {
+        return new ElementConstitutifRepository($c->get(EntityManager::class));
+    },
+
+    NoteRepository::class => function ($c) {
+        return new NoteRepository($c->get(EntityManager::class));
+    },
+
+    // Staff repositories
+    EnseignantRepository::class => function ($c) {
+        return new EnseignantRepository($c->get(EntityManager::class));
+    },
+
+    GradeRepository::class => function ($c) {
+        return new GradeRepository($c->get(EntityManager::class));
+    },
+
+    FonctionRepository::class => function ($c) {
+        return new FonctionRepository($c->get(EntityManager::class));
+    },
+
+    SpecialiteRepository::class => function ($c) {
+        return new SpecialiteRepository($c->get(EntityManager::class));
+    },
+
+    PersonnelAdministratifRepository::class => function ($c) {
+        return new PersonnelAdministratifRepository($c->get(EntityManager::class));
+    },
+
+    // Stage repositories
+    CandidatureRepository::class => function ($c) {
+        return new CandidatureRepository($c->get(EntityManager::class));
+    },
+
+    EntrepriseRepository::class => function ($c) {
+        return new EntrepriseRepository($c->get(EntityManager::class));
+    },
+
+    HistoriqueCandidatureRepository::class => function ($c) {
+        return new HistoriqueCandidatureRepository($c->get(EntityManager::class));
+    },
+
+    InformationStageRepository::class => function ($c) {
+        return new InformationStageRepository($c->get(EntityManager::class));
+    },
+
+    MotifRejetCandidatureRepository::class => function ($c) {
+        return new MotifRejetCandidatureRepository($c->get(EntityManager::class));
+    },
+
+    // Report repositories
+    RapportRepository::class => function ($c) {
+        return new RapportRepository($c->get(EntityManager::class));
+    },
+
+    VersionRapportRepository::class => function ($c) {
+        return new VersionRapportRepository($c->get(EntityManager::class));
+    },
+
+    CommentaireRapportRepository::class => function ($c) {
+        return new CommentaireRapportRepository($c->get(EntityManager::class));
+    },
+
+    ValidationRapportRepository::class => function ($c) {
+        return new ValidationRapportRepository($c->get(EntityManager::class));
+    },
+
+    ModeleRapportRepository::class => function ($c) {
+        return new ModeleRapportRepository($c->get(EntityManager::class));
+    },
+
+    // Commission repositories
+    SessionCommissionRepository::class => function ($c) {
+        return new SessionCommissionRepository($c->get(EntityManager::class));
+    },
+
+    MembreCommissionRepository::class => function ($c) {
+        return new MembreCommissionRepository($c->get(EntityManager::class));
+    },
+
+    CompteRenduCommissionRepository::class => function ($c) {
+        return new CompteRenduCommissionRepository($c->get(EntityManager::class));
+    },
+
+    CompteRenduRapportRepository::class => function ($c) {
+        return new CompteRenduRapportRepository($c->get(EntityManager::class));
+    },
+
+    EvaluationRapportRepository::class => function ($c) {
+        return new EvaluationRapportRepository($c->get(EntityManager::class));
+    },
+
+    AffectationEncadrantRepository::class => function ($c) {
+        return new AffectationEncadrantRepository($c->get(EntityManager::class));
+    },
+
+    // Soutenance repositories
+    SoutenanceRepository::class => function ($c) {
+        return new SoutenanceRepository($c->get(EntityManager::class));
+    },
+
+    JuryRepository::class => function ($c) {
+        return new JuryRepository($c->get(EntityManager::class));
+    },
+
+    CompositionJuryRepository::class => function ($c) {
+        return new CompositionJuryRepository($c->get(EntityManager::class));
+    },
+
+    RoleJuryRepository::class => function ($c) {
+        return new RoleJuryRepository($c->get(EntityManager::class));
+    },
+
+    NoteSoutenanceRepository::class => function ($c) {
+        return new NoteSoutenanceRepository($c->get(EntityManager::class));
+    },
+
+    ResultatFinalRepository::class => function ($c) {
+        return new ResultatFinalRepository($c->get(EntityManager::class));
+    },
+
+    AptitudeSoutenanceRepository::class => function ($c) {
+        return new AptitudeSoutenanceRepository($c->get(EntityManager::class));
+    },
+
+    CritereEvaluationRepository::class => function ($c) {
+        return new CritereEvaluationRepository($c->get(EntityManager::class));
+    },
+
+    BaremeCritereRepository::class => function ($c) {
+        return new BaremeCritereRepository($c->get(EntityManager::class));
+    },
+
+    SalleRepository::class => function ($c) {
+        return new SalleRepository($c->get(EntityManager::class));
+    },
+
+    MentionRepository::class => function ($c) {
+        return new MentionRepository($c->get(EntityManager::class));
+    },
+
+    // System repositories
+    AuditLogRepository::class => function ($c) {
+        return new AuditLogRepository($c->get(EntityManager::class));
+    },
+
+    // Student services
+    EtudiantService::class => function ($c) {
+        return new EtudiantService(
+            $c->get(EntityManagerInterface::class),
+            $c->get(InscriptionRepository::class)
+        );
+    },
+
+    InscriptionService::class => function ($c) {
+        return new InscriptionService(
+            $c->get(EntityManagerInterface::class),
+            $c->get(InscriptionRepository::class)
+        );
+    },
+
+    // Stage services
+    CandidatureService::class => function ($c) {
+        return new CandidatureService(
+            $c->get(EntityManagerInterface::class),
+            $c->get(CandidatureRepository::class),
+            $c->get(HistoriqueCandidatureRepository::class)
+        );
+    },
+
+    EntrepriseService::class => function ($c) {
+        return new EntrepriseService(
+            $c->get(EntityManagerInterface::class),
+            $c->get(EntrepriseRepository::class)
+        );
+    },
+
+    // Report services
+    RapportService::class => function ($c) {
+        return new RapportService(
+            $c->get(EntityManagerInterface::class),
+            $c->get(RapportRepository::class),
+            $c->get(VersionRapportRepository::class),
+            $c->get(CommentaireRapportRepository::class),
+            $c->get(ValidationRapportRepository::class)
+        );
+    },
+
+    // Commission services
+    CommissionService::class => function ($c) {
+        return new CommissionService(
+            $c->get(EntityManagerInterface::class),
+            $c->get(SessionCommissionRepository::class),
+            $c->get(MembreCommissionRepository::class),
+            $c->get(RapportRepository::class)
+        );
+    },
+
+    VoteService::class => function ($c) {
+        return new VoteService(
+            $c->get(EntityManagerInterface::class),
+            $c->get(EvaluationRapportRepository::class)
+        );
+    },
+
+    AffectationService::class => function ($c) {
+        return new AffectationService(
+            $c->get(EntityManagerInterface::class),
+            $c->get(AffectationEncadrantRepository::class)
+        );
+    },
+
+    // Soutenance services
+    JuryService::class => function ($c) {
+        return new JuryService(
+            $c->get(EntityManagerInterface::class),
+            $c->get(JuryRepository::class),
+            $c->get(CompositionJuryRepository::class),
+            $c->get(RoleJuryRepository::class)
+        );
+    },
+
+    SoutenanceService::class => function ($c) {
+        return new SoutenanceService(
+            $c->get(EntityManagerInterface::class),
+            $c->get(SoutenanceRepository::class),
+            $c->get(NoteSoutenanceRepository::class),
+            $c->get(ResultatFinalRepository::class)
         );
     },
 

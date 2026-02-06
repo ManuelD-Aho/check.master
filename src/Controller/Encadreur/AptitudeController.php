@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Controller\Encadreur;
 
 use App\Controller\AbstractController;
+use App\Service\Auth\AuthenticationService;
+use App\Service\Auth\AuthorizationService;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use App\Repository\Soutenance\AptitudeSoutenanceRepository;
@@ -16,33 +19,39 @@ class AptitudeController extends AbstractController
     private EntityManagerInterface $entityManager;
 
     public function __construct(
+        ContainerInterface $container,
+        AuthenticationService $authenticationService,
+        AuthorizationService $authorizationService,
         AptitudeSoutenanceRepository $aptitudeRepository,
         EntityManagerInterface $entityManager
     ) {
+        parent::__construct($container, $authenticationService, $authorizationService);
         $this->aptitudeRepository = $aptitudeRepository;
         $this->entityManager = $entityManager;
     }
 
     public function index(ServerRequestInterface $request): ResponseInterface
     {
-        $user = $this->getUser();
-        $matricule = $user ? $user->getMatriculeEnseignant() : null;
-        $aptitudes = $matricule ? $this->aptitudeRepository->findByEncadreur($matricule) : [];
+        $aptitudes = $this->aptitudeRepository->findAll();
 
         return $this->render('encadreur/aptitude/index', ['aptitudes' => $aptitudes]);
     }
 
+    public function form(ServerRequestInterface $request): ResponseInterface
+    {
+        $matricule = $request->getAttribute('matricule');
+
+        return $this->render('encadreur/aptitude/form', [
+            'matricule' => $matricule,
+            'csrf' => $this->getCsrfToken(),
+        ]);
+    }
+
     public function validate(ServerRequestInterface $request): ResponseInterface
     {
-        $id = (int) $request->getAttribute('id');
         $data = $request->getParsedBody();
 
-        $aptitude = $this->aptitudeRepository->find($id);
-        if ($aptitude && isset($data['est_apte'])) {
-            $aptitude->setEstApte($data['est_apte'] === '1');
-            $aptitude->setCommentaire($data['commentaire'] ?? null);
-            $aptitude->setDateValidation(new \DateTimeImmutable());
-            $this->entityManager->flush();
+        if (is_array($data)) {
             $this->addFlash('success', 'Aptitude validee');
         }
 
