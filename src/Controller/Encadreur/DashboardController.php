@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Controller\Encadreur;
 
 use App\Controller\AbstractController;
+use App\Service\Auth\AuthenticationService;
+use App\Service\Auth\AuthorizationService;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use App\Repository\Commission\AffectationEncadrantRepository;
@@ -16,9 +19,13 @@ class DashboardController extends AbstractController
     private RapportRepository $rapportRepository;
 
     public function __construct(
+        ContainerInterface $container,
+        AuthenticationService $authenticationService,
+        AuthorizationService $authorizationService,
         AffectationEncadrantRepository $affectationRepository,
         RapportRepository $rapportRepository
     ) {
+        parent::__construct($container, $authenticationService, $authorizationService);
         $this->affectationRepository = $affectationRepository;
         $this->rapportRepository = $rapportRepository;
     }

@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Controller\Encadreur;
 
 use App\Controller\AbstractController;
+use App\Service\Auth\AuthenticationService;
+use App\Service\Auth\AuthorizationService;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use App\Repository\Student\EtudiantRepository;
@@ -16,9 +19,13 @@ class EtudiantController extends AbstractController
     private AffectationEncadrantRepository $affectationRepository;
 
     public function __construct(
+        ContainerInterface $container,
+        AuthenticationService $authenticationService,
+        AuthorizationService $authorizationService,
         EtudiantRepository $etudiantRepository,
         AffectationEncadrantRepository $affectationRepository
     ) {
+        parent::__construct($container, $authenticationService, $authorizationService);
         $this->etudiantRepository = $etudiantRepository;
         $this->affectationRepository = $affectationRepository;
     }

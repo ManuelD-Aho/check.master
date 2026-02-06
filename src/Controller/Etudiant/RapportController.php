@@ -100,4 +100,75 @@ class RapportController extends AbstractController
             'matricule' => $matricule,
         ]);
     }
+
+    public function choisirModele(Request $request): ResponseInterface
+    {
+        return $this->create($request);
+    }
+
+    public function creer(Request $request): ResponseInterface
+    {
+        $matricule = $this->getUser()?->getMatriculeEtudiant();
+
+        if ($matricule === null || $matricule === '') {
+            return new Response(403, ['Content-Type' => 'text/plain'], 'Acces refuse');
+        }
+
+        $this->addFlash('success', 'Rapport cree');
+        return $this->redirect('/etudiant/rapport/editeur');
+    }
+
+    public function editeur(Request $request): ResponseInterface
+    {
+        return $this->edit($request);
+    }
+
+    public function sauvegarder(Request $request): ResponseInterface
+    {
+        return $this->save($request);
+    }
+
+    public function informations(Request $request): ResponseInterface
+    {
+        $matricule = $this->getUser()?->getMatriculeEtudiant();
+
+        if ($matricule === null || $matricule === '') {
+            return new Response(403, ['Content-Type' => 'text/plain'], 'Acces refuse');
+        }
+
+        return $this->render('etudiant/rapport/informations', [
+            'matricule' => $matricule,
+            'csrf' => $this->getCsrfToken(),
+        ]);
+    }
+
+    public function updateInformations(Request $request): ResponseInterface
+    {
+        $this->addFlash('success', 'Informations mises a jour');
+        return $this->redirect('/etudiant/rapport/informations');
+    }
+
+    public function soumettre(Request $request): ResponseInterface
+    {
+        return $this->submit($request);
+    }
+
+    public function voir(Request $request): ResponseInterface
+    {
+        return $this->show($request);
+    }
+
+    public function telecharger(Request $request): ResponseInterface
+    {
+        $matricule = $this->getUser()?->getMatriculeEtudiant();
+
+        if ($matricule === null || $matricule === '') {
+            return new Response(403, ['Content-Type' => 'text/plain'], 'Acces refuse');
+        }
+
+        return new Response(200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="rapport.pdf"',
+        ], '');
+    }
 }

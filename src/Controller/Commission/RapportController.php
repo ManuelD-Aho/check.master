@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Controller\Commission;
 
 use App\Controller\AbstractController;
+use App\Service\Auth\AuthenticationService;
+use App\Service\Auth\AuthorizationService;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use App\Repository\Report\RapportRepository;
@@ -18,10 +21,14 @@ class RapportController extends AbstractController
     private VoteService $voteService;
 
     public function __construct(
+        ContainerInterface $container,
+        AuthenticationService $authenticationService,
+        AuthorizationService $authorizationService,
         RapportRepository $rapportRepository,
         EvaluationRapportRepository $evaluationRepository,
         VoteService $voteService
     ) {
+        parent::__construct($container, $authenticationService, $authorizationService);
         $this->rapportRepository = $rapportRepository;
         $this->evaluationRepository = $evaluationRepository;
         $this->voteService = $voteService;

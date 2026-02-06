@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Controller\Api;
 
 use App\Controller\AbstractController;
+use App\Service\Auth\AuthenticationService;
+use App\Service\Auth\AuthorizationService;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use App\Service\Rapport\RapportService;
@@ -13,9 +16,22 @@ class RapportApiController extends AbstractController
 {
     private RapportService $rapportService;
 
-    public function __construct(RapportService $rapportService)
-    {
+    public function __construct(
+        ContainerInterface $container,
+        AuthenticationService $authenticationService,
+        AuthorizationService $authorizationService,
+        RapportService $rapportService
+    ) {
+        parent::__construct($container, $authenticationService, $authorizationService);
         $this->rapportService = $rapportService;
+    }
+
+    public function versions(ServerRequestInterface $request): ResponseInterface
+    {
+        $id = (int) $request->getAttribute('id');
+        $versions = $this->rapportService->getVersions($id);
+
+        return $this->json(['versions' => $versions]);
     }
 
     public function autoSave(ServerRequestInterface $request): ResponseInterface
