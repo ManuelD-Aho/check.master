@@ -14,7 +14,7 @@
         }
     },
     "require": {
-        "php": "^8.4",
+        "php": "^8.3",
         "brick/math": "^0.12",
         "defuse/php-encryption": "^2.4",
         "doctrine/dbal": "^4.0",
