@@ -98,6 +98,64 @@ class CommissionController extends AbstractController
         ]);
     }
 
+    public function saveMembres(Request $request): Response
+    {
+        $this->addFlash('success', 'Configuration des membres enregistree');
+
+        return $this->redirect('/admin/commission/membres');
+    }
+
+    public function storeSession(Request $request): Response
+    {
+        $this->addFlash('success', 'Session enregistree');
+
+        return $this->redirect('/admin/commission/sessions');
+    }
+
+    public function showSession(Request $request): Response
+    {
+        $id = $this->getRouteParam($request, 'id');
+        $session = $id !== null ? $this->sessionRepository->find((int) $id) : null;
+
+        return $this->render('admin/commission/sessions-show', [
+            'session' => $session,
+            'flashes' => $this->getFlashes(),
+        ]);
+    }
+
+    public function downloadSessionPdf(Request $request): Response
+    {
+        $id = $this->getRouteParam($request, 'id');
+
+        $this->addFlash('info', 'Telechargement du PDF en cours');
+
+        return $this->redirect('/admin/commission/sessions/' . $id);
+    }
+
+    public function assignation(Request $request): Response
+    {
+        return $this->render('admin/commission/assignation', [
+            'flashes' => $this->getFlashes(),
+        ]);
+    }
+
+    public function assignationForm(Request $request): Response
+    {
+        $rapportId = $this->getRouteParam($request, 'rapportId');
+
+        return $this->render('admin/commission/assignation-form', [
+            'rapportId' => $rapportId,
+            'flashes' => $this->getFlashes(),
+        ]);
+    }
+
+    public function assign(Request $request): Response
+    {
+        $this->addFlash('success', 'Encadrant assigne avec succes');
+
+        return $this->redirect('/admin/commission/assignation');
+    }
+
     private function getRouteParam(Request $request, string $key): ?string
     {
         $value = $request->getAttribute($key);
