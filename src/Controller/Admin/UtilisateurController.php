@@ -123,6 +123,36 @@ class UtilisateurController extends AbstractController
         return $this->redirect('/admin/utilisateurs');
     }
 
+    public function unblock(Request $request): Response
+    {
+        $id = $this->getRouteParam($request, 'id');
+        $utilisateur = $id !== null ? $this->utilisateurRepository->find((int) $id) : null;
+
+        if ($utilisateur !== null) {
+            $utilisateur->setBlocked(false);
+            $this->utilisateurRepository->save($utilisateur);
+            $this->addFlash('success', 'Utilisateur debloque');
+        } else {
+            $this->addFlash('error', 'Utilisateur introuvable');
+        }
+
+        return $this->redirect('/admin/utilisateurs');
+    }
+
+    public function resetPassword(Request $request): Response
+    {
+        $id = $this->getRouteParam($request, 'id');
+        $utilisateur = $id !== null ? $this->utilisateurRepository->find((int) $id) : null;
+
+        if ($utilisateur !== null) {
+            $this->addFlash('success', 'Mot de passe reinitialise');
+        } else {
+            $this->addFlash('error', 'Utilisateur introuvable');
+        }
+
+        return $this->redirect('/admin/utilisateurs');
+    }
+
     private function getRouteParam(Request $request, string $key): ?string
     {
         $value = $request->getAttribute($key);
