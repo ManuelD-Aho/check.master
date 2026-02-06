@@ -37,14 +37,14 @@ return [
     ['GET', '/login', [LoginController::class, 'showLoginForm']],
     ['POST', '/login', [LoginController::class, 'login']],
     ['GET', '/logout', [LoginController::class, 'logout']],
-    ['GET', '/login/2fa', [TwoFactorController::class, 'form']],
+    ['GET', '/login/2fa', [TwoFactorController::class, 'showSetup']],
     ['POST', '/login/2fa', [TwoFactorController::class, 'verify']],
-    ['GET', '/premiere-connexion', [FirstLoginController::class, 'form']],
-    ['POST', '/premiere-connexion', [FirstLoginController::class, 'changePassword']],
-    ['GET', '/mot-de-passe/oublie', [PasswordController::class, 'forgotForm']],
+    ['GET', '/premiere-connexion', [FirstLoginController::class, 'showForm']],
+    ['POST', '/premiere-connexion', [FirstLoginController::class, 'updatePassword']],
+    ['GET', '/mot-de-passe/oublie', [PasswordController::class, 'showForgotForm']],
     ['POST', '/mot-de-passe/oublie', [PasswordController::class, 'sendResetLink']],
-    ['GET', '/mot-de-passe/reinitialiser/{token}', [PasswordController::class, 'resetForm']],
-    ['POST', '/mot-de-passe/reinitialiser/{token}', [PasswordController::class, 'reset']],
+    ['GET', '/mot-de-passe/reinitialiser/{token}', [PasswordController::class, 'showResetForm']],
+    ['POST', '/mot-de-passe/reinitialiser/{token}', [PasswordController::class, 'resetPassword']],
 
     ['GET', '/admin', [AdminDashboardController::class, 'index']],
     ['GET', '/admin/dashboard', [AdminDashboardController::class, 'index']],
@@ -55,7 +55,7 @@ return [
     ['GET', '/admin/utilisateurs/{id}', [UtilisateurController::class, 'show']],
     ['GET', '/admin/utilisateurs/{id}/modifier', [UtilisateurController::class, 'edit']],
     ['POST', '/admin/utilisateurs/{id}', [UtilisateurController::class, 'update']],
-    ['POST', '/admin/utilisateurs/{id}/toggle', [UtilisateurController::class, 'toggle']],
+    ['POST', '/admin/utilisateurs/{id}/toggle', [UtilisateurController::class, 'toggleStatus']],
     ['POST', '/admin/utilisateurs/{id}/debloquer', [UtilisateurController::class, 'unblock']],
     ['POST', '/admin/utilisateurs/{id}/reset-password', [UtilisateurController::class, 'resetPassword']],
 
@@ -91,7 +91,7 @@ return [
     ['GET', '/admin/rapports/{id}', [AdminRapportController::class, 'show']],
     ['POST', '/admin/rapports/{id}/approuver', [AdminRapportController::class, 'approve']],
     ['POST', '/admin/rapports/{id}/retourner', [AdminRapportController::class, 'returnReport']],
-    ['POST', '/admin/rapports/transferer', [AdminRapportController::class, 'transfer']],
+    ['POST', '/admin/rapports/transferer', [AdminRapportController::class, 'sendToCommission']],
 
     ['GET', '/admin/commission/membres', [AdminCommissionController::class, 'membres']],
     ['POST', '/admin/commission/membres', [AdminCommissionController::class, 'saveMembres']],
@@ -186,7 +186,7 @@ return [
 
     ['GET', '/commission/rapports', [CommissionRapportController::class, 'index']],
     ['GET', '/commission/rapports/{id}', [CommissionRapportController::class, 'show']],
-    ['GET', '/commission/evaluer/{id}', [CommissionRapportController::class, 'evaluateForm']],
+    ['GET', '/commission/evaluer/{id}', [CommissionRapportController::class, 'evaluate']],
     ['POST', '/commission/evaluer/{id}', [CommissionRapportController::class, 'vote']],
 
     ['GET', '/commission/sessions', [SessionController::class, 'index']],
@@ -217,5 +217,5 @@ return [
     ['GET', '/api/enseignants/{matricule}', [EnseignantApiController::class, 'get']],
 
     ['GET', '/api/rapports/{id}/versions', [RapportApiController::class, 'versions']],
-    ['POST', '/api/rapports/{id}/autosave', [RapportApiController::class, 'autosave']],
+    ['POST', '/api/rapports/{id}/autosave', [RapportApiController::class, 'autoSave']],
 ];
