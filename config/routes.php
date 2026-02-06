@@ -28,6 +28,11 @@ use App\Controller\Encadreur\DashboardController as EncadreurDashboardController
 use App\Controller\Encadreur\EtudiantController as EncadreurEtudiantController;
 use App\Controller\Encadreur\RapportController as EncadreurRapportController;
 use App\Controller\Encadreur\AptitudeController;
+use App\Controller\Admin\Maintenance\StatistiqueController;
+use App\Controller\Admin\Maintenance\CacheController;
+use App\Controller\Admin\Maintenance\AuditController;
+use App\Controller\Admin\Maintenance\ModeController;
+use App\Controller\Admin\Document\DocumentController as AdminDocumentController;
 use App\Controller\Api\EntrepriseApiController;
 use App\Controller\Api\EtudiantApiController;
 use App\Controller\Api\EnseignantApiController;
@@ -152,6 +157,16 @@ return [
     ['POST', '/admin/parametres/entreprises', [ParametresController::class, 'storeEntreprise']],
     ['GET', '/admin/parametres/entreprises/{id}/modifier', [ParametresController::class, 'editEntreprise']],
     ['POST', '/admin/parametres/entreprises/{id}', [ParametresController::class, 'updateEntreprise']],
+
+    ['GET', '/admin/maintenance/statistiques', [StatistiqueController::class, 'index']],
+    ['GET', '/admin/maintenance/cache', [CacheController::class, 'index']],
+    ['POST', '/admin/maintenance/cache/clear', [CacheController::class, 'clear']],
+    ['GET', '/admin/maintenance/audit', [AuditController::class, 'index']],
+    ['GET', '/admin/maintenance/mode', [ModeController::class, 'index']],
+    ['POST', '/admin/maintenance/mode/toggle', [ModeController::class, 'toggle']],
+
+    ['GET', '/admin/documents', [AdminDocumentController::class, 'index']],
+    ['POST', '/admin/documents/generate', [AdminDocumentController::class, 'generate']],
 
     ['GET', '/etudiant', [EtudiantDashboardController::class, 'index']],
     ['GET', '/etudiant/dashboard', [EtudiantDashboardController::class, 'index']],

@@ -84,6 +84,18 @@ use App\Service\Commission\VoteService;
 use App\Service\Commission\AffectationService;
 use App\Service\Soutenance\JuryService;
 use App\Service\Soutenance\SoutenanceService;
+use App\Service\Document\DocumentGeneratorService;
+use App\Service\Document\RecuPaiementGenerator;
+use App\Service\Document\AttestationInscriptionGenerator;
+use App\Service\Document\AttestationStageGenerator;
+use App\Service\Document\Annexe1Generator;
+use App\Service\Document\Annexe2Generator;
+use App\Service\Document\Annexe3Generator;
+use App\Service\Document\CompteRenduCommissionGenerator;
+use App\Service\Document\FicheNotationGenerator;
+use App\Service\Document\PvSoutenanceGenerator;
+use App\Service\Document\BulletinGeneratorService;
+use App\Service\Document\PvFinalGeneratorService;
 
 $containerBuilder = new ContainerBuilder();
 
@@ -573,6 +585,114 @@ $containerBuilder->addDefinitions([
             $c->get(SoutenanceRepository::class),
             $c->get(NoteSoutenanceRepository::class),
             $c->get(ResultatFinalRepository::class)
+        );
+    },
+
+    // Document generators
+    RecuPaiementGenerator::class => function ($c) {
+        $settings = $c->get('settings');
+        return new RecuPaiementGenerator(
+            $c->get(SettingsService::class),
+            $settings['paths']['documents']
+        );
+    },
+
+    AttestationInscriptionGenerator::class => function ($c) {
+        $settings = $c->get('settings');
+        return new AttestationInscriptionGenerator(
+            $c->get(SettingsService::class),
+            $settings['paths']['documents']
+        );
+    },
+
+    AttestationStageGenerator::class => function ($c) {
+        $settings = $c->get('settings');
+        return new AttestationStageGenerator(
+            $c->get(SettingsService::class),
+            $settings['paths']['documents']
+        );
+    },
+
+    Annexe1Generator::class => function ($c) {
+        $settings = $c->get('settings');
+        return new Annexe1Generator(
+            $c->get(SettingsService::class),
+            $settings['paths']['documents']
+        );
+    },
+
+    Annexe2Generator::class => function ($c) {
+        $settings = $c->get('settings');
+        return new Annexe2Generator(
+            $c->get(SettingsService::class),
+            $settings['paths']['documents']
+        );
+    },
+
+    Annexe3Generator::class => function ($c) {
+        $settings = $c->get('settings');
+        return new Annexe3Generator(
+            $c->get(SettingsService::class),
+            $settings['paths']['documents']
+        );
+    },
+
+    CompteRenduCommissionGenerator::class => function ($c) {
+        $settings = $c->get('settings');
+        return new CompteRenduCommissionGenerator(
+            $c->get(SettingsService::class),
+            $settings['paths']['documents']
+        );
+    },
+
+    FicheNotationGenerator::class => function ($c) {
+        $settings = $c->get('settings');
+        return new FicheNotationGenerator(
+            $c->get(SettingsService::class),
+            $settings['paths']['documents']
+        );
+    },
+
+    PvSoutenanceGenerator::class => function ($c) {
+        $settings = $c->get('settings');
+        return new PvSoutenanceGenerator(
+            $c->get(SettingsService::class),
+            $settings['paths']['documents']
+        );
+    },
+
+    BulletinGeneratorService::class => function ($c) {
+        $settings = $c->get('settings');
+        return new BulletinGeneratorService(
+            $c->get(SettingsService::class),
+            $settings['paths']['documents']
+        );
+    },
+
+    PvFinalGeneratorService::class => function ($c) {
+        $settings = $c->get('settings');
+        return new PvFinalGeneratorService(
+            $c->get(SettingsService::class),
+            $settings['paths']['documents']
+        );
+    },
+
+    DocumentGeneratorService::class => function ($c) {
+        $settings = $c->get('settings');
+        return new DocumentGeneratorService(
+            $c->get(SettingsService::class),
+            $settings['paths']['documents'],
+            $c->get(RecuPaiementGenerator::class),
+            $c->get(AttestationInscriptionGenerator::class),
+            $c->get(AttestationStageGenerator::class),
+            $c->get(Annexe1Generator::class),
+            $c->get(Annexe2Generator::class),
+            $c->get(Annexe3Generator::class),
+            $c->get(CompteRenduCommissionGenerator::class),
+            $c->get(FicheNotationGenerator::class),
+            $c->get(PvSoutenanceGenerator::class),
+            $c->get(BulletinGeneratorService::class),
+            $c->get(PvFinalGeneratorService::class)
         );
     },
 
