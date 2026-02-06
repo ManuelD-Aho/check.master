@@ -1,0 +1,205 @@
+/* ============================================================
+   Navigation — Sidebar, breadcrumb, tabs & topbar styles
+   Complements layout classes in style.css and admin.css
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   Sidebar
+   ---------------------------------------------------------- */
+.sidebar {
+    width: var(--sidebar-width, 250px);
+    background: var(--gray-900, #111827);
+    color: #fff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    z-index: 200;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--gray-700, #374151);
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0.5rem 0;
+    margin: 0;
+    flex: 1;
+}
+
+.sidebar-item {
+    margin: 0;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1.5rem;
+    color: var(--gray-300, #d1d5db);
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+}
+
+.sidebar-link:hover {
+    background: var(--gray-700, #374151);
+    color: #fff;
+    text-decoration: none;
+}
+
+.sidebar-link.active {
+    background: rgba(37, 99, 235, 0.15);
+    color: #fff;
+    border-left: 3px solid var(--primary, #1e40af);
+    padding-left: calc(1.5rem - 3px);
+}
+
+/* ----------------------------------------------------------
+   Collapsible submenu
+   ---------------------------------------------------------- */
+.sidebar-submenu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.sidebar-item.open > .sidebar-submenu {
+    max-height: 20rem;
+}
+
+.sidebar-submenu .sidebar-link {
+    padding-left: 2.75rem;
+    font-size: 0.8rem;
+}
+
+/* ----------------------------------------------------------
+   Breadcrumb
+   ---------------------------------------------------------- */
+.breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.25rem;
+    font-size: 0.85rem;
+}
+
+.breadcrumb-item {
+    color: var(--gray-500, #6b7280);
+}
+
+.breadcrumb-item a {
+    color: var(--primary, #1e40af);
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb-separator {
+    color: var(--gray-300, #d1d5db);
+    margin: 0 0.15rem;
+}
+
+/* ----------------------------------------------------------
+   Tabs
+   ---------------------------------------------------------- */
+.nav-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--gray-200, #e5e7eb);
+    margin-bottom: 1.5rem;
+}
+
+.nav-tab {
+    padding: 0.6rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-500, #6b7280);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s, border-color 0.2s;
+    cursor: pointer;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+}
+
+.nav-tab:hover {
+    color: var(--gray-900, #111827);
+    text-decoration: none;
+}
+
+.nav-tab.active {
+    color: var(--primary, #1e40af);
+    border-bottom-color: var(--primary, #1e40af);
+}
+
+/* ----------------------------------------------------------
+   Top bar
+   ---------------------------------------------------------- */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.topbar-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-900, #111827);
+}
+
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* ----------------------------------------------------------
+   Responsive — sidebar collapses
+   ---------------------------------------------------------- */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .breadcrumb {
+        font-size: 0.8rem;
+    }
+
+    .nav-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+    }
+
+    .nav-tab {
+        white-space: nowrap;
+    }
+}

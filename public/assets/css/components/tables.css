@@ -1,0 +1,111 @@
+/* ============================================================
+   Tables — Reusable table component styles
+   Complements base .table in style.css
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   Base table
+   ---------------------------------------------------------- */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.table th,
+.table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--gray-200, #e5e7eb);
+    vertical-align: middle;
+}
+
+.table th {
+    background: var(--gray-50, #f9fafb);
+    font-weight: 600;
+    color: var(--gray-700, #374151);
+    white-space: nowrap;
+}
+
+/* ----------------------------------------------------------
+   Striped rows
+   ---------------------------------------------------------- */
+.table-striped tbody tr:nth-child(even) {
+    background: var(--gray-50, #f9fafb);
+}
+
+/* ----------------------------------------------------------
+   Row hover
+   ---------------------------------------------------------- */
+.table-hover tbody tr:hover {
+    background: var(--gray-100, #f3f4f6);
+}
+
+/* ----------------------------------------------------------
+   Bordered
+   ---------------------------------------------------------- */
+.table-bordered {
+    border: 1px solid var(--gray-200, #e5e7eb);
+}
+
+.table-bordered th,
+.table-bordered td {
+    border: 1px solid var(--gray-200, #e5e7eb);
+}
+
+/* ----------------------------------------------------------
+   Compact table
+   ---------------------------------------------------------- */
+.table-sm th,
+.table-sm td {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+}
+
+/* ----------------------------------------------------------
+   Responsive wrapper
+   ---------------------------------------------------------- */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive .table {
+    min-width: 600px;
+}
+
+/* ----------------------------------------------------------
+   Action column
+   ---------------------------------------------------------- */
+.table-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    white-space: nowrap;
+}
+
+/* ----------------------------------------------------------
+   Sort indicators on <th>
+   ---------------------------------------------------------- */
+.table th[data-sort] {
+    cursor: pointer;
+    user-select: none;
+}
+
+.table th[data-sort]::after {
+    content: '\2195';  /* ↕ */
+    margin-left: 0.35rem;
+    font-size: 0.7rem;
+    color: var(--gray-300, #d1d5db);
+}
+
+.table th[data-sort].sort-asc::after {
+    content: '\2191';  /* ↑ */
+    color: var(--gray-700, #374151);
+}
+
+.table th[data-sort].sort-desc::after {
+    content: '\2193';  /* ↓ */
+    color: var(--gray-700, #374151);
+}
