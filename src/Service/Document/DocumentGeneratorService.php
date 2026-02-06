@@ -24,7 +24,9 @@ class DocumentGeneratorService
         Annexe3Generator $annexe3Generator,
         CompteRenduCommissionGenerator $compteRenduGenerator,
         FicheNotationGenerator $ficheNotationGenerator,
-        PvSoutenanceGenerator $pvSoutenanceGenerator
+        PvSoutenanceGenerator $pvSoutenanceGenerator,
+        BulletinGeneratorService $bulletinGenerator,
+        PvFinalGeneratorService $pvFinalGenerator
     ) {
         $this->settings = $settings;
         $this->storagePath = $storagePath;
@@ -38,6 +40,8 @@ class DocumentGeneratorService
             'compte_rendu_commission' => $compteRenduGenerator,
             'fiche_notation' => $ficheNotationGenerator,
             'pv_soutenance' => $pvSoutenanceGenerator,
+            'bulletin' => $bulletinGenerator,
+            'pv_final' => $pvFinalGenerator,
         ];
     }
 
