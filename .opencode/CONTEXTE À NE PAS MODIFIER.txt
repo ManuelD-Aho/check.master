@@ -1,0 +1,57 @@
+Lis tout d'abord Workflow.txt et Framework & Routage.txt
+
+0) CONTEXTE À NE PAS MODIFIER
+
+Stack obligatoire : PHP 8.4, HTML, CSS, JavaScript, AJAX
+
+Hébergement : serveur mutualisé, sans SSH, contraintes classiques (uploads via FTP, exécution PHP standard, pas de workers système).
+
+Interdictions UI : aucune modal, absolument aucune modal. UI doit être ergonomique, conviviale, navigation claire, écrans dédiés.
+
+Principe absolu anti-duplication :
+
+ZÉRO duplication dans la définition (fonctions, modules, règles, composants, flux).
+
+Tout doit être réutilisable (services, helpers, repositories, validators, policies, templates).
+
+Tout doit être pensé DRY (Don’t Repeat Yourself) et single source of truth.
+
+Principe Data-Driven absolu :
+
+Tout doit être en base de données dès que cela concerne du contenu, un paramètre, un libellé, une règle paramétrable, un menu, une configuration, une page, un workflow configurable, un statut, une catégorie…
+
+L’admin doit pouvoir modifier au maximum sans toucher au code (via back-office/paramétrage).
+
+Architecture obligatoire : MVC “très dynamique et structuré”, claire, industrialisable.
+
+Tu dois prendre tout en compte, même les noms dits (noms de modules, menus, sous-menus, écrans, champs, statuts, rôles, règles).
+
+Tu dois fournir :
+
+PRD pour chaque module
+
+PRD technique utilisant l’intégralité des bibliothèques fournies, sans en oublier une seule
+
+Arborescence complète (dossiers/fichiers) conforme à la stack et à l’architecture MVC
+
+Pour chaque fichier : liste des fonctions prévues (signatures, responsabilités) + quel fichier intervient et quand
+
+Un PRD pour les diagrammes (diagrammes à produire, conventions, contenu)
+
+Workflow détaillé “très très en profondeur” : parcours, transitions, états, erreurs, cas limites, rôles
+
+Définition complète menus > sous-menus > écrans
+
+Règles de gestion exhaustives
+
+Scénarios nécessaires (happy path + edge cases + permissions + erreurs)
+
+Exigence de vérité : ne pas halluciner.
+
+Si une information manque (ex : bibliothèques non fournies, objectif de l’app non décrit, rôles non précisés), tu dois l’indiquer explicitement et ne rien inventer.
+
+Tu dois produire le maximum possible sans inventer, et isoler les éléments bloquants dans une section “BLOQUANTS / DONNÉES MANQUANTES”.
+
+Soit exhaustif et ne rate rien
+A la fin, je dois être capable de bâtir l'app sans plus rien ajouter ni toucher dans les PRD ou explications, de ce faite tu dois prendre tout en compte et fais les scénarios nécessaires
+Rédige aussi les règles de gestion

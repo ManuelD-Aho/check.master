@@ -1,0 +1,97 @@
+🌐 Framework & Routage (Architecture)
+
+nikic/fast-route : Le moteur de routage ultra-rapide pour diriger les URLs vers les bonnes fonctions.
+
+middlewares/fast-route : Le pont permettant d'utiliser FastRoute dans une architecture standardisée PSR-15.
+
+oscarotero/middleland : Un gestionnaire de middlewares simple pour organiser l'exécution en couches de votre application.
+
+psr/http-server-middleware : Le standard qui assure que tous vos middlewares sont compatibles entre eux.
+
+🔌 Fondations HTTP & API
+
+symfony/http-foundation : La couche indispensable pour manipuler les requêtes ($_POST, $_GET) et les réponses de manière propre.
+
+nyholm/psr7 : Une implémentation ultra-légère et rapide des standards de messages HTTP.
+
+symfony/http-client : Un client performant pour que votre serveur puisse appeler d'autres API externes si besoin.
+
+league/uri : Bibliothèque complète pour analyser, manipuler et valider les adresses Web (URIs).
+
+⚙️ Gestion des Processus & Logique (Workflow)
+
+symfony/workflow (en base): Le cœur de votre application. Il gère les passages d'états du rapport (Brouillon → Validé Communication → Commission) et empêche les actions non autorisées selon l'étape actuelle.
+
+symfony/expression-language : (Nouveau) Permet d'écrire des règles métier complexes (ex: conditions de validation d'un jury) dans des fichiers de configuration sans toucher au code PHP.
+
+symfony/dependency-injection : L'outil central pour gérer vos classes et éviter de coder en dur les liens entre vos composants.
+
+symfony/event-dispatcher : Permet à vos modules de communiquer de manière découplée (ex: envoyer un mail dès que le workflow change d'état).
+
+symfony/options-resolver : Utile pour valider les configurations et les tableaux de paramètres par défaut.
+
+opis/closure : Permet de sauvegarder des fonctions PHP complexes (closures) en base de données ou en cache.
+
+🛡️ Sécurité & Protection
+
+defuse/php-encryption : Pour chiffrer les données ultra-sensibles en base de données (ex: montants financiers ou documents personnels) de manière sécurisée.
+
+ezyang/htmlpurifier : (Déjà présent, renforcé) Nettoie rigoureusement le code HTML saisi par les étudiants dans l'éditeur de rapport pour bloquer toute faille XSS.
+
+symfony/security-core : Les briques fondamentales pour gérer l'authentification et les droits d'accès.
+
+symfony/security-http : Gère la couche de sécurité liée au Web (formulaire de connexion, pare-feu).
+
+symfony/password-hasher : Outil dédié au hachage ultra-sécurisé des mots de passe.
+
+symfony/security-csrf : Protection contre les attaques de type Cross-Site Request Forgery (vol de session).
+
+lcobucci/jwt : Le standard pour générer et valider des jetons de connexion (JSON Web Tokens).
+
+spomky-labs/otphp : Génère des codes de sécurité temporaires (2FA) pour une double protection des comptes profs/admin.
+
+symfony/rate-limiter : Empêche les abus (ex: tentatives de connexion répétées).
+
+🗄️ Base de Données & Cache
+
+doctrine/orm : Le moteur de référence pour gérer vos données (Étudiants, Rapports, Jurys) comme des objets PHP.
+
+doctrine/dbal : La couche de communication puissante avec votre serveur SQL.
+
+robmorgan/phinx : Gère les versions (migrations) de votre base de données pour la faire évoluer sans perte de données.
+
+psr/simple-cache : Une interface simplifiée pour stocker des données temporaires et accélérer l'application.
+
+laravel/scout : Permet d'ajouter une recherche plein texte ultra-efficace dans vos listes d'étudiants.
+
+🛠️ Utilitaires métier
+
+respect/validation : Moteur de validation fluide pour vérifier toutes les données saisies (dates, textes, nombres).
+
+egulias/email-validator : Validation stricte de la conformité des adresses e-mail.
+
+nesbot/carbon : L'extension indispensable pour gérer les dates (délais de stage, calcul d'âge, dates de soutenance).
+
+brick/math : Pour effectuer des calculs de notes et de moyennes avec une précision mathématique parfaite.
+
+symfony/string : Manipulation avancée des textes (Unicode, nettoyage de caractères spéciaux).
+
+📄 Documents, Emails & Logs
+
+phpoffice/phpword : convertis word en pdf
+
+tecnickcom/tcpdf : Pour générer les Procès-Verbaux (PV) et attestations de réussite définitives au format PDF.
+
+phpmailer/phpmailer : La solution fiable pour l'envoi de toutes les notifications e-mail du système.
+
+league/csv : Pour l'import/export massif des données (ex: liste de scolarité vers Excel).
+
+monolog/monolog : Le système de journalisation pour l'Audit Trail (qui a validé quoi et quand).
+
+whoops/monolog : Affiche des erreurs claires durant la phase de développement.
+
+📱 Interface & UX
+
+jenssegers/agent : Identifie l'appareil de l'utilisateur pour adapter certaines fonctionnalités.
+
+white-october/pagerfanta : Gère la pagination de vos tableaux de données (Éviter de charger 2000 étudiants sur une seule page).

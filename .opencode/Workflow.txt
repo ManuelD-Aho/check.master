@@ -1,0 +1,282 @@
+Nous devons mettre les choses au clair : 
+Cette règle est totale : Tout dépend des permissions du groupe utilisateur.
+Tout doit être dans la base de données pour pouvoir être changé depuis un menu de l'administrateur
+Il existe des entités comme Etudiant, personnel administratif, enseignant
+L'année académique est importante, elle est un champ en entrée chez l'administrateur, mais une sortie chez les autres utilisateurs
+Quand on ouvre l'année académique, on ne peut que travailler sur l'année en cours
+Tout fonctionne en fonction des permissions par groupe utilisateur
+Workflow : 
+L'administrateur a droit à tout dans le système mais ça doit être intelligent au niveau de certaines écrans du système
+En premier lieu, vraiment tout d'abord, on renseigne les informations nécessaires pour créer un étudiant, quand l'étudiant est crée, on l'inscrit maintenant à l'année académique et il rentre les informations sur sa scolarité, s'il a soldé sa scolarité ou non, après cela, on entre sa moyenne générale en Master 1 et si c'est déjà possible, on entre les moyennes dans chaque UE du semestre 1 de Master 2, le semestre 2 étant la note de soutenance(On y reviendra), ensuite, on génère à partir de l'étudiant un utilisateur avec mot de passe aléatoire qui sera envoyé par mail. Chaque utilisateur crée suit ce même processus.
+L'Etudiant reçoit ces identifiants par mail et peut à présent se connecter à la plateforme
+Une fois connectée, L'etudiant commence par saisir ses informations de stage dans une section qui s'appelle candidature puis, soumet cette candidature.
+Jusqu'ici, tant que la candidature de l'étudiant n'est pas validé, il ne peut pas rédiger son rapport de stage et la section est verrouillée. Donc, lorsqu'il soumet cette candidature, elle est reçu dans l'espace dédiée à cela et la personne qui en aura la permission pourra valider oui ou non sa candidature, bien sûr si c'est non, l'étudiant va réessayer mais si c'est oui, l'espace pour rédiger son rapport se débloque et donc l'étudiant peut ainsi rédiger son rapport de stage. Arrivé dans cette espace, l'Etudiant peut choisir parmi des modèles déjà existants lui permettant de commencer à partir d'une base, d'un modèle à suivre, tout ceci se passe directement dans l'app et également à l'aide d'un éditeur de texte intégré. Une fois la rédaction du rapport terminé, l'Etudiant le soumet et l'éditeur se verrouille, une page en lecture seul apparait où il peut visualiser ou télécharger le rapport qu'il a fait sans pouvoir le modifier. Lorsqu'il a soumit son rapport, ce rapport arrive dans un espace pour une vérification, dans cette espace, il sera possible d'uniquement visualiser le rapport de l'étudiant et de mettre un commentaire. Si le rapport n'est pas bon, il est retourné chez l'étudiant pour correction, son espace de rédaction se débloque alors et le processus reprend, mais si le rapport est approuvé, il est transféré immédiatement. Le rapport arrive alors dans l'espace de commission. Dans cette espace, le rapport sera soumis à une évaluation par 4 membres ayant le droit d'évaluer les rapports reçus. Donc pour continuer dans notre processus, le rapport reçu sera évalué par les 4 membres pour un vote, bien sûr, chaque membre aura la possibilité de visualiser ou télécharger le rapport sans toutefois le modifier, il pourra même y ajouter des commentaires.
+Le rapport ainsi évalué individuellement, chaque membre va voter et si le vote est unanime, c'est à dire que les 4 ont dit oui, le rapport est bon, mais si un seul n'est pas d'accord, le vote reprend car il faut que les 4 membres soient entièrement d'accord. Si les 4 membres sont unanimes sur le faite que le rapport n'est pas bon, alors ce rapport est retourné à son Etudiant pour correction et ce Etudiant devra refaire le processus de rédaction.
+Si le rapport est bon, alors on continue et alors on assigne pour l'étudiant possédant ce rapport un directeur de mémoire et un encadreur pédagogique.
+Lorsque cela est fait, le rapport est envoyé dans la liste d'attente pour faire partir du compte rendu de la commission, à l'intérieur de ce document, des remarques et l'évaluation du rapport avec l'assignation du directeur de mémoire et encadreur pédagogique de chaque étudiant dont le rapport a été évalué, on sélectionne bien sûr les étudiants qui vont faire partir de ce compte rendu qui se nomme Pv(Procès verbal) qui se fait par session (Explication : Les étudiants qui seront dans le Pv feront partie des étudiants dont le rapport a été évaluer à la session du mois et année de rédaction du Pv, ça permet l'historique). Quand la rédaction est terminée dans l'éditeur de texte, bien sûr, il est envoyé aux différents étudiants dont le nom figurait dans le rapport ainsi qu'à d'autres personnes. Une fois cette étape accomplie, l'étudiant n'a plus d'interaction avec le système pour le moment car il doit rédiger son rapport qui est en dehors du système. Maintenant, l'encadreur pédagogie qui est forcément membre de la commission pourra approuvé dans son espace que le ou les étudiants qu'il encadre sont prêts à soutenir. Quand cela a été fait, l'utilisateur possédant les permissions va programmer les soutenances, la première étape est l'élaboration du jury de l'étudiant, le jury est composé de 5 membres : Président du Jury, Encadreur pédagogique, directeur de mémoire, maître de stage et examinateur. Lorsque le jury est composé, il faut maintenant planifier la soutenance, elle se fait par la définition du jour, l'heure et la salle où va se dérouler la soutenance (Explication : Il faut noter que plusieurs soutenances peuvent se produire le même jour, à la même heure mais pas dans la même salle). Après, tout cela se consigne dans un tableau en pdf qui répertorie les soutenances par jour en fonction de l'heure et la salle avec les membres du jury et thème de chaque étudiant, ce document est généré à la suite de cette évaluation et envoyé à tous les acteurs qui interviennent dans les différentes soutenances(Jury, Etudiant etc...), (Généralement, le tableau se fait également par session ou il regroupe plusieurs soutenances sur une période à la fois). Quand tout ça est terminé, place à la soutenance. Lors de la soutenance, c'est le président du jury qui entre les différentes notes de l'étudiant en fonction d'un barème bien défini, il le fait dans un espace temporaire qui lui est spécialement crée lorsqu'il reçoit le tableau des soutenances. Quand les notes de soutenances sont entrées, le président génère 3 Pv finaux qui répertories plusieurs choses à la fois et est envoyé aux différents acteurs. Quand tout ceci est fini, tous les éléments s'archivent et c'est tout.
+Les documents générés par la plateforme :
+Reçu de paiement
+Bulletin de note provisoire
+Rapport de stage l'étudiant
+Pv (Compte rendu de la commission)
+Tableau pdf des soutenances
+3 Pv finaux (C'est trois documents dans le même pdf)
+Précision : 
+On se base sur les permissions pour faire tout dans le système (Peut-être avec Etudiant non)
+Les enseignants sont soit membre de la commission soit rien (Ils sont plus utile lorsqu'il faut assigner un directeur de mémoire, un président du Jury ou un examinateur, s'ils sont pas membre de la commission ou président du jury, ils ne sont rien, donc pas d'interface), de toute façon on parle en terme de permission, si ton groupe utilisateur a cette permission, tu peux réaliser les transactions de cette permission
+
+Pv Finaux descriptions : 
+1. Annexe 1 : Soutenance de Mémoire (Grille d'évaluation technique)
+Ce document sert à l'évaluation détaillée de la prestation de l'étudiant lors de la soutenance.
+Contenu :
+En-tête officiel : Logos de l'UFHB et de l'UFR MI, bandeau MIAGE-GI.
+Identification : Nom et prénoms de l'impétrant, matricule, niveau (Master 2), classe (Promotion), date et thème de la soutenance.
+Tableau des critères : Liste dynamique des critères (ex: Qualité du document, Maîtrise du sujet, Présentation orale) avec les notes obtenues et leurs barèmes respectifs.
+Bloc de signatures : Noms des membres du jury (Président, Examinateur, Directeur de mémoire, Examinateur, Maître de stage).
+Mode de calcul :
+Note Finale (sur 20) : C'est la somme arithmétique simple des points attribués à chaque critère.
+Formule : Note Finale = Σ (notes par critère).
+Note : Le système vérifie que la somme ne dépasse pas le total des barèmes défini pour l'année académique.
+
+
+2. Annexe 2 : PV Jury Standard
+C'est le document principal pour la délibération finale du jury de Master 2.
+Contenu :
+Identification : Informations de l'étudiant et date de la soutenance.
+Tableau récapitulatif des moyennes : Présente les trois piliers du cursus Master.
+Moyenne Générale /20 : Calculée sur la base des coefficients ci-dessous.
+Mention : Attribuée automatiquement en fonction de la moyenne finale.
+Mode de calcul (Moyenne pondérée sur un coefficient total de 8) :
+Moyenne Générale Master 1 
+Moyenne Générale Semestre 1 Master 2 
+Coefficient : 3
+Note du Mémoire : Correspond à la note finale obtenue à l'Annexe 1. Coefficient : 3.
+Formule : Note Finale = ((Moyenne M1 × 2) + (Moyenne S1 M2 × 3) + (Note Mémoire × 3)) / 8.
+
+3. Annexe 3 : PV Jury 
+Ce document est spécifique aux parcours de formation continue ou aux cas particuliers de validation simplifiée.
+Contenu :
+Identification : Identité de l'étudiant et informations de base.
+Tableau de calcul simplifié : Se concentre sur le Master 1 et le Mémoire.
+Note Finale /20 : Moyenne pondérée calculée sur un coefficient 3.
+Mention : Calculée selon les mêmes seuils que l'Annexe 2.
+Mode de calcul (Moyenne pondérée sur un coefficient total de 3) :
+Moyenne Générale Master 1
+Note du Mémoire : Reprise de la note finale de l'Annexe 1. Coefficient : 2.
+Formule : Note Finale = ((Moyenne M1 × 1) + (Note Mémoire × 2)) / 3.
+
+
+1. Paramètres Généraux (Structurels et Pédagogiques)
+Ces paramètres définissent le cadre académique et administratif de l'université.
+Années Académiques : Gestion des périodes (ex: 2023-2024) avec dates de début et de fin.
+Niveaux d'Étude : Configuration des cycles (L1, L2, L3, M1, M2) avec les montants de scolarité et d'inscription associés.
+Semestres : Définition des semestres (S1 à S10) liés aux niveaux d'étude.
+Spécialités : Gestion des filières ou options (ex: MIAGE, Génie Logiciel).
+Grades : Hiérarchie des enseignants (ex: Maître de Conférences, Professeur Titulaire).
+Fonctions Personnel : Rôles administratifs pour le personnel (ex: Secrétaire, Comptable).
+Fonctions Utilisateurs : Gestion des types d'utilisateurs et des groupes (Rôles RBAC).
+Niveaux d'Accès : Définition des droits de lecture/écriture sur les données.
+Niveaux d'Approbation : Configuration des étapes du workflow de validation (Niveau 1, Niveau 2, etc.).
+Statuts du Jury : Définition des rôles au sein d'un jury de soutenance (Président, Examinateur, etc.).
+
+2. Paramètres Spécifiques (Opérationnels et Système)
+Ces paramètres concernent le fonctionnement technique de la plateforme et les détails des cours.
+Unités d'Enseignement (UE) : Gestion des matières principales, attribution des crédits et des professeurs responsables.
+Éléments Constitutifs (ECUE) : Détail des sous-matières rattachées aux UE.
+Critères d'Évaluation : Configuration des barèmes de notation pour les soutenances (ex: Qualité du document /5, Présentation /5).
+Salles : Gestion des lieux physiques pour les cours et les soutenances.
+Entreprises : Référentiel des partenaires accueillant les étudiants en stage.
+Gestion des Menus : Configuration de la structure de navigation (catégories, icônes et ordre d'affichage).
+Habilitations (Attributions) : Matrice de permissions CRUD (Créer, Lire, Modifier, Supprimer) par groupe d'utilisateurs.
+Traitements : Configuration technique des actions programmées ou des fonctions du système.
+Messages Système : Gestion des libellés, des notifications et des messages d'erreur personnalisés.
+
+
+
+Schéma Sql :
+
+action : id_action, lib_action.
+
+auth_rate_limits : id, action, ip, identifier, attempts, window_start, last_attempt, blocked_until, created_at, updated_at.
+
+categories_fonctionnalites : id_categorie, code_categorie, lib_categorie, description_categorie, icone_categorie, ordre_categorie, actif, date_creation.
+
+fonctionnalites : id_fonctionnalite, id_categorie, code_fonctionnalite, lib_fonctionnalite, label_fonctionnalite, description_fonctionnalite, url_fonctionnalite, icone_fonctionnalite, ordre_fonctionnalite, est_sous_page, page_parente, actif, date_creation.
+
+Clé Étrangère : id_categorie (référence categories_fonctionnalites).
+
+groupe_utilisateur : id_GU, lib_GU, id_type_utilisateur.
+
+Clé Étrangère : id_type_utilisateur (référence type_utilisateur).
+
+niveau_acces_donnees : id_niveau_acces_donnees, lib_niveau_acces_donnees.
+
+permissions : id_permission, id_GU, id_fonctionnalite, peut_voir, peut_creer, peut_modifier, peut_supprimer, date_attribution.
+
+Clés Étrangères : id_GU (réf. groupe_utilisateur), id_fonctionnalite (réf. fonctionnalites).
+
+type_utilisateur : id_type_utilisateur, lib_type_utilisateur.
+
+utilisateur : id_utilisateur, nom_utilisateur, id_type_utilisateur, id_GU, id_niv_acces_donnee, statut_utilisateur, login_utilisateur, mdp_utilisateur.
+
+Clés Étrangères : id_GU (réf. groupe_utilisateur), id_niv_acces_donnee (réf. niveau_acces_donnees), id_type_utilisateur (réf. type_utilisateur).
+
+route_actions : id_route_action, route_pattern, http_method, action_crud, description, actif, created_at, updated_at.
+
+annee_academique : id_annee_acad, date_deb, date_fin.
+
+etudiants : num_etu, nom_etu, prenom_etu, email_etu, date_naiss_etu, genre_etu, promotion_etu.
+
+filiere : id_filiere, lib_filiere.
+
+niveau_etude : id_niv_etude, lib_niv_etude, id_enseignant, montant_scolarite, montant_inscription.
+
+Clé Étrangère : id_enseignant (réf. enseignants).
+
+semestre : id_semestre, lib_semestre, id_niv_etude.
+
+Clé Étrangère : id_niv_etude (réf. niveau_etude).
+
+ue (Unités d'Enseignement) : id_ue, lib_ue, id_niveau_etude, id_semestre, id_annee_academique, credit, id_enseignant.
+
+Clés Étrangères : id_annee_academique, id_niveau_etude, id_semestre, id_enseignant.
+
+ecue (Éléments constitutifs) : id_ecue, id_ue, lib_ecue, credit, id_enseignant.
+
+Clés Étrangères : id_ue, id_enseignant.
+
+inscriptions : id_inscription, id_etudiant, id_niveau, id_annee_acad, date_inscription, statut_inscription, nombre_tranche, reste_a_payer, montant_paye.
+
+Clés Étrangères : id_etudiant, id_niveau, id_annee_acad.
+
+notes : id, num_etu, id_ue, id_ecue, moyenne, commentaire, date_creation, date_modification.
+
+Clés Étrangères : num_etu, id_ue, id_ecue.
+
+versements : id_versement, id_inscription, montant, date_versement, type_versement, methode_paiement.
+
+Clé Étrangère : id_inscription.
+
+echeances : id_echeance, id_inscription, montant, date_echeance, statut_echeance.
+
+Clé Étrangère : id_inscription.
+
+enseignants : id_enseignant, nom_enseignant, prenom_enseignant, mail_enseignant, id_specialite, type_enseignant.
+
+Clé Étrangère : id_specialite (réf. specialite).
+
+specialite : id_specialite, lib_specialite.
+
+personnel_admin : id_pers_admin, nom_pers_admin, prenom_pers_admin, email_pers_admin, tel_pers_admin, poste, date_embauche.
+
+fonction : id_fonction, lib_fonction.
+
+grade : id_grade, lib_grade.
+
+occuper (Lien Enseignant/Fonction) : id_fonction, id_enseignant, date_occupation.
+
+avoir (Lien Enseignant/Grade) : id_grade, id_enseignant, date_grade.
+
+entreprises : id_entreprise, lib_entreprise.
+
+informations_stage : id_info_stage, num_etu, id_entreprise, date_debut_stage, date_fin_stage, sujet_stage, description_stage, encadrant_entreprise, email_encadrant, telephone_encadrant.
+
+Clés Étrangères : num_etu, id_entreprise.
+
+rapport_etudiants : id_rapport, num_etu, nom_rapport, date_rapport, theme_rapport, chemin_fichier, statut_rapport, date_modification, taille_fichier, version, etape_validation.
+
+Clé Étrangère : num_etu.
+
+deposer : num_etu, id_rapport, date_depot.
+
+Clés Étrangères : num_etu, id_rapport.
+
+valider (Validation enseignant) : id_enseignant, id_rapport, date_validation, commentaire_validation, decision_validation.
+
+Clés Étrangères : id_enseignant, id_rapport.
+
+evaluations_rapports : id_evaluation, id_rapport, id_evaluateur, decision_evaluation, commentaire, date_evaluation, date_modification.
+
+Clés Étrangères : id_evaluateur, id_rapport.
+
+approuver (Approbation admin) : id_pers_admin, id_rapport, decision, date_approv, commentaire_approv, id_approb.
+
+Clés Étrangères : id_pers_admin, id_rapport, id_approb.
+
+niveau_approbation : id_approb, lib_approb.
+
+candidature_soutenance : id_candidature, num_etu, date_candidature, statut_candidature, date_traitement, id_pers_admin, commentaire_admin.
+
+Clés Étrangères : num_etu, id_pers_admin.
+
+resume_candidature : id, num_etu, id_candidature, resume_json, decision, date_enregistrement.
+
+Clés Étrangères : num_etu, id_candidature.
+
+roles_jury : id_role_jury, lib_role, description, actif.
+
+statut_jury : id_jury, lib_jury.
+
+composer_jury : num_jury, id_enseignant, id_qualite_jury, date_composer_jury.
+
+Clés Étrangères : id_enseignant, id_qualite_jury.
+
+affecter : id_enseignant, role, id_rapport, id_jury.
+
+Clés Étrangères : id_enseignant, id_rapport, id_jury.
+
+salles : id_salle, lib_salle.
+
+programmer : id_programmation, num_etud, num_jury, id_salle, date_soutenance, heure_soutenance, theme_soutenance.
+
+Clés Étrangères : num_etud, id_salle.
+
+decisions_jury : id_decision, lib_decision, description, actif.
+
+mentions : id_mention, lib_mention, actif.
+
+critere_evaluation : id_critere, lib_critere.
+
+correspondre (Barème par année) : id_annee_acad, id_critere, bareme.
+
+Clés Étrangères : id_annee_acad, id_critere.
+
+evaluer (Notes de soutenance) : num_etudiant, num_jury, id_critere, date_eval, note.
+
+Clés Étrangères : id_critere, num_etudiant.
+
+compte_rendu : id_CR, num_etu, nom_CR, contenu_CR, chemin_fichier_pdf, date_CR.
+
+Clé Étrangère : num_etu.
+
+compte_rendu_rapport : id_CR, id_rapport.
+
+Clés Étrangères : id_CR, id_rapport.
+
+rendre : id_CR, id_enseignant, date_env.
+
+Clés Étrangères : id_CR, id_enseignant.
+
+pdf_cr_pv_rapetd : id_arch, libelle.
+
+app_settings : setting_key, setting_value, is_sensitive, updated_at.
+
+pister (Log d'audit) : id_piste, id_utilisateur, action, statut_action, nom_table, date_creation.
+
+Clé Étrangère : id_utilisateur.
+
+password_resets : id, email, token, expires_at, used, created_at.
+
+messages : id_message, contenu_message, lib_message, type_message.
+
+reclamations : id_reclamation, num_etu, titre_reclamation, description_reclamation, type_reclamation, priorite_reclamation, statut_reclamation, date_creation, date_mise_a_jour, id_pers_admin.
+
+Clé Étrangère : id_pers_admin.
+
+traitement_legacy : id_traitement, lib_traitement, label_traitement, icone_traitement, ordre_traitement.
+
+rattacher_legacy : id_GU, id_traitement.
+
+Clés Étrangères : id_GU, id_traitement.
+
+La base de données doit être modifiée mais les entités personnel Admin, Etudiant, Enseignant ne bougent pas, type Utilisateur aussi même si ça fera juste objet de décoration, et renomme bien les attributs de la base pour que ça soit plus propre, le num_etu est en varchar, pareil pour les matricules de personnel Admin, Enseignant

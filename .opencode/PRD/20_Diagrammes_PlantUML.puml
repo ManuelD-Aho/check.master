@@ -1,0 +1,1438 @@
+' ============================================================
+' DIAGRAMMES UML - FORMAT PLANTUML
+' Plateforme de Gestion des Stages et Soutenances MIAGE-GI
+' ============================================================
+' 
+' Pour visualiser ces diagrammes :
+' 1. PlantUML Online: https://www.plantuml.com/plantuml/uml
+' 2. VS Code: Extension "PlantUML"
+' 3. IntelliJ: Plugin PlantUML integration
+' 4. CLI: java -jar plantuml.jar fichier.puml
+'
+' ============================================================
+
+' ============================================================
+' 1. DIAGRAMME DE CLASSES - PACKAGE USER
+' ============================================================
+
+@startuml ClassDiagram_User
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+
+title Diagramme de Classes - Module Utilisateurs et Permissions
+
+package "User Management" {
+    
+    class TypeUtilisateur {
+        - id : int
+        - libelle : string
+        - actif : bool
+        --
+        + getGroupes() : GroupeUtilisateur[]
+    }
+    
+    class GroupeUtilisateur {
+        - id : int
+        - libelle : string
+        - code : string
+        - actif : bool
+        - typeUtilisateur : TypeUtilisateur
+        --
+        + getPermissions() : Permission[]
+        + getUtilisateurs() : Utilisateur[]
+    }
+    
+    class NiveauAccesDonnees {
+        - id : int
+        - libelle : string
+        - code : string
+        --
+    }
+    
+    class Utilisateur {
+        - id : int
+        - login : string
+        - motDePasseHash : string
+        - email : string
+        - statut : StatutUtilisateur
+        - secret2fa : string
+        - is2faEnabled : bool
+        - derniereConnexion : datetime
+        - dateCreation : datetime
+        - sourceId : int
+        - sourceType : string
+        --
+        + verifyPassword(password: string) : bool
+        + hasPermission(fonctionnalite: string, action: string) : bool
+        + isActive() : bool
+        + getSourceEntity() : Etudiant | Enseignant | PersonnelAdmin
+        + enable2FA(secret: string) : void
+        + disable2FA() : void
+    }
+    
+    enum StatutUtilisateur {
+        ACTIF
+        INACTIF
+        BLOQUE
+        EN_ATTENTE
+    }
+    
+    class AuthRateLimit {
+        - id : int
+        - ip : string
+        - tentatives : int
+        - derniereAttempt : datetime
+        - bloqueJusqua : datetime
+        --
+        + incrementer() : void
+        + estBloque() : bool
+        + reinitialiser() : void
+    }
+}
+
+package "Permissions" {
+    
+    class CategorieFonctionnalite {
+        - id : int
+        - libelle : string
+        - icone : string
+        - ordre : int
+        --
+        + getFonctionnalites() : Fonctionnalite[]
+    }
+    
+    class Fonctionnalite {
+        - id : int
+        - code : string
+        - libelle : string
+        - routeBase : string
+        - actif : bool
+        - ordre : int
+        --
+        + getActions() : RouteAction[]
+    }
+    
+    class RouteAction {
+        - id : int
+        - action : string
+        - methode : string
+        - route : string
+        --
+    }
+    
+    class Permission {
+        - id : int
+        - peutLire : bool
+        - peutCreer : bool
+        - peutModifier : bool
+        - peutSupprimer : bool
+        - peutExporter : bool
+        --
+        + hasAction(action: string) : bool
+    }
+}
+
+' Relations
+TypeUtilisateur "1" --> "*" GroupeUtilisateur : contient
+GroupeUtilisateur "1" --> "*" Utilisateur : regroupe
+NiveauAccesDonnees "1" --> "*" Utilisateur : definit acces
+GroupeUtilisateur "1" --> "*" Permission : possede
+Fonctionnalite "1" --> "*" Permission : concerne
+CategorieFonctionnalite "1" --> "*" Fonctionnalite : categorise
+Fonctionnalite "1" --> "*" RouteAction : expose
+Utilisateur --> StatutUtilisateur
+
+@enduml
+
+' ============================================================
+' 2. DIAGRAMME DE CLASSES - PACKAGE ETUDIANT
+' ============================================================
+
+@startuml ClassDiagram_Student
+!theme plain
+skinparam classAttributeIconSize 0
+
+title Diagramme de Classes - Module Etudiants et Inscriptions
+
+package "Student" {
+    
+    class Etudiant {
+        - matricule : string <<PK>>
+        - nom : string
+        - prenom : string
+        - dateNaissance : date
+        - lieuNaissance : string
+        - sexe : char
+        - nationalite : string
+        - email : string
+        - telephone : string
+        - adresse : text
+        - photoPath : string
+        - actif : bool
+        - dateCreation : datetime
+        --
+        + getNomComplet() : string
+        + getInscriptions() : Inscription[]
+        + getInscriptionActive() : Inscription
+        + getCandidatures() : Candidature[]
+    }
+    
+    class Inscription {
+        - id : int
+        - dateInscription : date
+        - statut : StatutInscription
+        - montantTotal : decimal
+        - montantPaye : decimal
+        - resteAPayer : decimal
+        - estComplete : bool
+        --
+        + calculerSolde() : decimal
+        + getVersements() : Versement[]
+        + getNotes() : Note[]
+        + getMoyenneGenerale() : decimal
+    }
+    
+    enum StatutInscription {
+        EN_ATTENTE
+        PARTIELLE
+        COMPLETE
+        ANNULEE
+    }
+    
+    class Versement {
+        - id : int
+        - montant : decimal
+        - dateVersement : date
+        - modeReglement : string
+        - reference : string
+        - numeroRecu : string
+        - observation : text
+        --
+        + genererRecu() : string
+    }
+    
+    class Echeance {
+        - id : int
+        - montant : decimal
+        - dateEcheance : date
+        - estPaye : bool
+        - datePaiement : date
+        --
+        + estEnRetard() : bool
+    }
+    
+    class Note {
+        - id : int
+        - noteCC : decimal
+        - noteExamen : decimal
+        - moyenne : decimal
+        - session : string
+        - estValidee : bool
+        --
+        + calculerMoyenne() : decimal
+        + estAcquise() : bool
+    }
+}
+
+package "Academic" {
+    
+    class AnneeAcademique {
+        - id : int
+        - libelle : string
+        - dateDebut : date
+        - dateFin : date
+        - estActive : bool
+        - estOuverte : bool
+        --
+    }
+    
+    class NiveauEtude {
+        - id : int
+        - code : string
+        - libelle : string
+        - montantScolarite : decimal
+        - montantInscription : decimal
+        --
+    }
+    
+    class Filiere {
+        - id : int
+        - code : string
+        - libelle : string
+        - actif : bool
+        --
+    }
+}
+
+' Relations
+Etudiant "1" --> "*" Inscription : effectue
+Inscription "*" --> "1" AnneeAcademique : pour
+Inscription "*" --> "1" NiveauEtude : en
+Inscription "*" --> "1" Filiere : dans
+Inscription "1" --> "*" Versement : recoit
+Inscription "1" --> "*" Echeance : planifie
+Inscription "1" --> "*" Note : obtient
+Inscription --> StatutInscription
+
+@enduml
+
+' ============================================================
+' 3. DIAGRAMME DE CLASSES - PACKAGE STAGE
+' ============================================================
+
+@startuml ClassDiagram_Stage
+!theme plain
+skinparam classAttributeIconSize 0
+
+title Diagramme de Classes - Module Candidatures et Rapports
+
+package "Stage" {
+    
+    class Candidature {
+        - id : int
+        - statut : StatutCandidature
+        - dateCreation : datetime
+        - dateSoumission : datetime
+        - dateTraitement : datetime
+        - commentaireRejet : text
+        --
+        + soumettre() : void
+        + valider() : void
+        + rejeter(motif: string) : void
+        + estModifiable() : bool
+    }
+    
+    enum StatutCandidature {
+        BROUILLON
+        SOUMISE
+        VALIDEE
+        REJETEE
+    }
+    
+    class InformationStage {
+        - id : int
+        - sujet : string
+        - description : text
+        - dateDebut : date
+        - dateFin : date
+        - nomEncadrant : string
+        - emailEncadrant : string
+        - telephoneEncadrant : string
+        - fonctionEncadrant : string
+        --
+        + getDureeJours() : int
+        + getDureeMois() : int
+        + estValide() : bool
+    }
+    
+    class Entreprise {
+        - id : int
+        - raisonSociale : string
+        - secteur : string
+        - adresse : text
+        - ville : string
+        - pays : string
+        - telephone : string
+        - email : string
+        - siteWeb : string
+        - actif : bool
+        --
+    }
+    
+    class ResumeCandidature {
+        - id : int
+        - nomFichier : string
+        - cheminFichier : string
+        - tailleOctets : int
+        - dateUpload : datetime
+        --
+    }
+}
+
+package "Report" {
+    
+    class Rapport {
+        - id : int
+        - titre : string
+        - theme : string
+        - contenuHtml : longtext
+        - statut : StatutRapport
+        - nombreMots : int
+        - versionCourante : int
+        - cheminPdf : string
+        - dateSoumission : datetime
+        - dateApprobation : datetime
+        --
+        + submit() : void
+        + approve() : void
+        + returnToStudent(motif: string) : void
+        + isEditable() : bool
+        + getWordCount() : int
+        + generatePdf() : string
+    }
+    
+    enum StatutRapport {
+        BROUILLON
+        SOUMIS
+        APPROUVE
+        RETOURNE
+        EN_COMMISSION
+        PRET_SOUTENANCE
+    }
+    
+    class VersionRapport {
+        - id : int
+        - numero : int
+        - contenuHtml : longtext
+        - type : TypeVersion
+        - dateCreation : datetime
+        --
+    }
+    
+    enum TypeVersion {
+        AUTOSAVE
+        SOUMISSION
+        RESTAURATION
+    }
+    
+    class ModeleRapport {
+        - id : int
+        - nom : string
+        - description : text
+        - structureHtml : longtext
+        - actif : bool
+        --
+    }
+    
+    class CommentaireRapport {
+        - id : int
+        - contenu : text
+        - section : string
+        - dateCreation : datetime
+        --
+    }
+    
+    class ValidationRapport {
+        - id : int
+        - decision : string
+        - commentaire : text
+        - dateValidation : datetime
+        --
+    }
+}
+
+' Relations
+Candidature "1" --> "1" InformationStage : contient
+Candidature "1" --> "0..1" ResumeCandidature : attache
+InformationStage "*" --> "1" Entreprise : chez
+Candidature "1" --> "0..1" Rapport : produit
+Rapport "*" --> "1" ModeleRapport : utilise
+Rapport "1" --> "*" VersionRapport : historise
+Rapport "1" --> "*" CommentaireRapport : recoit
+Rapport "1" --> "*" ValidationRapport : passe
+
+Candidature --> StatutCandidature
+Rapport --> StatutRapport
+VersionRapport --> TypeVersion
+
+@enduml
+
+' ============================================================
+' 4. DIAGRAMME DE CLASSES - PACKAGE COMMISSION
+' ============================================================
+
+@startuml ClassDiagram_Commission
+!theme plain
+skinparam classAttributeIconSize 0
+
+title Diagramme de Classes - Module Commission
+
+package "Commission" {
+    
+    class MembreCommission {
+        - id : int
+        - role : RoleCommission
+        - actif : bool
+        --
+        + getRapportsAEvaluer() : Rapport[]
+        + getVotesEffectues() : Vote[]
+    }
+    
+    enum RoleCommission {
+        PRESIDENT
+        MEMBRE
+    }
+    
+    class SessionCommission {
+        - id : int
+        - dateSession : date
+        - statut : StatutSession
+        - nombreRapports : int
+        --
+        + getEvaluations() : EvaluationRapport[]
+        + genererPV() : string
+    }
+    
+    enum StatutSession {
+        PLANIFIEE
+        EN_COURS
+        TERMINEE
+        ARCHIVEE
+    }
+    
+    class EvaluationRapport {
+        - id : int
+        - numeroCycle : int
+        - decision : DecisionEvaluation
+        - dateEvaluation : datetime
+        - estUnamine : bool
+        --
+        + getVotes() : Vote[]
+        + isComplete() : bool
+        + calculateDecision() : DecisionEvaluation
+    }
+    
+    enum DecisionEvaluation {
+        EN_ATTENTE
+        UNANIME_OUI
+        UNANIME_NON
+        NON_UNANIME
+    }
+    
+    class Vote {
+        - id : int
+        - decision : DecisionVote
+        - commentaire : text
+        - dateVote : datetime
+        --
+    }
+    
+    enum DecisionVote {
+        OUI
+        NON
+    }
+    
+    class AffectationEncadrant {
+        - id : int
+        - dateAffectation : datetime
+        --
+    }
+    
+    class CompteRendu {
+        - id : int
+        - numero : string
+        - dateGeneration : date
+        - cheminPdf : string
+        --
+    }
+}
+
+' Relations
+MembreCommission "4" --> "*" Vote : emet
+SessionCommission "1" --> "*" EvaluationRapport : examine
+EvaluationRapport "1" --> "4" Vote : recoit
+SessionCommission "1" --> "0..1" CompteRendu : genere
+
+MembreCommission --> RoleCommission
+SessionCommission --> StatutSession
+EvaluationRapport --> DecisionEvaluation
+Vote --> DecisionVote
+
+@enduml
+
+' ============================================================
+' 5. DIAGRAMME DE CLASSES - PACKAGE SOUTENANCE
+' ============================================================
+
+@startuml ClassDiagram_Soutenance
+!theme plain
+skinparam classAttributeIconSize 0
+
+title Diagramme de Classes - Module Soutenance
+
+package "Soutenance" {
+    
+    class AptitudeSoutenance {
+        - id : int
+        - estApte : bool
+        - commentaire : text
+        - dateValidation : datetime
+        --
+    }
+    
+    class Jury {
+        - id : int
+        - statut : StatutJury
+        - dateCreation : datetime
+        --
+        + getComposition() : CompositionJury[]
+        + isComplete() : bool
+        + getPresident() : Enseignant
+    }
+    
+    enum StatutJury {
+        EN_COMPOSITION
+        COMPLET
+        VALIDE
+    }
+    
+    class RoleJury {
+        - id : int
+        - code : string
+        - libelle : string
+        - estObligatoire : bool
+        - ordre : int
+        --
+    }
+    
+    class CompositionJury {
+        - id : int
+        - estPresent : bool
+        - observation : text
+        --
+    }
+    
+    class Salle {
+        - id : int
+        - code : string
+        - nom : string
+        - batiment : string
+        - capacite : int
+        - actif : bool
+        --
+        + estDisponible(date: date, heure: time) : bool
+    }
+    
+    class Soutenance {
+        - id : int
+        - dateSoutenance : date
+        - heureDebut : time
+        - dureeMinutes : int
+        - theme : string
+        - statut : StatutSoutenance
+        --
+        + getNotes() : NoteSoutenance[]
+        + calculateTotal() : decimal
+        + getHeureFin() : time
+    }
+    
+    enum StatutSoutenance {
+        PROGRAMMEE
+        EFFECTUEE
+        NOTES_SAISIES
+        DELIBEREE
+        ANNULEE
+    }
+    
+    class CritereEvaluation {
+        - id : int
+        - code : string
+        - libelle : string
+        - noteMaximale : decimal
+        - coefficient : decimal
+        - ordre : int
+        --
+    }
+    
+    class NoteSoutenance {
+        - id : int
+        - note : decimal
+        - observation : text
+        --
+    }
+    
+    class ResultatFinal {
+        - id : int
+        - moyenneSoutenance : decimal
+        - moyenneM1 : decimal
+        - moyenneS1M2 : decimal
+        - moyenneStageRapport : decimal
+        - moyenneFinale : decimal
+        - decision : string
+        - dateDeliberation : datetime
+        --
+    }
+    
+    class Mention {
+        - id : int
+        - libelle : string
+        - seuilMin : decimal
+        - seuilMax : decimal
+        --
+    }
+}
+
+' Relations
+Jury "1" --> "5" CompositionJury : compose
+CompositionJury "*" --> "1" RoleJury : avec
+Jury "1" --> "1" Soutenance : programme
+Soutenance "*" --> "1" Salle : dans
+Soutenance "1" --> "*" NoteSoutenance : recoit
+NoteSoutenance "*" --> "1" CritereEvaluation : selon
+Soutenance "1" --> "1" ResultatFinal : produit
+ResultatFinal "*" --> "1" Mention : obtient
+
+Jury --> StatutJury
+Soutenance --> StatutSoutenance
+
+@enduml
+
+' ============================================================
+' 6. DIAGRAMME D'ETATS - CANDIDATURE
+' ============================================================
+
+@startuml StateDiagram_Candidature
+!theme plain
+
+title Diagramme d'Etats - Candidature de Stage
+
+[*] --> BROUILLON : creer()
+
+state BROUILLON {
+    [*] --> Saisie
+    Saisie --> Saisie : modifier()
+    Saisie --> Complete : remplirTousChamps()
+}
+
+BROUILLON --> SOUMISE : soumettre()\n[tous champs valides]
+
+state SOUMISE {
+    [*] --> EnAttente
+    EnAttente : Candidature en attente\nde validation
+}
+
+SOUMISE --> VALIDEE : valider()\n[par validateur]
+SOUMISE --> REJETEE : rejeter(motif)\n[par validateur]
+
+state REJETEE {
+    [*] --> Refusee
+    Refusee : Motif de rejet visible\npar l'etudiant
+}
+
+REJETEE --> SOUMISE : reSoumettre()\n[apres correction]
+
+state VALIDEE {
+    [*] --> Approuvee
+    Approuvee : Deblocage automatique\ndu module Rapport
+}
+
+VALIDEE --> [*]
+
+note right of BROUILLON
+  Etudiant peut modifier
+  librement sa candidature
+end note
+
+note right of REJETEE
+  L'etudiant peut corriger
+  et resoumettre
+end note
+
+note right of VALIDEE
+  Etat final pour
+  la candidature
+end note
+
+@enduml
+
+' ============================================================
+' 7. DIAGRAMME D'ETATS - RAPPORT
+' ============================================================
+
+@startuml StateDiagram_Rapport
+!theme plain
+
+title Diagramme d'Etats - Rapport de Stage
+
+[*] --> BROUILLON : creerRapport()
+
+state BROUILLON {
+    [*] --> Redaction
+    Redaction --> Redaction : autoSave()\n[toutes 30 sec]
+    Redaction --> Redaction : modifier()
+    
+    state "Compteur mots" as compteur
+    compteur : >= 5000 mots requis
+}
+
+BROUILLON --> SOUMIS : soumettre()\n[nombreMots >= 5000]
+
+state SOUMIS {
+    [*] --> EnVerification
+    EnVerification : Verificateur examine\nle rapport
+}
+
+SOUMIS --> APPROUVE : approuver()
+SOUMIS --> RETOURNE : retourner(motif)
+
+state RETOURNE {
+    [*] --> ACorreiger
+    ACorreiger : Commentaires visibles\npar l'etudiant
+}
+
+RETOURNE --> BROUILLON : reprendre()
+
+state APPROUVE {
+    [*] --> PretTransfert
+    PretTransfert : Rapport valide
+}
+
+APPROUVE --> EN_COMMISSION : transferer()\n[automatique ou manuel]
+
+state EN_COMMISSION {
+    [*] --> EnEvaluation
+    EnEvaluation : Commission evalue
+    EnEvaluation : et vote
+}
+
+EN_COMMISSION --> PRET_SOUTENANCE : voteUnanime(OUI)
+EN_COMMISSION --> RETOURNE : voteUnanime(NON)
+
+state PRET_SOUTENANCE {
+    [*] --> Finalise
+    Finalise : Encadrants assignes
+}
+
+PRET_SOUTENANCE --> [*]
+
+@enduml
+
+' ============================================================
+' 8. DIAGRAMME D'ETATS - COMMISSION
+' ============================================================
+
+@startuml StateDiagram_Commission
+!theme plain
+
+title Diagramme d'Etats - Evaluation en Commission
+
+[*] --> EN_ATTENTE_EVALUATION
+
+state EN_ATTENTE_EVALUATION {
+    [*] --> Pret
+    Pret : Rapport transfere\ndepuis Module 4
+}
+
+EN_ATTENTE_EVALUATION --> EN_COURS_EVALUATION : premierVote()
+
+state EN_COURS_EVALUATION {
+    [*] --> Vote1
+    Vote1 --> Vote2 : vote(membre2)
+    Vote2 --> Vote3 : vote(membre3)
+    Vote3 --> VoteComplet : vote(membre4)
+    
+    state "Votes collectes" as votes
+    votes : 4 votes requis
+}
+
+EN_COURS_EVALUATION --> VOTE_COMPLET : [4 votes recus]
+
+state VOTE_COMPLET {
+    [*] --> Analyse
+    Analyse : Calcul du resultat
+}
+
+VOTE_COMPLET --> VOTE_UNANIME_OUI : [4 OUI]
+VOTE_COMPLET --> VOTE_UNANIME_NON : [4 NON]
+VOTE_COMPLET --> VOTE_NON_UNANIME : [mixte]
+
+state VOTE_NON_UNANIME {
+    [*] --> Discussion
+    Discussion : Nouveau cycle\nde vote
+}
+
+VOTE_NON_UNANIME --> EN_COURS_EVALUATION : relancer()
+
+state VOTE_UNANIME_OUI {
+    [*] --> Approuve
+    Approuve : Deblocage assignation
+}
+
+VOTE_UNANIME_OUI --> ENCADRANTS_ASSIGNES : assigner()
+
+state VOTE_UNANIME_NON {
+    [*] --> Rejete
+    Rejete : Retour a l'etudiant
+}
+
+VOTE_UNANIME_NON --> RETOURNE_ETUDIANT : retourner()
+
+state ENCADRANTS_ASSIGNES {
+    [*] --> Complet
+    Complet : Directeur + Encadreur
+}
+
+ENCADRANTS_ASSIGNES --> PRET_POUR_PV : finaliser()
+
+PRET_POUR_PV --> [*]
+RETOURNE_ETUDIANT --> [*]
+
+@enduml
+
+' ============================================================
+' 9. DIAGRAMME D'ETATS - SOUTENANCE
+' ============================================================
+
+@startuml StateDiagram_Soutenance
+!theme plain
+
+title Diagramme d'Etats - Processus de Soutenance
+
+[*] --> ENCADRANTS_ASSIGNES
+
+state ENCADRANTS_ASSIGNES {
+    [*] --> AttentAptitude
+    AttentAptitude : Encadreur pedagogique\ndoit valider
+}
+
+ENCADRANTS_ASSIGNES --> APTITUDE_VALIDEE : validerAptitude(apte=true)
+ENCADRANTS_ASSIGNES --> APTITUDE_REFUSEE : validerAptitude(apte=false)
+
+APTITUDE_REFUSEE --> ENCADRANTS_ASSIGNES : revalider()
+
+state APTITUDE_VALIDEE {
+    [*] --> PretJury
+    PretJury : Peut composer le jury
+}
+
+APTITUDE_VALIDEE --> JURY_COMPOSE : composerJury(5 membres)
+
+state JURY_COMPOSE {
+    [*] --> JuryComplet
+    JuryComplet : 5 membres:\n- President\n- Rapporteur\n- Examinateur 1\n- Examinateur 2\n- Maitre de stage
+}
+
+JURY_COMPOSE --> SOUTENANCE_PROGRAMMEE : programmer(date, heure, salle)
+
+state SOUTENANCE_PROGRAMMEE {
+    [*] --> Planifiee
+    Planifiee : Convocations envoyees
+}
+
+SOUTENANCE_PROGRAMMEE --> SOUTENANCE_EFFECTUEE : marquerEffectuee()
+
+state SOUTENANCE_EFFECTUEE {
+    [*] --> Terminee
+    Terminee : Jour J passe
+}
+
+SOUTENANCE_EFFECTUEE --> NOTES_SAISIES : saisirNotes()
+
+state NOTES_SAISIES {
+    [*] --> NotesCompletes
+    NotesCompletes : Notes par critere\npour chaque membre jury
+}
+
+NOTES_SAISIES --> DELIBERE : deliberer()
+
+state DELIBERE {
+    [*] --> Calcule
+    Calcule : Moyenne finale calculee\nMention attribuee\nDecision prise
+}
+
+DELIBERE --> [*]
+
+note right of JURY_COMPOSE
+  Contraintes:
+  - President: grade suffisant
+  - 5 membres obligatoires
+  - Roles distincts
+end note
+
+note right of DELIBERE
+  Generation automatique:
+  - Annexe 1 (individuel)
+  - Annexe 2 (reussite)
+  - Annexe 3 (echec)
+end note
+
+@enduml
+
+' ============================================================
+' 10. DIAGRAMME DE SEQUENCE - AUTHENTIFICATION
+' ============================================================
+
+@startuml Sequence_Authentication
+!theme plain
+
+title Sequence - Authentification Utilisateur
+
+actor Utilisateur as U
+participant "LoginController" as LC
+participant "RateLimiter" as RL
+participant "AuthService" as AS
+participant "UtilisateurRepository" as UR
+participant "Session" as S
+database "MySQL" as DB
+
+U -> LC : POST /login\n{login, password}
+activate LC
+
+LC -> RL : checkRateLimit(ip)
+activate RL
+
+alt Rate limit atteint
+    RL --> LC : false (bloque)
+    LC --> U : 429 Too Many Requests
+else Rate limit OK
+    RL --> LC : true (autorise)
+    deactivate RL
+    
+    LC -> AS : authenticate(login, password)
+    activate AS
+    
+    AS -> UR : findByLogin(login)
+    activate UR
+    UR -> DB : SELECT * FROM utilisateur WHERE login = ?
+    DB --> UR : ResultSet
+    UR --> AS : Utilisateur | null
+    deactivate UR
+    
+    alt Utilisateur non trouve
+        AS --> LC : AuthResult(FAILED)
+        LC --> U : 401 Identifiants incorrects
+    else Utilisateur trouve
+        AS -> AS : verifyPassword(password, hash)
+        
+        alt Mot de passe incorrect
+            AS --> LC : AuthResult(FAILED)
+            LC --> U : 401 Identifiants incorrects
+        else Mot de passe correct
+            AS -> AS : checkAccountStatus()
+            
+            alt Compte bloque
+                AS --> LC : AuthResult(BLOCKED)
+                LC --> U : 403 Compte bloque
+            else Compte actif
+                alt 2FA active
+                    AS --> LC : AuthResult(NEEDS_2FA)
+                    LC --> U : Redirect /2fa
+                else 2FA non active
+                    AS -> S : createSession(utilisateur)
+                    activate S
+                    S --> AS : session_id
+                    deactivate S
+                    AS --> LC : AuthResult(SUCCESS)
+                    deactivate AS
+                    LC --> U : Redirect /dashboard
+                end
+            end
+        end
+    end
+end
+
+deactivate LC
+
+@enduml
+
+' ============================================================
+' 11. DIAGRAMME DE SEQUENCE - SOUMISSION CANDIDATURE
+' ============================================================
+
+@startuml Sequence_Candidature
+!theme plain
+
+title Sequence - Soumission de Candidature
+
+actor Etudiant as E
+participant "CandidatureController" as CC
+participant "CandidatureService" as CS
+participant "WorkflowManager" as WM
+participant "CandidatureValidator" as CV
+participant "EmailService" as ES
+database "MySQL" as DB
+
+E -> CC : POST /candidature/soumettre
+activate CC
+
+CC -> CC : validateCSRF()
+CC -> CS : submit(candidature_id)
+activate CS
+
+CS -> DB : findCandidature(id)
+activate DB
+DB --> CS : Candidature
+deactivate DB
+
+CS -> WM : can(candidature, 'soumettre')
+activate WM
+WM --> CS : true
+deactivate WM
+
+CS -> CV : validate(candidature)
+activate CV
+
+alt Donnees invalides
+    CV --> CS : ValidationException
+    CS --> CC : ValidationException
+    CC --> E : Erreur: champs invalides
+else Donnees valides
+    CV --> CS : void
+    deactivate CV
+    
+    CS -> WM : apply(candidature, 'soumettre')
+    activate WM
+    WM -> WM : updateState('SOUMISE')
+    WM -> WM : setDateSoumission(now)
+    WM --> CS : void
+    deactivate WM
+    
+    CS -> DB : persist(candidature)
+    activate DB
+    DB --> CS : void
+    deactivate DB
+    
+    CS -> ES : notifyValidateurs(candidature)
+    activate ES
+    ES -> DB : getValidateurs()
+    ES -> ES : sendEmails()
+    ES --> CS : void
+    deactivate ES
+    
+    CS --> CC : SubmitResult(SUCCESS)
+    deactivate CS
+    
+    CC --> E : Redirect /candidature/confirmation
+end
+
+deactivate CC
+
+@enduml
+
+' ============================================================
+' 12. DIAGRAMME DE SEQUENCE - VOTE COMMISSION
+' ============================================================
+
+@startuml Sequence_Vote
+!theme plain
+
+title Sequence - Vote Commission (Cycle Complet)
+
+actor "Membre 1" as M1
+actor "Membre 2" as M2
+actor "Membre 3" as M3
+actor "Membre 4" as M4
+participant "EvaluationController" as EC
+participant "VoteService" as VS
+participant "EmailService" as ES
+database "MySQL" as DB
+
+== Vote 1/4 ==
+
+M1 -> EC : POST /vote\n{rapport_id, decision: OUI}
+activate EC
+EC -> VS : submitVote(rapport, membre1, OUI)
+activate VS
+VS -> DB : saveVote()
+VS -> VS : countVotes() = 1/4
+VS --> EC : VoteResult(PENDING, 1/4)
+deactivate VS
+EC --> M1 : Vote enregistre (1/4)
+deactivate EC
+
+== Vote 2/4 ==
+
+M2 -> EC : POST /vote\n{rapport_id, decision: OUI}
+activate EC
+EC -> VS : submitVote(rapport, membre2, OUI)
+activate VS
+VS -> DB : saveVote()
+VS -> VS : countVotes() = 2/4
+VS --> EC : VoteResult(PENDING, 2/4)
+deactivate VS
+EC --> M2 : Vote enregistre (2/4)
+deactivate EC
+
+== Vote 3/4 ==
+
+M3 -> EC : POST /vote\n{rapport_id, decision: OUI}
+activate EC
+EC -> VS : submitVote(rapport, membre3, OUI)
+activate VS
+VS -> DB : saveVote()
+VS -> VS : countVotes() = 3/4
+VS -> ES : notifyProgress(3/4)
+activate ES
+ES --> VS : void
+deactivate ES
+VS --> EC : VoteResult(PENDING, 3/4)
+deactivate VS
+EC --> M3 : Vote enregistre (3/4)
+deactivate EC
+
+== Vote 4/4 - Final ==
+
+M4 -> EC : POST /vote\n{rapport_id, decision: OUI}
+activate EC
+EC -> VS : submitVote(rapport, membre4, OUI)
+activate VS
+VS -> DB : saveVote()
+VS -> VS : countVotes() = 4/4
+VS -> VS : calculateResult()
+
+alt 4 OUI - Unanime
+    VS -> VS : markUnanimousYes()
+    VS -> ES : notifyUnanimousApproval()
+    activate ES
+    ES --> VS : void
+    deactivate ES
+    VS --> EC : VoteResult(UNANIME_OUI)
+    note right: Deblocage assignation\nencadrants
+else 4 NON - Unanime
+    VS -> VS : markUnanimousNo()
+    VS --> EC : VoteResult(UNANIME_NON)
+    note right: Retour rapport\na l'etudiant
+else Mixte - Non unanime
+    VS -> VS : markNonUnanimous()
+    VS --> EC : VoteResult(NON_UNANIME)
+    note right: Relance nouveau\ncycle de vote
+end
+
+deactivate VS
+EC --> M4 : Resultat du vote affiche
+deactivate EC
+
+@enduml
+
+' ============================================================
+' 13. DIAGRAMME DE DEPLOIEMENT
+' ============================================================
+
+@startuml Deployment
+!theme plain
+
+title Diagramme de Deploiement - Serveur Mutualise
+
+node "Navigateur Client" as browser {
+    component [Chrome/Firefox] as client
+}
+
+node "Serveur Mutualise" as server {
+    
+    node "Apache HTTP" as apache {
+        component [.htaccess] as htaccess
+        component [mod_rewrite] as rewrite
+        component [mod_php] as modphp
+    }
+    
+    node "PHP 8.4" as php {
+        package "Application MIAGE" as app {
+            component [public/index.php] as index
+            component [src/Controller/] as controllers
+            component [src/Service/] as services
+            component [src/Entity/] as entities
+            component [templates/] as templates
+            component [vendor/] as vendor
+        }
+        
+        package "Storage" as storage {
+            folder "logs/" as logs
+            folder "cache/" as cache
+            folder "documents/" as docs
+            folder "uploads/" as uploads
+        }
+    }
+    
+    database "MySQL 8.0+" as mysql {
+        collections "Tables utilisateur, etudiant, etc."
+    }
+}
+
+cloud "Services Externes" as external {
+    component [Serveur SMTP] as smtp
+}
+
+browser --> apache : HTTPS
+htaccess --> rewrite
+rewrite --> modphp
+modphp --> index
+index --> controllers
+controllers --> services
+services --> entities
+entities --> mysql
+services --> smtp : PHPMailer
+services --> docs : TCPDF
+
+@enduml
+
+' ============================================================
+' 14. DIAGRAMME DE COMPOSANTS
+' ============================================================
+
+@startuml Component
+!theme plain
+
+title Diagramme de Composants - Architecture Applicative
+
+package "Couche Presentation" {
+    [Controllers] as ctrl
+    [Templates PHP] as tpl
+    [Assets CSS/JS] as assets
+}
+
+package "Couche Metier" {
+    [Services] as svc
+    [Validators] as val
+    [Symfony Workflow] as wf
+    [Event Dispatcher] as evt
+}
+
+package "Couche Persistence" {
+    [Repositories] as repo
+    [Entities Doctrine] as ent
+    [Migrations Phinx] as mig
+}
+
+package "Infrastructure" {
+    [FastRoute Router] as router
+    [PHP-DI Container] as di
+    [PSR-15 Middlewares] as mid
+}
+
+package "Services Externes" {
+    [PHPMailer] as mail
+    [TCPDF] as pdf
+    [APCu Cache] as cache
+}
+
+database "MySQL 8.0" as db
+folder "Fichiers" as files
+
+' Relations
+ctrl --> svc : utilise
+ctrl --> tpl : rend
+svc --> repo : interroge
+svc --> val : valide
+svc --> wf : applique
+svc --> evt : dispatche
+repo --> ent : mappe
+ent --> db : persiste
+svc --> mail : envoie
+svc --> pdf : genere
+svc --> cache : met en cache
+pdf --> files : ecrit
+
+router --> ctrl : route vers
+di --> svc : injecte
+mid --> ctrl : filtre
+
+@enduml
+
+' ============================================================
+' 15. DIAGRAMME ERD GLOBAL
+' ============================================================
+
+@startuml ERD_Global
+!theme plain
+
+title Diagramme Entite-Relation - Vue Globale
+
+entity "utilisateur" as user {
+    * id : INT <<PK>>
+    --
+    * login : VARCHAR(50) <<UK>>
+    * email : VARCHAR(255) <<UK>>
+    * mot_de_passe_hash : VARCHAR(255)
+    * groupe_id : INT <<FK>>
+    statut : ENUM
+    is_2fa_enabled : BOOL
+}
+
+entity "etudiant" as student {
+    * matricule : VARCHAR(20) <<PK>>
+    --
+    * nom : VARCHAR(100)
+    * prenom : VARCHAR(100)
+    * email : VARCHAR(255)
+    date_naissance : DATE
+    utilisateur_id : INT <<FK>>
+}
+
+entity "inscription" as insc {
+    * id : INT <<PK>>
+    --
+    * matricule : VARCHAR(20) <<FK>>
+    * annee_id : INT <<FK>>
+    * niveau_id : INT <<FK>>
+    date_inscription : DATE
+    statut : ENUM
+}
+
+entity "candidature" as cand {
+    * id : INT <<PK>>
+    --
+    * matricule : VARCHAR(20) <<FK>>
+    * annee_id : INT <<FK>>
+    statut : ENUM
+    date_soumission : DATETIME
+}
+
+entity "rapport" as report {
+    * id : INT <<PK>>
+    --
+    * candidature_id : INT <<FK>> <<UK>>
+    titre : VARCHAR(255)
+    contenu_html : LONGTEXT
+    statut : ENUM
+}
+
+entity "evaluation_rapport" as eval {
+    * id : INT <<PK>>
+    --
+    * rapport_id : INT <<FK>>
+    * session_id : INT <<FK>>
+    numero_cycle : INT
+    decision : ENUM
+}
+
+entity "vote" as vote {
+    * id : INT <<PK>>
+    --
+    * evaluation_id : INT <<FK>>
+    * membre_id : INT <<FK>>
+    decision : ENUM
+    commentaire : TEXT
+}
+
+entity "jury" as jury {
+    * id : INT <<PK>>
+    --
+    * matricule : VARCHAR(20) <<FK>>
+    * annee_id : INT <<FK>>
+    statut : ENUM
+}
+
+entity "soutenance" as sout {
+    * id : INT <<PK>>
+    --
+    * jury_id : INT <<FK>> <<UK>>
+    * salle_id : INT <<FK>>
+    date_soutenance : DATE
+    heure_debut : TIME
+}
+
+entity "resultat_final" as result {
+    * id : INT <<PK>>
+    --
+    * soutenance_id : INT <<FK>> <<UK>>
+    moyenne_finale : DECIMAL
+    mention_id : INT <<FK>>
+}
+
+' Relations
+user ||--o| student : "lie"
+student ||--o{ insc : "effectue"
+student ||--o{ cand : "soumet"
+cand ||--o| report : "produit"
+report ||--o{ eval : "evalue"
+eval ||--o{ vote : "recoit"
+student ||--o| jury : "compose"
+jury ||--|| sout : "programme"
+sout ||--|| result : "produit"
+
+@enduml
+
+' ============================================================
+' FIN DES DIAGRAMMES PLANTUML
+' ============================================================
