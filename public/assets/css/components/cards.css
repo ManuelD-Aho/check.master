@@ -1,0 +1,102 @@
+/* ============================================================
+   Cards — Reusable card component styles
+   Complements base .card in style.css
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   Base card
+   ---------------------------------------------------------- */
+.card {
+    background: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* ----------------------------------------------------------
+   Card sections
+   ---------------------------------------------------------- */
+.card-header {
+    border-bottom: 1px solid var(--gray-200, #e5e7eb);
+    padding-bottom: 1rem;
+    margin: -1.5rem -1.5rem 1rem;
+    padding: 1rem 1.5rem;
+}
+
+.card-body {
+    padding: 0;
+}
+
+.card-footer {
+    border-top: 1px solid var(--gray-200, #e5e7eb);
+    margin: 1rem -1.5rem -1.5rem;
+    padding: 1rem 1.5rem;
+}
+
+/* ----------------------------------------------------------
+   Titles
+   ---------------------------------------------------------- */
+.card-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-900, #111827);
+    margin: 0 0 0.25rem;
+}
+
+.card-subtitle {
+    font-size: 0.85rem;
+    color: var(--gray-500, #6b7280);
+    margin: 0;
+}
+
+/* ----------------------------------------------------------
+   Stat card — dashboard numbers
+   ---------------------------------------------------------- */
+.card-stat {
+    background: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.card-stat .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary, #1e40af);
+    line-height: 1.2;
+}
+
+.card-stat .stat-label {
+    font-size: 0.85rem;
+    color: var(--gray-500, #6b7280);
+    margin-top: 0.25rem;
+}
+
+.card-stat .stat-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+    font-size: 1.25rem;
+    color: #fff;
+}
+
+/* ----------------------------------------------------------
+   Card grid layout
+   ---------------------------------------------------------- */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+    .card-grid {
+        grid-template-columns: 1fr;
+    }
+}
