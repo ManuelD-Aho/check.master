@@ -4,12 +4,40 @@ declare(strict_types=1);
 namespace App\Controller\Etudiant;
 
 use App\Controller\AbstractController;
+use App\Repository\Academic\AnneeAcademiqueRepository;
+use App\Repository\Stage\CandidatureRepository;
+use App\Repository\Student\EtudiantRepository;
+use App\Service\Auth\AuthenticationService;
+use App\Service\Auth\AuthorizationService;
+use App\Service\Stage\CandidatureService;
 use Nyholm\Psr7\Response;
-use Psr\Http\Message\ResponseInterface as ResponseInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 class CandidatureController extends AbstractController
 {
+    private CandidatureService $candidatureService;
+    private CandidatureRepository $candidatureRepository;
+    private AnneeAcademiqueRepository $anneeAcademiqueRepository;
+    private EtudiantRepository $etudiantRepository;
+
+    public function __construct(
+        ContainerInterface $container,
+        AuthenticationService $authenticationService,
+        AuthorizationService $authorizationService,
+        CandidatureService $candidatureService,
+        CandidatureRepository $candidatureRepository,
+        AnneeAcademiqueRepository $anneeAcademiqueRepository,
+        EtudiantRepository $etudiantRepository
+    ) {
+        parent::__construct($container, $authenticationService, $authorizationService);
+        $this->candidatureService = $candidatureService;
+        $this->candidatureRepository = $candidatureRepository;
+        $this->anneeAcademiqueRepository = $anneeAcademiqueRepository;
+        $this->etudiantRepository = $etudiantRepository;
+    }
+
     public function index(Request $request): ResponseInterface
     {
         $matricule = $this->getUser()?->getMatriculeEtudiant();
@@ -38,15 +66,50 @@ class CandidatureController extends AbstractController
 
     public function store(Request $request): ResponseInterface
     {
-        $matricule = $this->getUser()?->getMatriculeEtudiant();
+        $body = (array) ($request->getParsedBody() ?? []);
+        $csrfToken = (string) ($body['_csrf_token'] ?? '');
 
-        if ($matricule === null || $matricule === '') {
+        if (!$this->validateCsrf($csrfToken)) {
+            $this->addFlash('error', 'Jeton CSRF invalide');
+            return $this->redirect('/etudiant/candidature/formulaire');
+        }
+
+        $user = $this->getUser();
+        $matricule = $user?->getMatriculeEtudiant();
+
+        if ($user === null || $matricule === null || $matricule === '') {
             return new Response(403, ['Content-Type' => 'text/plain'], 'Acces refuse');
         }
 
-        return $this->render('etudiant/candidature/store', [
-            'matricule' => $matricule,
-        ]);
+        $etudiant = $this->etudiantRepository->findByMatricule($matricule);
+        if ($etudiant === null) {
+            $this->addFlash('error', 'Etudiant introuvable');
+            return $this->redirect('/etudiant/candidature');
+        }
+
+        $annees = $this->anneeAcademiqueRepository->findActive();
+        $anneeAcademique = $annees[0] ?? null;
+        if ($anneeAcademique === null) {
+            $this->addFlash('error', 'Aucune annee academique active');
+            return $this->redirect('/etudiant/candidature');
+        }
+
+        $candidature = $this->candidatureRepository->findByEtudiantAndAnnee(
+            $matricule,
+            $anneeAcademique->getIdAnneeAcademique()
+        );
+
+        $commentaire = isset($body['commentaire']) ? (string) $body['commentaire'] : null;
+
+        if ($candidature !== null) {
+            $this->candidatureService->saveDraft($candidature, $user, $commentaire);
+            $this->addFlash('success', 'Candidature sauvegardee');
+        } else {
+            $this->candidatureService->createCandidature($etudiant, $anneeAcademique, $user);
+            $this->addFlash('success', 'Candidature creee');
+        }
+
+        return $this->redirect('/etudiant/candidature');
     }
 
     public function edit(Request $request): ResponseInterface
@@ -64,28 +127,71 @@ class CandidatureController extends AbstractController
 
     public function update(Request $request): ResponseInterface
     {
-        $matricule = $this->getUser()?->getMatriculeEtudiant();
+        $body = (array) ($request->getParsedBody() ?? []);
+        $csrfToken = (string) ($body['_csrf_token'] ?? '');
 
-        if ($matricule === null || $matricule === '') {
+        if (!$this->validateCsrf($csrfToken)) {
+            $this->addFlash('error', 'Jeton CSRF invalide');
+            return $this->redirect('/etudiant/candidature');
+        }
+
+        $user = $this->getUser();
+        if ($user === null) {
             return new Response(403, ['Content-Type' => 'text/plain'], 'Acces refuse');
         }
 
-        return $this->render('etudiant/candidature/update', [
-            'matricule' => $matricule,
-        ]);
+        $id = $this->getRouteParam($request, 'id');
+        if ($id === null) {
+            $this->addFlash('error', 'Candidature introuvable');
+            return $this->redirect('/etudiant/candidature');
+        }
+
+        $candidature = $this->candidatureRepository->find((int) $id);
+        if ($candidature === null) {
+            $this->addFlash('error', 'Candidature introuvable');
+            return $this->redirect('/etudiant/candidature');
+        }
+
+        $commentaire = isset($body['commentaire']) ? (string) $body['commentaire'] : null;
+        $this->candidatureService->saveDraft($candidature, $user, $commentaire);
+
+        $this->addFlash('success', 'Candidature mise a jour');
+        return $this->redirect('/etudiant/candidature');
     }
 
     public function submit(Request $request): ResponseInterface
     {
-        $matricule = $this->getUser()?->getMatriculeEtudiant();
+        $user = $this->getUser();
+        $matricule = $user?->getMatriculeEtudiant();
 
-        if ($matricule === null || $matricule === '') {
+        if ($user === null || $matricule === null || $matricule === '') {
             return new Response(403, ['Content-Type' => 'text/plain'], 'Acces refuse');
         }
 
-        return $this->render('etudiant/candidature/submit', [
-            'matricule' => $matricule,
-        ]);
+        $id = $this->getRouteParam($request, 'id');
+        $candidature = null;
+
+        if ($id !== null) {
+            $candidature = $this->candidatureRepository->find((int) $id);
+        } else {
+            $annees = $this->anneeAcademiqueRepository->findActive();
+            $anneeAcademique = $annees[0] ?? null;
+            if ($anneeAcademique !== null) {
+                $candidature = $this->candidatureRepository->findByEtudiantAndAnnee(
+                    $matricule,
+                    $anneeAcademique->getIdAnneeAcademique()
+                );
+            }
+        }
+
+        if ($candidature === null) {
+            $this->addFlash('error', 'Candidature introuvable');
+            return $this->redirect('/etudiant/candidature');
+        }
+
+        $this->candidatureService->submit($candidature, $user);
+        $this->addFlash('success', 'Candidature soumise');
+        return $this->redirect('/etudiant/candidature');
     }
 
     public function show(Request $request): ResponseInterface
@@ -119,5 +225,25 @@ class CandidatureController extends AbstractController
     public function recapitulatif(Request $request): ResponseInterface
     {
         return $this->show($request);
+    }
+
+    private function getRouteParam(Request $request, string $key): ?string
+    {
+        $value = $request->getAttribute($key);
+        if (is_string($value) && $value !== '') {
+            return $value;
+        }
+        if (is_int($value)) {
+            return (string) $value;
+        }
+        $query = $request->getQueryParams();
+        $value = $query[$key] ?? null;
+        if (is_string($value) && $value !== '') {
+            return $value;
+        }
+        if (is_int($value)) {
+            return (string) $value;
+        }
+        return null;
     }
 }
